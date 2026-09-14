@@ -3631,10 +3631,18 @@ const faqData = [
 ];
 
 export function FaqPage() {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [openIndices, setOpenIndices] = useState<Set<number>>(new Set());
 
   const toggle = (idx: number) => {
-    setOpenIndex((curr) => (curr === idx ? null : idx));
+    setOpenIndices((curr) => {
+      const next = new Set(curr);
+      if (next.has(idx)) {
+        next.delete(idx);
+      } else {
+        next.add(idx);
+      }
+      return next;
+    });
   };
 
   return (
@@ -3652,7 +3660,7 @@ export function FaqPage() {
 
             <div className="space-y-3.5 sm:space-y-4">
               {faqData.map((item, idx) => {
-                const isOpen = openIndex === idx;
+                const isOpen = openIndices.has(idx);
                 return (
                   <div
                     key={idx}
@@ -3726,7 +3734,41 @@ export function AboutPage() {
               </p>
             </section>
 
-            {/* 3. PHILOSOPHY */}
+            {/* 3. AIM */}
+            <section aria-labelledby="aim-heading">
+              <h2
+                id="aim-heading"
+                className="t-main-heading uppercase"
+              >
+                AIM
+              </h2>
+              <div className="t-content-block space-y-6 sm:space-y-7">
+                <p className="text-gray-800 font-normal">
+                  To encourage the youth of India to observe and identify real problems in their own surroundings in their villages, towns, cities, districts and communities and to transform these problems into opportunities for innovation by developing sustainable, affordable and implementable solutions, culminating in the creation and demonstration of working prototypes.
+                </p>
+                <p className="font-semibold! text-gray-900">
+                  &ldquo;The Challenge begins not with an idea, but with a problem observed by a young Indian in his or her own surroundings; and it does not end with an award, but with a solution that can reach the beneficiary.&rdquo;
+                </p>
+              </div>
+            </section>
+
+            {/* 4. OBJECTIVES */}
+            <section aria-labelledby="objectives-heading">
+              <h2
+                id="objectives-heading"
+                className="t-main-heading uppercase"
+              >
+                OBJECTIVES
+              </h2>
+              {/* Breaks out of the About page's max-w-5xl column. 1360px is
+                  the narrowest frame that still lets the longest objective
+                  description sit on one line at content size. */}
+              <div className="relative left-1/2 w-[min(100vw-2rem,1360px)] -translate-x-1/2">
+                <ObjectivesRoadmap />
+              </div>
+            </section>
+
+            {/* 5. PHILOSOPHY */}
             <section aria-labelledby="philosophy-heading">
               <h2
                 id="philosophy-heading"
@@ -3746,40 +3788,6 @@ export function AboutPage() {
                   step columns get room to breathe. */}
               <div className="relative left-1/2 mt-8 w-[min(100vw-2rem,1280px)] -translate-x-1/2 sm:mt-12">
                 <InnovationJourney />
-              </div>
-            </section>
-
-            {/* 4. AIM */}
-            <section aria-labelledby="aim-heading">
-              <h2
-                id="aim-heading"
-                className="t-main-heading uppercase"
-              >
-                AIM
-              </h2>
-              <div className="t-content-block space-y-6 sm:space-y-7">
-                <p className="text-gray-800 font-normal">
-                  To encourage the youth of India to observe and identify real problems in their own surroundings in their villages, towns, cities, districts and communities and to transform these problems into opportunities for innovation by developing sustainable, affordable and implementable solutions, culminating in the creation and demonstration of working prototypes.
-                </p>
-                <p className="font-semibold! text-gray-900">
-                  &ldquo;The Challenge begins not with an idea, but with a problem observed by a young Indian in his or her own surroundings; and it does not end with an award, but with a solution that can reach the beneficiary.&rdquo;
-                </p>
-              </div>
-            </section>
-
-            {/* 5. OBJECTIVES */}
-            <section aria-labelledby="objectives-heading">
-              <h2
-                id="objectives-heading"
-                className="t-main-heading uppercase"
-              >
-                OBJECTIVES
-              </h2>
-              {/* Breaks out of the About page's max-w-5xl column. 1360px is
-                  the narrowest frame that still lets the longest objective
-                  description sit on one line at content size. */}
-              <div className="relative left-1/2 w-[min(100vw-2rem,1360px)] -translate-x-1/2">
-                <ObjectivesRoadmap />
               </div>
             </section>
 
@@ -3812,15 +3820,29 @@ export function AboutPage() {
             </section>
 
             {/* 7. PURPOSE & BENEFITS */}
-            <section aria-labelledby="purpose-benefits-heading" className="min-h-[200px] sm:min-h-[280px]">
+            <section aria-labelledby="purpose-benefits-heading">
               <h2
                 id="purpose-benefits-heading"
                 className="t-main-heading uppercase"
               >
                 PURPOSE &amp; BENEFITS
               </h2>
-              {/* Space reserved for content */}
-              <div className="py-8 sm:py-14" />
+              <div className="t-content-block text-gray-800 space-y-6 sm:space-y-7">
+                <p>
+                  The Sewa First Innovation Challenge empowers youth to identify real local and national problems and create innovative, practical and scalable solutions that contribute to nation-building and Viksit Bharat.
+                </p>
+                <p>
+                  Participants will:
+                </p>
+                <ul className="space-y-2 sm:space-y-2.5 list-none p-0 m-0">
+                  <li>Develop innovation &amp; problem-solving skills</li>
+                  <li>Apply knowledge to real-world challenges</li>
+                  <li>Build teamwork, leadership &amp; entrepreneurial skills</li>
+                  <li>Gain exposure to mentors, experts &amp; industry</li>
+                  <li>Showcase ideas and gain recognition &amp; incubation opportunities</li>
+                  <li>Outstanding innovations will be recognised and awarded.</li>
+                </ul>
+              </div>
             </section>
           </div>
         </main>
