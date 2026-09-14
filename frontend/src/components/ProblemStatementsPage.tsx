@@ -78,36 +78,36 @@ export const NATIONAL_CATEGORIES: NationalCategory[] = [
   {
     label: "Defence, Intelligence, Space & National Security",
     psTitle: "PS1 TITLE",
-    idNumber: "NAT-001",
-    psId: "NAT-001-PS",
-    openId: "NAT-001-OP",
+    idNumber: "NAT-009",
+    psId: "NAT-009",
+    openId: "",
     badgeBg: "#FDE8E8",
     badgeText: "#E03137",
   },
   {
     label: "Disaster Management & Resilience",
     psTitle: "PS2 TITLE",
-    idNumber: "NAT-002",
-    psId: "NAT-002-PS",
-    openId: "NAT-002-OP",
+    idNumber: "NAT-008",
+    psId: "NAT-008",
+    openId: "",
     badgeBg: "#DBEAFE",
     badgeText: "#0284C7",
   },
   {
     label: "Manufacturing & Electronics, AI, Robotics & Autonomous Systems",
     psTitle: "PS3 TITLE",
-    idNumber: "NAT-003",
-    psId: "NAT-003-PS",
-    openId: "NAT-003-OP",
+    idNumber: "NAT-007",
+    psId: "NAT-007",
+    openId: "",
     badgeBg: "#DCFCE7",
     badgeText: "#16A34A",
   },
   {
     label: "Energy & Sustainable Technology & Environment",
     psTitle: "PS4 TITLE",
-    idNumber: "NAT-004",
-    psId: "NAT-004-PS",
-    openId: "NAT-004-OP",
+    idNumber: "NAT-006",
+    psId: "NAT-006",
+    openId: "",
     badgeBg: "#FEF3C7",
     badgeText: "#D97706",
   },
@@ -115,8 +115,8 @@ export const NATIONAL_CATEGORIES: NationalCategory[] = [
     label: "Advanced Engineering, Infrastructure, Future Mobility & Transportation",
     psTitle: "PS5 TITLE",
     idNumber: "NAT-005",
-    psId: "NAT-005-PS",
-    openId: "NAT-005-OP",
+    psId: "NAT-005",
+    openId: "",
     badgeBg: "#EDE9FE",
     badgeText: "#7C3AED",
   },
@@ -128,18 +128,18 @@ export const NATIONAL_CATEGORIES: NationalCategory[] = [
  * only ever one option per row, and the table has no Problem Statement
  * column since there is nothing to show in it.
  */
-export const COMMUNITY_CATEGORIES: Category[] = [
-  { label: "Village & Panchayat Development, Agriculture & Rural Economy", idNumber: "REG-001-OP", badgeBg: "#FDE8E8", badgeText: "#E03137" },
-  { label: "Education & Skill Development", idNumber: "REG-002-OP", badgeBg: "#DBEAFE", badgeText: "#0284C7" },
-  { label: "Healthcare & Community Well-being", idNumber: "REG-003-OP", badgeBg: "#DCFCE7", badgeText: "#16A34A" },
-  { label: "City & Urban Problems", idNumber: "REG-004-OP", badgeBg: "#FEF3C7", badgeText: "#D97706" },
-  { label: "Environment & Natural Resources", idNumber: "REG-005-OP", badgeBg: "#EDE9FE", badgeText: "#7C3AED" },
-  { label: "Sports (Khelo India)", idNumber: "REG-006-OP", badgeBg: "#FDE8E8", badgeText: "#E03137" },
-  { label: "Employment & Livelihood", idNumber: "REG-007-OP", badgeBg: "#DBEAFE", badgeText: "#0284C7" },
-  { label: "Women & Child Safety and Development", idNumber: "REG-008-OP", badgeBg: "#DCFCE7", badgeText: "#16A34A" },
-  { label: "Safety & Disaster Management", idNumber: "REG-009-OP", badgeBg: "#FEF3C7", badgeText: "#D97706" },
-  { label: "Transport, Energy & Tourism", idNumber: "REG-010-OP", badgeBg: "#EDE9FE", badgeText: "#7C3AED" },
-  { label: "Miscellaneous", idNumber: "REG-011-OP", badgeBg: "#FDE8E8", badgeText: "#E03137" },
+export const COMMUNITY_CATEGORIES: NationalCategory[] = [
+  { label: "Village & Panchayat Development, Agriculture & Rural Economy", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#FDE8E8", badgeText: "#E03137" },
+  { label: "Education & Skill Development", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#DBEAFE", badgeText: "#0284C7" },
+  { label: "Healthcare & Community Well-being", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#DCFCE7", badgeText: "#16A34A" },
+  { label: "City & Urban Problems", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#FEF3C7", badgeText: "#D97706" },
+  { label: "Environment & Natural Resources", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#EDE9FE", badgeText: "#7C3AED" },
+  { label: "Sports (Khelo India)", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#FDE8E8", badgeText: "#E03137" },
+  { label: "Employment & Livelihood", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#DBEAFE", badgeText: "#0284C7" },
+  { label: "Women & Child Safety and Development", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#DCFCE7", badgeText: "#16A34A" },
+  { label: "Safety & Disaster Management", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#FEF3C7", badgeText: "#D97706" },
+  { label: "Transport, Energy & Tourism", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#EDE9FE", badgeText: "#7C3AED" },
+  { label: "Miscellaneous", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#FDE8E8", badgeText: "#E03137" },
 ];
 
 /*
@@ -153,8 +153,8 @@ export const COMMUNITY_CATEGORIES: Category[] = [
  *   open proposal and there is nothing to show for it.
  */
 function TableCard({ categories, showPsColumn }: { categories: Category[]; showPsColumn: boolean }) {
-  const categoryWidth = showPsColumn ? "38%" : "62%";
-  const idWidth = "23%";
+  const categoryWidth = showPsColumn ? "40%" : "62%";
+  const idWidth = "16%";
 
   return (
     /* Outer card — white, rounded-[24px], soft border + shadow */
@@ -194,20 +194,24 @@ function TableCard({ categories, showPsColumn }: { categories: Category[]; showP
                   ID Number
                 </span>
               </th>
+              {/* REGISTER */}
+              <th className="w-[120px] px-4 py-4 text-center">
+                <span className="t-content-sm font-bold! tracking-[0.65px] uppercase text-[#60718B]">
+                  &nbsp;
+                </span>
+              </th>
             </tr>
           </thead>
 
           {/* ── Body ── */}
           <tbody>
             {categories.map((row, i) => {
-              // National rows carry psId/openId — two options for one
-              // category. Regional rows don't, since there's only ever one.
               const national = row as Partial<NationalCategory>;
-              const hasTwoOptions = showPsColumn && national.psId !== undefined && national.openId !== undefined;
+              const hasSinglePs = showPsColumn && national.psTitle !== undefined;
 
               return (
                 <tr
-                  key={row.idNumber}
+                  key={`${row.idNumber}-${i}`}
                   className={`hover:bg-[#FAFBFD] transition-colors ${
                     i > 0 ? "border-t border-[#F1F5F9]" : ""
                   }`}
@@ -229,45 +233,29 @@ function TableCard({ categories, showPsColumn }: { categories: Category[]; showP
                     </span>
                   </td>
 
-                  {/* Problem statement — national only, two stacked options */}
+                  {/* Problem statement — national only, single entry */}
                   {showPsColumn && (
                     <td className="px-6 py-[22.5px]" style={{ width: "31%" }}>
-                      {hasTwoOptions ? (
-                        <div className="flex flex-col gap-2.5">
-                          <div className="flex items-center gap-3">
-                            {/* PDF icon badge */}
-                            <span className="inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-lg border border-[#FECACA] shadow-[0px_1px_2px_rgba(0,0,0,0.05)]" style={{ background: "rgba(254,242,242,0.6)" }}>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                                <polyline points="14 2 14 8 20 8" />
-                              </svg>
-                            </span>
-                            <span className="t-content-sm font-bold! text-[#142340]">
-                              {national.psTitle}
-                            </span>
-                            {/* External link badge */}
-                            <span className="inline-flex items-center justify-center w-7 h-7 shrink-0 rounded-full bg-white border border-[rgba(226,232,240,0.8)] shadow-[0px_1px_2px_rgba(0,0,0,0.05)]">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                                <polyline points="15 3 21 3 21 9" />
-                                <line x1="10" y1="14" x2="21" y2="3" />
-                              </svg>
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            {/* Pencil/propose icon badge, distinct from the
-                                PDF icon so this option reads as different
-                                from the row above it at a glance. */}
-                            <span className="inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-lg border border-[#BBE3D0] shadow-[0px_1px_2px_rgba(0,0,0,0.05)]" style={{ background: "rgba(236,253,245,0.7)" }}>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 20h9" />
-                                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                              </svg>
-                            </span>
-                            <span className="t-content-sm font-bold! text-[#16A34A]">
-                              OPEN
-                            </span>
-                          </div>
+                      {hasSinglePs ? (
+                        <div className="flex items-center gap-3">
+                          {/* PDF icon badge */}
+                          <span className="inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-lg border border-[#FECACA] shadow-[0px_1px_2px_rgba(0,0,0,0.05)]" style={{ background: "rgba(254,242,242,0.6)" }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                              <polyline points="14 2 14 8 20 8" />
+                            </svg>
+                          </span>
+                          <span className="t-content-sm font-bold! text-[#142340]">
+                            {national.psTitle}
+                          </span>
+                          {/* External link badge */}
+                          <span className="inline-flex items-center justify-center w-7 h-7 shrink-0 rounded-full bg-white border border-[rgba(226,232,240,0.8)] shadow-[0px_1px_2px_rgba(0,0,0,0.05)]">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                              <polyline points="15 3 21 3 21 9" />
+                              <line x1="10" y1="14" x2="21" y2="3" />
+                            </svg>
+                          </span>
                         </div>
                       ) : null}
                     </td>
@@ -276,20 +264,19 @@ function TableCard({ categories, showPsColumn }: { categories: Category[]; showP
                   {/* ID pill(s) — national rows stack the PS and OPEN IDs to
                       line up with their matching option above */}
                   <td className="px-6 py-[24.5px] text-center" style={{ width: idWidth }}>
-                    {hasTwoOptions ? (
-                      <div className="flex flex-col gap-2.5">
-                        <span className="t-content-sm font-semibold! inline-flex items-center justify-center px-5 py-1.5 rounded-full bg-[#EAF1F8] tracking-[0.3px] text-[#1E2F4D]">
-                          {national.psId}
-                        </span>
-                        <span className="t-content-sm font-semibold! inline-flex items-center justify-center px-5 py-1.5 rounded-full bg-[#EAF1F8] tracking-[0.3px] text-[#1E2F4D]">
-                          {national.openId}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="t-content-sm font-semibold! inline-flex items-center justify-center px-5 py-1.5 rounded-full bg-[#EAF1F8] tracking-[0.3px] text-[#1E2F4D]">
-                        {row.idNumber}
-                      </span>
-                    )}
+                    <span className="t-content-sm font-semibold! inline-flex items-center justify-center px-5 py-1.5 rounded-full bg-[#EAF1F8] tracking-[0.3px] text-[#1E2F4D] whitespace-nowrap">
+                      {row.idNumber}
+                    </span>
+                  </td>
+
+                  {/* Register button */}
+                  <td className="w-[120px] px-4 py-[24.5px] text-center">
+                    <a
+                      href="/team-register"
+                      className="inline-flex items-center justify-center px-5 py-2 rounded-full bg-[#E03137] hover:bg-[#c52a2f] text-white text-sm font-bold transition-colors shadow-sm"
+                    >
+                      Register
+                    </a>
                   </td>
                 </tr>
               );
@@ -348,7 +335,7 @@ export function ProblemStatementsPage() {
                   <TableCard categories={NATIONAL_CATEGORIES} showPsColumn />
                 </div>
 
-                <Pagination total={NATIONAL_CATEGORIES.length} current={1} />
+                <Pagination total={24} current={1} />
               </section>
 
               {/* ── Theme 2 ── */}
@@ -380,10 +367,10 @@ export function ProblemStatementsPage() {
                 </p>
 
                 <div className="mt-8">
-                  <TableCard categories={COMMUNITY_CATEGORIES} showPsColumn={false} />
+                  <TableCard categories={COMMUNITY_CATEGORIES} showPsColumn />
                 </div>
 
-                <Pagination total={COMMUNITY_CATEGORIES.length} current={1} />
+                <Pagination total={24} current={1} />
               </section>
 
             </div>

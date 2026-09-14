@@ -191,7 +191,7 @@ export function AdditionalResourcesPage() {
                     </thead>
                     <tbody>
                       {TRL_ROWS.map((row, index) => {
-                        const badge = BADGE_STYLES[index % BADGE_STYLES.length];
+                        const badge = BADGE_STYLES[index % BADGE_STYLES.length] ?? { bg: "bg-slate-100", text: "text-slate-700" };
                         return (
                           <tr
                             key={row.level}

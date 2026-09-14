@@ -227,6 +227,7 @@ export function ParticipationSteps() {
     if (!frame) return;
 
     const observer = new ResizeObserver(([entry]) => {
+      if (!entry) return;
       const width = entry.contentRect.width;
       if (width > 0) setScale(width / STAGE_WIDTH);
     });
