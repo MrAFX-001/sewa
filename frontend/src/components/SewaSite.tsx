@@ -2034,6 +2034,30 @@ export function HomePage() {
             <PeopleGrid rows={2} />
           </div>
         </section>
+
+        {/* ── Development Team ── */}
+        <section id="development-team" className="t-section-band scroll-mt-20">
+          <div className="site-shell">
+            <h2 className="t-main-heading t-title-gap-wide uppercase">
+              Development Team
+            </h2>
+            <PeopleGrid
+              names={[
+                "Narayan Mishra",
+                "Daksh Shailesh Panchal",
+                "Ankit Kumar Roy",
+                "Vedant Singh",
+                "Afroz",
+                "Ilisha Dabas",
+                "Suraj Jaiswal",
+                "Prakhar Awasthi",
+                "Soumya Saurav Das",
+                "Sudhanshu Shekhar",
+              ]}
+              showDesignation={false}
+            />
+          </div>
+        </section>
       </main>
       <SubscribeSection />
       <Footer />
@@ -2049,16 +2073,27 @@ export function HomePage() {
  * Still placeholder content: swap the Array.from for the real roster when the
  * names and photos land.
  */
-function PeopleGrid({ rows }: { rows: number }) {
+function PeopleGrid({
+  rows,
+  names,
+  showDesignation = true,
+}: {
+  rows?: number;
+  names?: string[];
+  showDesignation?: boolean;
+}) {
   const COLUMNS = 4;
+  const people = names ?? Array.from({ length: (rows ?? 1) * COLUMNS }, () => "Name");
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 sm:gap-x-12 md:gap-x-16 gap-y-10 sm:gap-y-12 md:gap-y-16 max-w-4xl mx-auto">
-      {Array.from({ length: rows * COLUMNS }).map((_, idx) => (
-        <div key={idx} className="flex flex-col items-center text-center">
+      {people.map((name, idx) => (
+        <div key={`${name}-${idx}`} className="flex flex-col items-center text-center">
           <div className="size-20 sm:size-24 md:size-28 rounded-full bg-[#d2d2d2] mb-3 sm:mb-3.5 transition-transform duration-200 hover:scale-105" />
-          <h3 className="t-subheading-2 text-gray-900">Name</h3>
-          <p className="t-content text-gray-500 mt-1">Designation</p>
+          <h3 className="t-subheading-2 text-gray-900">{name}</h3>
+          {showDesignation && (
+            <p className="t-content text-gray-500 mt-1">Designation</p>
+          )}
         </div>
       ))}
     </div>
