@@ -9,7 +9,7 @@
   --heading-color: #172554;
 
   /* MAIN HEADING — the big section titles. */
-  --main-heading-min: 52;
+  --main-heading-min: 36;
   --main-heading-max: 76;
   --main-heading-leading: 0.95;
   --main-heading-weight: 600;
@@ -77,6 +77,7 @@
   text-align: center;
   margin-bottom: calc(var(--title-gap) * var(--u));
   color: var(--heading-color);
+  overflow-wrap: break-word;
 }
 
 .t-subheading-1 {

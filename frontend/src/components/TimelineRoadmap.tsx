@@ -248,105 +248,158 @@ export function TimelineRoadmap() {
   }, []);
 
   return (
-    <div
-      ref={frameRef}
-      className="w-full overflow-hidden"
-      style={{ aspectRatio: `${STAGE_WIDTH} / ${STAGE_HEIGHT}` }}
-      role="img"
-      aria-label="Timeline of the 100 day journey: Ideate, Screen, Build, Validate, Test, Select"
-    >
+    <div className="w-full">
+      {/* Mobile / Tablet Vertical Timeline (< 1024px) */}
+      <div className="block lg:hidden">
+        <div className="relative">
+          {/* Vertical timeline spine */}
+          <div
+            className="absolute left-6 sm:left-7 top-6 bottom-6 w-1 -translate-x-1/2 rounded-full bg-slate-200"
+            aria-hidden="true"
+          />
+
+          <div className="space-y-6 sm:space-y-8 relative">
+            {steps.map((step) => (
+              <div key={step.number} className="flex items-start gap-4 sm:gap-6">
+                {/* Pin with icon */}
+                <div
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shrink-0 z-10 shadow-md"
+                  style={{ backgroundColor: step.color }}
+                >
+                  <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-full bg-white flex items-center justify-center shadow-xs [&_svg]:w-5 [&_svg]:h-5 [&_svg]:stroke-[2.2]">
+                    {step.icon}
+                  </div>
+                </div>
+
+                {/* Content Card */}
+                <div className="flex-1 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs hover:border-slate-300 transition-all">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="font-black text-xs px-2.5 py-0.5 rounded-full text-white shrink-0"
+                        style={{ backgroundColor: step.color }}
+                      >
+                        {step.number}
+                      </span>
+                      <h3 className="font-extrabold text-base sm:text-lg uppercase text-[#0f172a] tracking-tight">
+                        {step.title}
+                      </h3>
+                    </div>
+                    <span className="text-xs sm:text-[13px] font-semibold text-slate-500">
+                      {step.dates}
+                    </span>
+                  </div>
+                  <p className="text-sm sm:text-[15px] leading-relaxed text-slate-600 font-normal">
+                    {step.body}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Horizontal Roadmap (>= 1024px) */}
       <div
-        className="relative select-none"
-        style={{
-          width: STAGE_WIDTH,
-          height: STAGE_HEIGHT,
-          transformOrigin: "top left",
-          transform: `scale(${scale})`,
-        }}
+        ref={frameRef}
+        className="hidden lg:block w-full overflow-hidden"
+        style={{ aspectRatio: `${STAGE_WIDTH} / ${STAGE_HEIGHT}` }}
+        role="img"
+        aria-label="Timeline of the 100 day journey: Ideate, Screen, Build, Validate, Test, Select"
       >
-        {/* Continuous segmented bar */}
-        <div className="absolute left-0 w-full flex z-10" style={{ top: BAR_TOP, height: BAR_H }}>
-          {steps.map((step) => (
+        <div
+          className="relative select-none"
+          style={{
+            width: STAGE_WIDTH,
+            height: STAGE_HEIGHT,
+            transformOrigin: "top left",
+            transform: `scale(${scale})`,
+          }}
+        >
+          {/* Continuous segmented bar */}
+          <div className="absolute left-0 w-full flex z-10" style={{ top: BAR_TOP, height: BAR_H }}>
+            {steps.map((step) => (
+              <div
+                key={step.number}
+                className="h-full"
+                style={{ width: `${100 / COLUMNS}%`, backgroundColor: step.color }}
+              />
+            ))}
+          </div>
+
+          {/* Node dots on the bar */}
+          {steps.map((step, i) => (
             <div
-              key={step.number}
-              className="h-full"
-              style={{ width: `${100 / COLUMNS}%`, backgroundColor: step.color }}
-            />
+              key={`node-${step.number}`}
+              className="absolute -translate-x-1/2 z-30 flex flex-col items-center"
+              style={{ left: nodeLeft(i), top: BAR_TOP + BAR_H / 2 - NODE / 2 }}
+            >
+              <div
+                className="rounded-full flex items-center justify-center shadow-md"
+                style={{ width: NODE, height: NODE, backgroundColor: step.color }}
+              >
+                <div className="rounded-full bg-white node-dot-shadow" style={{ width: NODE_INNER, height: NODE_INNER }} />
+              </div>
+            </div>
+          ))}
+
+          {/* Pins and stems */}
+          {steps.map((step, i) => (
+            <Pin key={`pin-${step.number}`} step={step} index={i} />
+          ))}
+
+          {/* Large display numbers */}
+          {steps.map((step, i) => (
+            <div
+              key={`num-${step.number}`}
+              className="absolute z-20 select-none pointer-events-none"
+              style={{
+                left: `calc(${nodeLeft(i)} + ${STEM_W / 2 + 12}px)`,
+                top: step.side === "below" ? NUMBER_TOP_BELOW : NUMBER_TOP_ABOVE,
+              }}
+            >
+              <span
+                className="font-black tracking-tight"
+                style={{ color: step.color, fontSize: 38, lineHeight: 1 }}
+              >
+                {step.number}
+              </span>
+            </div>
+          ))}
+
+          {/* Text blocks */}
+          {steps.map((step, i) => (
+            <div
+              key={`text-${step.number}`}
+              className="absolute z-40 -translate-x-1/2 text-center [hyphens:none]"
+              style={
+                step.side === "below"
+                  ? { left: nodeLeft(i), bottom: TEXT_BOTTOM_ABOVE, width: TEXT_W }
+                  : { left: nodeLeft(i), top: TEXT_TOP_BELOW, width: TEXT_W }
+              }
+            >
+              <p
+                className="flex items-center justify-center gap-2 text-center font-black tracking-tight text-[#0f172a] uppercase [hyphens:none]"
+                style={{ fontSize: 27, lineHeight: 1.2 }}
+              >
+                <span style={{ color: step.color }}>{step.number}</span>
+                {step.title}
+              </p>
+              <p
+                className="mt-1 text-center font-bold text-slate-800 [hyphens:none]"
+                style={{ fontSize: 15.5, lineHeight: 1.4 }}
+              >
+                {step.dates}
+              </p>
+              <p
+                className="mt-1.5 text-center font-medium text-slate-700 [hyphens:none]"
+                style={{ fontSize: 18, lineHeight: 1.5 }}
+              >
+                {step.body}
+              </p>
+            </div>
           ))}
         </div>
-
-        {/* Node dots on the bar */}
-        {steps.map((step, i) => (
-          <div
-            key={`node-${step.number}`}
-            className="absolute -translate-x-1/2 z-30 flex flex-col items-center"
-            style={{ left: nodeLeft(i), top: BAR_TOP + BAR_H / 2 - NODE / 2 }}
-          >
-            <div
-              className="rounded-full flex items-center justify-center shadow-md"
-              style={{ width: NODE, height: NODE, backgroundColor: step.color }}
-            >
-              <div className="rounded-full bg-white node-dot-shadow" style={{ width: NODE_INNER, height: NODE_INNER }} />
-            </div>
-          </div>
-        ))}
-
-        {/* Pins and stems */}
-        {steps.map((step, i) => (
-          <Pin key={`pin-${step.number}`} step={step} index={i} />
-        ))}
-
-        {/* Large display numbers */}
-        {steps.map((step, i) => (
-          <div
-            key={`num-${step.number}`}
-            className="absolute z-20 select-none pointer-events-none"
-            style={{
-              left: `calc(${nodeLeft(i)} + ${STEM_W / 2 + 12}px)`,
-              top: step.side === "below" ? NUMBER_TOP_BELOW : NUMBER_TOP_ABOVE,
-            }}
-          >
-            <span
-              className="font-black tracking-tight"
-              style={{ color: step.color, fontSize: 38, lineHeight: 1 }}
-            >
-              {step.number}
-            </span>
-          </div>
-        ))}
-
-        {/* Text blocks */}
-        {steps.map((step, i) => (
-          <div
-            key={`text-${step.number}`}
-            className="absolute z-40 -translate-x-1/2 text-center [hyphens:none]"
-            style={
-              step.side === "below"
-                ? { left: nodeLeft(i), bottom: TEXT_BOTTOM_ABOVE, width: TEXT_W }
-                : { left: nodeLeft(i), top: TEXT_TOP_BELOW, width: TEXT_W }
-            }
-          >
-            <p
-              className="flex items-center justify-center gap-2 text-center font-black tracking-tight text-[#0f172a] uppercase [hyphens:none]"
-              style={{ fontSize: 27, lineHeight: 1.2 }}
-            >
-              <span style={{ color: step.color }}>{step.number}</span>
-              {step.title}
-            </p>
-            <p
-              className="mt-1 text-center font-bold text-slate-800 [hyphens:none]"
-              style={{ fontSize: 15.5, lineHeight: 1.4 }}
-            >
-              {step.dates}
-            </p>
-            <p
-              className="mt-1.5 text-center font-medium text-slate-700 [hyphens:none]"
-              style={{ fontSize: 18, lineHeight: 1.5 }}
-            >
-              {step.body}
-            </p>
-          </div>
-        ))}
       </div>
     </div>
   );

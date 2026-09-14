@@ -1898,7 +1898,7 @@ export function HomePage() {
           {/* Frame width drives the roadmap's scale: the 1400px stage is
               scaled to fit this box, so a narrower frame both shrinks the
               diagram and widens the page margins. */}
-          <div className="mx-auto w-[min(100%-6rem,1180px)]">
+          <div className="mx-auto w-[min(100%-2rem,1180px)] lg:w-[min(100%-6rem,1180px)]">
             <h2 className="t-main-heading text-center">
               <span className="uppercase">Timeline</span>
               <span className="t-subheading-2 block text-center text-black">OF 100 DAY SEWA FIRST RYIC 2026 JOURNEY</span>
@@ -1913,8 +1913,8 @@ export function HomePage() {
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10">
               <div>
                 <p className="eyebrow !text-base sm:!text-lg mb-2">Important Notices</p>
-                <h2 className="t-main-heading !text-left !mb-2">LIVE ANNOUNCEMENTS</h2>
-                <p className="t-subheading-2 text-black/60 font-normal">
+                <h2 className="t-main-heading !text-left !mb-2 break-words">LIVE ANNOUNCEMENTS</h2>
+                <p className="t-subheading-2 !text-left text-black/60 font-normal [hyphens:none]">
                   Stay updated with recent circulars, dates, and official notices.
                 </p>
               </div>
