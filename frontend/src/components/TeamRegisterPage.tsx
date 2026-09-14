@@ -1510,16 +1510,7 @@ export function TeamRegisterPage() {
                     className="mt-0.5 accent-primary"
                   />
                   <span className="text-xs leading-relaxed text-gray-500">
-                    I confirm that all details entered are accurate, all team members are eligible
-                    participants, and I agree to the{" "}
-                    <a href="#" className="text-primary hover:underline">
-                      SEWA 2026 Terms &amp; Conditions
-                    </a>{" "}
-                    and{" "}
-                    <a href="#" className="text-primary hover:underline">
-                      Code of Conduct
-                    </a>
-                    .
+                    I hereby confirm that the information and identification documents provided for myself and all team members are accurate and complete to the best of my knowledge. I accept full responsibility for any discrepancies or inaccuracies and understand that the committee reserves the right to reject or disqualify our participation if any information or documents are found to be false, misleading, or inconsistent.
                   </span>
                 </label>
 
