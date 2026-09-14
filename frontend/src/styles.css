@@ -936,9 +936,6 @@
     min-height: 620px;
   }
 
-  .bg-hero-overlay {
-    background: linear-gradient(90deg, oklch(0.99 0 0 / 0.94), oklch(0.99 0 0 / 0.65));
-  }
 
   .countdown {
     bottom: -1rem;

@@ -458,16 +458,23 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
 
                 <div className="mt-5 border-t border-gray-200 pt-5">
                   {isSignedIn ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        signOut();
-                      }}
-                      className="button button-outline w-full cursor-pointer justify-center text-sm"
-                    >
-                      Sign Out
-                    </button>
+                    <div className="flex flex-col gap-3">
+                      {user?.firstName && (
+                        <div className="text-xs text-muted-foreground px-1">
+                          Signed in as <span className="font-semibold text-gray-900">{user.firstName} {user.lastName || ""}</span>
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          signOut();
+                        }}
+                        className="button button-outline w-full cursor-pointer justify-center text-sm"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
                   ) : (
                     <Link
                       to="/signin"
@@ -484,11 +491,11 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
         </div>
       </header>
 
-      {/* Row 2: Sticky navigation bar that transforms on scroll with increased height */}
+      {/* Row 2: Sticky navigation bar that transforms on scroll with increased height (Desktop only) */}
       <header
-        className={`sticky top-0 z-50 bg-white border-b border-gray-200/80 transition-all duration-300 ${!isScrolled
-          ? "hidden lg:block shadow-sm py-2.5 sm:py-3"
-          : "block shadow-md py-3.5 sm:py-4 min-h-[64px] sm:min-h-[72px]"
+        className={`sticky top-0 z-50 bg-white border-b border-gray-200/80 transition-all duration-300 hidden lg:block ${!isScrolled
+          ? "shadow-sm py-2.5 sm:py-3"
+          : "shadow-md py-3.5 sm:py-4 min-h-[64px] sm:min-h-[72px]"
           }`}
       >
         <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -1673,6 +1680,28 @@ export function HomePage() {
     setCurrentSlide((prev) => (prev === heroImages.length - 1 ? 0 : prev + 1));
   };
 
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStart === null || touchEnd === null) return;
+    const distance = touchStart - touchEnd;
+    if (distance > 50) {
+      nextSlide();
+    } else if (distance < -50) {
+      prevSlide();
+    }
+  };
+
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   useEffect(() => {
@@ -1696,7 +1725,12 @@ export function HomePage() {
     <div>
       <Header />
       <main>
-        <section className="hero relative min-h-[580px]">
+        <section
+          className="hero relative min-h-[580px]"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <div className="absolute inset-0 overflow-hidden">
             {heroImages.map((image, idx) => (
               <img
@@ -1714,12 +1748,12 @@ export function HomePage() {
             <div className="absolute inset-0 bg-hero-overlay z-[2]" />
           </div>
 
-          {/* Carousel Arrows */}
+          {/* Carousel Arrows (Desktop / Tablet) */}
           <button
             type="button"
             aria-label="Previous slide"
             onClick={prevSlide}
-            className="flex absolute left-3 sm:left-4 md:left-6 top-1/2 -translate-y-1/2 z-20 text-white/80 hover:text-white hover:scale-110 active:scale-95 transition-all cursor-pointer select-none bg-white/20 hover:bg-white/40 backdrop-blur-xs p-1.5 sm:p-2 rounded-full shadow-xs"
+            className="hidden sm:flex absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-20 text-white/80 hover:text-white hover:scale-110 active:scale-95 transition-all cursor-pointer select-none bg-white/20 hover:bg-white/40 backdrop-blur-xs p-2 rounded-full shadow-xs"
           >
             <ChevronLeft size={36} strokeWidth={2.5} className="sm:size-[42px]" />
           </button>
@@ -1727,7 +1761,7 @@ export function HomePage() {
             type="button"
             aria-label="Next slide"
             onClick={nextSlide}
-            className="flex absolute right-3 sm:right-4 md:right-6 top-1/2 -translate-y-1/2 z-20 text-white/80 hover:text-white hover:scale-110 active:scale-95 transition-all cursor-pointer select-none bg-white/20 hover:bg-white/40 backdrop-blur-xs p-1.5 sm:p-2 rounded-full shadow-xs"
+            className="hidden sm:flex absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-20 text-white/80 hover:text-white hover:scale-110 active:scale-95 transition-all cursor-pointer select-none bg-white/20 hover:bg-white/40 backdrop-blur-xs p-2 rounded-full shadow-xs"
           >
             <ChevronRight size={36} strokeWidth={2.5} className="sm:size-[42px]" />
           </button>
@@ -1764,6 +1798,41 @@ export function HomePage() {
                 <a href="#about" className="inline-flex items-center gap-2 rounded-md bg-white/15 hover:bg-white/25 border border-white/30 backdrop-blur-sm px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5">
                   Latest Updates
                 </a>
+              </div>
+
+              {/* Minimal & subtle mobile carousel indicator */}
+              <div className="mt-4 flex sm:hidden items-center justify-center gap-3 select-none">
+                <button
+                  type="button"
+                  onClick={prevSlide}
+                  aria-label="Previous slide"
+                  className="p-1 text-white/50 hover:text-white active:scale-90 transition-colors cursor-pointer"
+                >
+                  <ChevronLeft size={14} strokeWidth={2.5} />
+                </button>
+                <div className="flex items-center gap-1.5">
+                  {heroImages.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setCurrentSlide(idx)}
+                      aria-label={`Go to slide ${idx + 1}`}
+                      className={`transition-all duration-300 rounded-full cursor-pointer ${
+                        idx === currentSlide
+                          ? "w-4 h-1 bg-white"
+                          : "size-1 bg-white/40 hover:bg-white/70"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={nextSlide}
+                  aria-label="Next slide"
+                  className="p-1 text-white/50 hover:text-white active:scale-90 transition-colors cursor-pointer"
+                >
+                  <ChevronRight size={14} strokeWidth={2.5} />
+                </button>
               </div>
             </div>
           </div>
