@@ -4,13 +4,13 @@ import { Header, Footer } from "./SewaSite";
 
 /* ── Reusable Pagination ──────────────────────────────────────────── */
 function Pagination({
-  total,
-  current,
+  total = 24,
+  current = 1,
   onChange,
 }: {
-  total: number;
-  current: number;
-  onChange: (page: number) => void;
+  total?: number;
+  current?: number;
+  onChange?: (page: number) => void;
 }) {
   const btnBase =
     "t-content-sm font-semibold! inline-flex items-center justify-center h-9 min-w-[36px] rounded-xl border transition-colors select-none cursor-pointer";
@@ -20,33 +20,41 @@ function Pagination({
   const navCls =
     `${btnBase} px-4 gap-1.5 bg-white border-[rgba(226,232,240,0.9)] text-[#374151] hover:bg-[#F1F5F9]`;
 
-  const pages = Array.from({ length: total }, (_, index) => index + 1);
-
-  if (total <= 1) return null;
+  // Show: 1 2 3 4 5 … 24
+  const pages = [1, 2, 3, 4, 5];
 
   return (
     <div className="mt-6 flex items-center justify-center gap-1.5 flex-wrap">
+      {/* Previous */}
       <button
         type="button"
         className={navCls}
         aria-label="Previous page"
-        disabled={current === 1}
-        onClick={() => onChange(current - 1)}
+        disabled={current <= 1}
+        onClick={() => onChange?.(Math.max(1, current - 1))}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
-          strokeLinejoin="round">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <polyline points="15 18 9 12 15 6" />
         </svg>
         Previous
       </button>
 
+      {/* Page numbers */}
       {pages.map((p) => (
         <button
           key={p}
           type="button"
           className={p === current ? activeCls : inactiveCls}
-          onClick={() => onChange(p)}
+          onClick={() => onChange?.(p)}
           aria-current={p === current ? "page" : undefined}
           style={{ padding: "0 12px" }}
         >
@@ -54,17 +62,40 @@ function Pagination({
         </button>
       ))}
 
+      {/* Ellipsis */}
+      <span className="t-content-sm inline-flex items-center justify-center h-9 w-9 text-[#9CA3AF] font-semibold!">
+        …
+      </span>
+
+      {/* Last page */}
+      <button
+        type="button"
+        className={total === current ? activeCls : inactiveCls}
+        onClick={() => onChange?.(total)}
+        style={{ padding: "0 12px" }}
+      >
+        {total}
+      </button>
+
+      {/* Next */}
       <button
         type="button"
         className={navCls}
         aria-label="Next page"
-        disabled={current === total}
-        onClick={() => onChange(current + 1)}
+        disabled={current >= total}
+        onClick={() => onChange?.(Math.min(total, current + 1))}
       >
         Next
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
-          strokeLinejoin="round">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <polyline points="9 18 15 12 9 6" />
         </svg>
       </button>
@@ -79,54 +110,47 @@ type Category = {
   badgeText: string;
 };
 
-/*
- * National Level: every category offers two options, not two separate rows —
- * take the problem statement we've supplied, or propose your own within that
- * category. Both live inside the ONE row for that category, as two stacked
- * sub-entries in the Problem Statement and ID Number columns, so the table
- * stays five rows (one per category) instead of ten.
- */
 type NationalCategory = Category & {
   psTitle: string;
   psUrl?: string;
-  psId: string; // e.g. "NAT-001-PS"
-  openId: string; // e.g. "NAT-001-OP"
+  psId: string;
+  openId: string;
 };
 
 export const NATIONAL_CATEGORIES: NationalCategory[] = [
   {
     label: "Defence, Intelligence, Space & National Security",
     psTitle: "PS1 TITLE",
-    idNumber: "NAT-001",
-    psId: "NAT-001-PS",
-    openId: "NAT-001-OP",
+    idNumber: "NAT-009",
+    psId: "NAT-009",
+    openId: "",
     badgeBg: "#FDE8E8",
     badgeText: "#E03137",
   },
   {
     label: "Disaster Management & Resilience",
     psTitle: "PS2 TITLE",
-    idNumber: "NAT-002",
-    psId: "NAT-002-PS",
-    openId: "NAT-002-OP",
+    idNumber: "NAT-008",
+    psId: "NAT-008",
+    openId: "",
     badgeBg: "#DBEAFE",
     badgeText: "#0284C7",
   },
   {
     label: "Manufacturing & Electronics, AI, Robotics & Autonomous Systems",
     psTitle: "PS3 TITLE",
-    idNumber: "NAT-003",
-    psId: "NAT-003-PS",
-    openId: "NAT-003-OP",
+    idNumber: "NAT-007",
+    psId: "NAT-007",
+    openId: "",
     badgeBg: "#DCFCE7",
     badgeText: "#16A34A",
   },
   {
     label: "Energy & Sustainable Technology & Environment",
     psTitle: "PS4 TITLE",
-    idNumber: "NAT-004",
-    psId: "NAT-004-PS",
-    openId: "NAT-004-OP",
+    idNumber: "NAT-006",
+    psId: "NAT-006",
+    openId: "",
     badgeBg: "#FEF3C7",
     badgeText: "#D97706",
   },
@@ -134,43 +158,28 @@ export const NATIONAL_CATEGORIES: NationalCategory[] = [
     label: "Advanced Engineering, Infrastructure, Future Mobility & Transportation",
     psTitle: "PS5 TITLE",
     idNumber: "NAT-005",
-    psId: "NAT-005-PS",
-    openId: "NAT-005-OP",
+    psId: "NAT-005",
+    openId: "",
     badgeBg: "#EDE9FE",
     badgeText: "#7C3AED",
   },
 ];
 
-/*
- * Regional (Local Community Level): open to all, with no problem statements
- * provided at all — every category is solved as an open proposal. There is
- * only ever one option per row, and the table has no Problem Statement
- * column since there is nothing to show in it.
- */
-export const COMMUNITY_CATEGORIES: Category[] = [
-  { label: "Village & Panchayat Development, Agriculture & Rural Economy", idNumber: "REG-001-OP", badgeBg: "#FDE8E8", badgeText: "#E03137" },
-  { label: "Education & Skill Development", idNumber: "REG-002-OP", badgeBg: "#DBEAFE", badgeText: "#0284C7" },
-  { label: "Healthcare & Community Well-being", idNumber: "REG-003-OP", badgeBg: "#DCFCE7", badgeText: "#16A34A" },
-  { label: "City & Urban Problems", idNumber: "REG-004-OP", badgeBg: "#FEF3C7", badgeText: "#D97706" },
-  { label: "Environment & Natural Resources", idNumber: "REG-005-OP", badgeBg: "#EDE9FE", badgeText: "#7C3AED" },
-  { label: "Sports (Khelo India)", idNumber: "REG-006-OP", badgeBg: "#FDE8E8", badgeText: "#E03137" },
-  { label: "Employment & Livelihood", idNumber: "REG-007-OP", badgeBg: "#DBEAFE", badgeText: "#0284C7" },
-  { label: "Women & Child Safety and Development", idNumber: "REG-008-OP", badgeBg: "#DCFCE7", badgeText: "#16A34A" },
-  { label: "Safety & Disaster Management", idNumber: "REG-009-OP", badgeBg: "#FEF3C7", badgeText: "#D97706" },
-  { label: "Transport, Energy & Tourism", idNumber: "REG-010-OP", badgeBg: "#EDE9FE", badgeText: "#7C3AED" },
-  { label: "Miscellaneous", idNumber: "REG-011-OP", badgeBg: "#FDE8E8", badgeText: "#E03137" },
+export const COMMUNITY_CATEGORIES: NationalCategory[] = [
+  { label: "Village & Panchayat Development, Agriculture & Rural Economy", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#FDE8E8", badgeText: "#E03137" },
+  { label: "Education & Skill Development", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#DBEAFE", badgeText: "#0284C7" },
+  { label: "Healthcare & Community Well-being", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#DCFCE7", badgeText: "#16A34A" },
+  { label: "City & Urban Problems", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#FEF3C7", badgeText: "#D97706" },
+  { label: "Environment & Natural Resources", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#EDE9FE", badgeText: "#7C3AED" },
+  { label: "Sports (Khelo India)", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#FDE8E8", badgeText: "#E03137" },
+  { label: "Employment & Livelihood", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#DBEAFE", badgeText: "#0284C7" },
+  { label: "Women & Child Safety and Development", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#DCFCE7", badgeText: "#16A34A" },
+  { label: "Safety & Disaster Management", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#FEF3C7", badgeText: "#D97706" },
+  { label: "Transport, Energy & Tourism", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#EDE9FE", badgeText: "#7C3AED" },
+  { label: "Miscellaneous", psTitle: "PS1 TITLE", idNumber: "REG-001", psId: "REG-001", openId: "", badgeBg: "#FDE8E8", badgeText: "#E03137" },
 ];
 
-/*
- * ── Table Card ──────────────────────────────────────────────────────
- * showPsColumn=true  (National): 4 columns — #, Category, Problem Statement,
- *   ID Number. A row either shows the PS we've supplied (with PDF/link
- *   icons) or, when row.psTitle is absent, an "Open — propose your own"
- *   badge in its place.
- * showPsColumn=false (Regional): 3 columns — #, Category, ID Number. There
- *   is no Problem Statement column at all, since every regional entry is an
- *   open proposal and there is nothing to show for it.
- */
+/* ── Problem Modal ─────────────────────────────────────────────────── */
 function ProblemModal({
   title,
   children,
@@ -244,6 +253,7 @@ function ProblemModal({
   );
 }
 
+/* ── Table Card ────────────────────────────────────────────────────── */
 function TableCard({
   categories,
   showPsColumn,
@@ -286,10 +296,7 @@ function TableCard({
       });
   }, [categories, search, sortBy]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredCategories.length / pageSize),
-  );
+  const totalPages = 24;
 
   const visibleCategories = filteredCategories.slice(
     (page - 1) * pageSize,
@@ -300,14 +307,8 @@ function TableCard({
     setPage(1);
   }, [search, sortBy, categories]);
 
-  useEffect(() => {
-    if (page > totalPages) {
-      setPage(totalPages);
-    }
-  }, [page, totalPages]);
-
-  const categoryWidth = showPsColumn ? "38%" : "62%";
-  const idWidth = "23%";
+  const categoryWidth = showPsColumn ? "40%" : "62%";
+  const idWidth = "16%";
 
   return (
     <div>
@@ -357,12 +358,14 @@ function TableCard({
                     "linear-gradient(180deg,#EDF2F7 0%,#E8EEF6 100%)",
                 }}
               >
+                {/* # */}
                 <th className="w-[84px] px-6 py-4 text-center">
                   <span className="t-content-sm font-bold! tracking-[0.65px] uppercase text-[#60718B]">
                     #
                   </span>
                 </th>
 
+                {/* CATEGORY */}
                 <th
                   className="px-6 py-4 text-left"
                   style={{ width: categoryWidth }}
@@ -372,6 +375,7 @@ function TableCard({
                   </span>
                 </th>
 
+                {/* PROBLEM STATEMENT */}
                 {showPsColumn && (
                   <th
                     className="px-6 py-4 text-left"
@@ -383,6 +387,7 @@ function TableCard({
                   </th>
                 )}
 
+                {/* ID NUMBER */}
                 <th
                   className="px-6 py-4 text-center"
                   style={{ width: idWidth }}
@@ -391,141 +396,102 @@ function TableCard({
                     ID Number
                   </span>
                 </th>
+
+                {/* REGISTER */}
+                <th className="w-[120px] px-4 py-4 text-center">
+                  <span className="t-content-sm font-bold! tracking-[0.65px] uppercase text-[#60718B]">
+                    &nbsp;
+                  </span>
+                </th>
               </tr>
             </thead>
 
+            {/* ── Body ── */}
             <tbody>
               {visibleCategories.map((row, i) => {
                 const national = row as Partial<NationalCategory>;
-                const hasTwoOptions =
-                  showPsColumn &&
-                  national.psId !== undefined &&
-                  national.openId !== undefined;
+                const hasSinglePs = showPsColumn && national.psTitle !== undefined;
 
                 return (
                   <tr
-                    key={row.idNumber}
-                    className={`transition-colors hover:bg-[#FAFBFD] ${
+                    key={`${row.idNumber}-${i}`}
+                    className={`hover:bg-[#FAFBFD] transition-colors ${
                       i > 0 ? "border-t border-[#F1F5F9]" : ""
                     }`}
                   >
+                    {/* Number badge */}
                     <td className="w-[84px] px-6 py-[20.5px] text-center">
                       <span
-                        className="t-content-sm font-bold! inline-flex h-9 w-9 items-center justify-center rounded-full shadow-[0px_1px_2px_rgba(0,0,0,0.05)]"
-                        style={{
-                          background: row.badgeBg,
-                          color: row.badgeText,
-                        }}
+                        className="t-content-sm font-bold! inline-flex items-center justify-center w-9 h-9 rounded-full shadow-[0px_1px_2px_rgba(0,0,0,0.05)]"
+                        style={{ background: row.badgeBg, color: row.badgeText }}
                       >
                         {(page - 1) * pageSize + i + 1}
                       </span>
                     </td>
 
-                    <td
-                      className="px-6 py-[27.5px]"
-                      style={{ width: categoryWidth }}
-                    >
+                    {/* Category name */}
+                    <td className="px-6 py-[27.5px]" style={{ width: categoryWidth }}>
                       <span className="t-content-sm font-bold! tracking-[-0.375px] text-[#142340]">
                         {row.label}
                       </span>
                     </td>
 
+                    {/* Problem statement */}
                     {showPsColumn && (
-                      <td
-                        className="px-6 py-[22.5px]"
-                        style={{ width: "31%" }}
-                      >
-                        {hasTwoOptions ? (
-                          <div className="flex flex-col gap-2.5">
+                      <td className="px-6 py-[22.5px]" style={{ width: "31%" }}>
+                        {hasSinglePs ? (
+                          <div className="flex items-center gap-3">
+                            {/* PDF icon badge */}
+                            <span className="inline-flex items-center justify-center w-8 h-8 shrink-0 rounded-lg border border-[#FECACA] shadow-[0px_1px_2px_rgba(0,0,0,0.05)]" style={{ background: "rgba(254,242,242,0.6)" }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                                <polyline points="14 2 14 8 20 8" />
+                              </svg>
+                            </span>
                             <button
                               type="button"
                               onClick={() => setSelectedRow(row)}
-                              className="flex w-full cursor-pointer items-center gap-3 rounded-lg text-left transition-colors hover:bg-[#F8FAFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2368B2]"
+                              className="t-content-sm font-bold! text-[#142340] hover:text-[#2368B2] text-left cursor-pointer transition-colors"
                             >
-                              <span
-                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#FECACA] shadow-[0px_1px_2px_rgba(0,0,0,0.05)]"
-                                style={{
-                                  background: "rgba(254,242,242,0.6)",
-                                }}
-                              >
-                                <svg
-                                  width="16"
-                                  height="16"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="#EF4444"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                                  <polyline points="14 2 14 8 20 8" />
-                                </svg>
-                              </span>
-
-                              <span className="t-content-sm font-bold! text-[#142340]">
-                                {national.psTitle}
-                              </span>
+                              {national.psTitle}
                             </button>
-
-                            <div className="flex items-center gap-3">
-                              <span
-                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#BBE3D0] shadow-[0px_1px_2px_rgba(0,0,0,0.05)]"
-                                style={{
-                                  background: "rgba(236,253,245,0.7)",
-                                }}
-                              >
-                                <svg
-                                  width="16"
-                                  height="16"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="#16A34A"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <path d="M12 20h9" />
-                                  <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                                </svg>
-                              </span>
-
-                              <span className="t-content-sm font-bold! text-[#16A34A]">
-                                OPEN
-                              </span>
-                            </div>
+                            {/* External link badge */}
+                            <button
+                              type="button"
+                              onClick={() => setSelectedRow(row)}
+                              className="inline-flex items-center justify-center w-7 h-7 shrink-0 rounded-full bg-white border border-[rgba(226,232,240,0.8)] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] hover:bg-[#F1F5F9] cursor-pointer transition-colors"
+                              aria-label="View problem statement details"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                <polyline points="15 3 21 3 21 9" />
+                                <line x1="10" y1="14" x2="21" y2="3" />
+                              </svg>
+                            </button>
                           </div>
                         ) : null}
                       </td>
                     )}
 
-                    <td
-                      className="px-6 py-[24.5px] text-center"
-                      style={{ width: idWidth }}
-                    >
-                      {hasTwoOptions ? (
-                        <div className="flex flex-col gap-2.5">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedRow(row)}
-                            className="t-content-sm font-semibold! inline-flex cursor-pointer items-center justify-center rounded-full bg-[#EAF1F8] px-5 py-1.5 tracking-[0.3px] text-[#1E2F4D] hover:bg-[#DDE8F2]"
-                          >
-                            {national.psId}
-                          </button>
+                    {/* ID pill */}
+                    <td className="px-6 py-[24.5px] text-center" style={{ width: idWidth }}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedRow(row)}
+                        className="t-content-sm font-semibold! inline-flex items-center justify-center px-5 py-1.5 rounded-full bg-[#EAF1F8] tracking-[0.3px] text-[#1E2F4D] whitespace-nowrap hover:bg-[#DDE8F2] cursor-pointer transition-colors"
+                      >
+                        {row.idNumber}
+                      </button>
+                    </td>
 
-                          <span className="t-content-sm font-semibold! inline-flex items-center justify-center rounded-full bg-[#EAF1F8] px-5 py-1.5 tracking-[0.3px] text-[#1E2F4D]">
-                            {national.openId}
-                          </span>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => setSelectedRow(row)}
-                          className="t-content-sm font-semibold! inline-flex cursor-pointer items-center justify-center rounded-full bg-[#EAF1F8] px-5 py-1.5 tracking-[0.3px] text-[#1E2F4D] hover:bg-[#DDE8F2]"
-                        >
-                          {row.idNumber}
-                        </button>
-                      )}
+                    {/* Register button */}
+                    <td className="w-[120px] px-4 py-[24.5px] text-center">
+                      <a
+                        href="/team-register"
+                        className="inline-flex items-center justify-center px-5 py-2 rounded-full bg-[#E03137] hover:bg-[#c52a2f] text-white text-sm font-bold transition-colors shadow-sm"
+                      >
+                        Register
+                      </a>
                     </td>
                   </tr>
                 );
@@ -579,17 +545,14 @@ function TableCard({
                   <p className="mt-1">{selectedRow.idNumber}</p>
                 </div>
 
-                {showPsColumn && national.psId && national.openId ? (
-                  <div>
-                    <p className="font-semibold text-[#263A56]">
-                      Registration IDs
-                    </p>
-                    <p className="mt-1">
-                      Official PS: {national.psId}
-                    </p>
-                    <p>Open proposal: {national.openId}</p>
-                  </div>
-                ) : null}
+                <div className="pt-2">
+                  <a
+                    href="/team-register"
+                    className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-[#E03137] hover:bg-[#c52a2f] text-white text-sm font-bold transition-colors shadow-sm"
+                  >
+                    Register for this Challenge
+                  </a>
+                </div>
               </div>
             );
           })()}
@@ -598,7 +561,6 @@ function TableCard({
     </div>
   );
 }
-
 
 /* ── Page ────────────────────────────────────────────────────────────── */
 export function ProblemStatementsPage() {
@@ -677,7 +639,7 @@ export function ProblemStatementsPage() {
                 </p>
 
                 <div className="mt-8">
-                  <TableCard categories={COMMUNITY_CATEGORIES} showPsColumn={false} />
+                  <TableCard categories={COMMUNITY_CATEGORIES} showPsColumn />
                 </div>
               </section>
 
