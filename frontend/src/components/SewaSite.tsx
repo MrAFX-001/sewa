@@ -19,6 +19,7 @@ import {
   Mail,
   Map,
   MapPin,
+  Menu,
   Phone,
   Play,
   Search,
@@ -50,6 +51,12 @@ import { ObjectivesRoadmap } from "./ObjectivesRoadmap";
 import { ParticipationBenefits } from "./ParticipationBenefits";
 import { SearchModal } from "./SearchModal";
 import { TimelineRoadmap } from "./TimelineRoadmap";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "./ui/sheet";
 
 const heroImages = [
   {
@@ -112,6 +119,7 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
   const { user, isSignedIn, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [latestAnnouncement, setLatestAnnouncement] = useState<Announcement | null>(null);
 
   useEffect(() => {
@@ -147,7 +155,7 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
   return (
     <>
       {/* Row 1: Light gray background - scrolls away naturally on scroll */}
-      <div className="w-full bg-[#F3F4F6] border-b border-gray-200/50 px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between">
+      <div className="hidden lg:flex w-full bg-[#F3F4F6] border-b border-gray-200/50 px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 items-center justify-between">
         <Brand />
         <div className="flex items-center gap-2.5 sm:gap-4 md:gap-5">
           {/* dtu.ac.in link */}
@@ -218,6 +226,263 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
           )}
         </div>
       </div>
+
+      {/* Mobile navigation: separate from desktop navigation to preserve desktop layout */}
+      <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-gray-200/80 bg-white px-4 shadow-sm lg:hidden">
+        <Link
+          to="/"
+          className="flex min-w-0 items-center"
+          aria-label="SEWA 2026 home"
+        >
+          <img
+            src={sewaLogo}
+            alt="SEWA FIRST"
+            className="h-9 w-auto object-contain"
+          />
+        </Link>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            className="flex size-9 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-700 transition-colors hover:border-[#ff4d4f]/40 hover:bg-red-50 hover:text-[#ff4d4f]"
+            aria-label="Search portal"
+            title="Search SEWA portal"
+          >
+            <Search size={17} className="text-[#ff4d4f]" />
+          </button>
+
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="flex size-9 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-700 transition-colors hover:border-[#ff4d4f]/40 hover:bg-red-50 hover:text-[#ff4d4f]"
+              aria-label="Open navigation menu"
+            >
+              <Menu size={19} />
+            </button>
+
+            <SheetContent side="right" className="w-[85vw] max-w-sm overflow-y-auto px-5">
+              <SheetHeader className="pr-8 text-left">
+                <SheetTitle className="text-left text-[#ff4d4f]">
+                  SEWA 2026
+                </SheetTitle>
+              </SheetHeader>
+
+              <nav
+                className="mt-6 flex flex-col"
+                aria-label="Mobile navigation"
+              >
+                <Link
+                  to="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="border-b border-gray-100 py-3 text-base font-semibold text-gray-800"
+                >
+                  Home
+                </Link>
+
+                <Link
+                  to="/about"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="border-b border-gray-100 py-3 text-base font-semibold text-gray-800"
+                >
+                  About
+                </Link>
+                <div className="border-b border-gray-100 py-2 pl-3">
+                  <Link
+                    to="/about"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    About SEWA
+                  </Link>
+                  <a
+                    href="https://dtu.ac.in"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    About DTU
+                  </a>
+                  <a
+                    href="/#committee"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    Our Team
+                  </a>
+                </div>
+
+                <Link
+                  to="/guidelines"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="border-b border-gray-100 py-3 text-base font-semibold text-gray-800"
+                >
+                  Guidelines
+                </Link>
+                <div className="border-b border-gray-100 py-2 pl-3">
+                  <Link
+                    to="/guidelines"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    All Guidelines
+                  </Link>
+                  <Link
+                    to="/guidelines"
+                    hash="eligibility-heading"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    Eligibility
+                  </Link>
+                  <Link
+                    to="/guidelines"
+                    hash="submission-heading"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    Submission Format
+                  </Link>
+                  <a
+                    href="/#benefits"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    Benefits
+                  </a>
+                </div>
+
+                <Link
+                  to="/problem-statements"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="border-b border-gray-100 py-3 text-base font-semibold text-gray-800"
+                >
+                  Problem Statements
+                </Link>
+                <div className="border-b border-gray-100 py-2 pl-3">
+                  <Link
+                    to="/problem-statements"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    All Problem Statements
+                  </Link>
+                  <Link
+                    to="/problem-statements"
+                    hash="national"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    National Level Innovation
+                  </Link>
+                  <Link
+                    to="/problem-statements"
+                    hash="community"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    Local / Regional Innovation
+                  </Link>
+                  <a
+                    href="/#themes"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    Themes Overview
+                  </a>
+                </div>
+
+                <Link
+                  to="/events"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="border-b border-gray-100 py-3 text-base font-semibold text-gray-800"
+                >
+                  Events
+                </Link>
+                <div className="border-b border-gray-100 py-2 pl-3">
+                  <Link
+                    to="/events"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    All Events
+                  </Link>
+                  <Link
+                    to="/events"
+                    hash="stages"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    Competition Stages
+                  </Link>
+                  <a
+                    href="/#timeline"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    100-Day Timeline
+                  </a>
+                  <a
+                    href="/#announcements"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-1.5 text-sm text-gray-600"
+                  >
+                    Announcements
+                  </a>
+                </div>
+
+                <Link
+                  to="/resources"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="border-b border-gray-100 py-3 text-base font-semibold text-gray-800"
+                >
+                  Resources
+                </Link>
+
+                <Link
+                  to="/faq"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="border-b border-gray-100 py-3 text-base font-semibold text-gray-800"
+                >
+                  FAQ
+                </Link>
+
+                <Link
+                  to="/contact"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="border-b border-gray-100 py-3 text-base font-semibold text-gray-800"
+                >
+                  Contact Us
+                </Link>
+
+                <div className="mt-5 border-t border-gray-200 pt-5">
+                  {isSignedIn ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        signOut();
+                      }}
+                      className="button button-outline w-full cursor-pointer justify-center text-sm"
+                    >
+                      Sign Out
+                    </button>
+                  ) : (
+                    <Link
+                      to="/signin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="inline-flex w-full items-center justify-center rounded-full bg-[#ff4d4f] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#e03d3f]"
+                    >
+                      Login
+                    </Link>
+                  )}
+                </div>
+              </nav>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </header>
 
       {/* Row 2: Sticky navigation bar that transforms on scroll with increased height */}
       <header
@@ -364,16 +629,16 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
       </header>
 
       {/* Row 3: Live updates ticker - scrolls away with the page */}
-      <div className="live-updates-bar flex h-12 overflow-hidden bg-[#e0e0e0] text-sm">
+      <div className="live-updates-bar flex h-10 sm:h-12 overflow-hidden bg-[#e0e0e0] text-sm">
         <a
           href="/#announcements"
-          className="live-updates-label flex shrink-0 items-center bg-[#ff5d5d] px-6 font-extrabold text-white text-sm sm:text-base shadow-[2px_0_8px_rgba(0,0,0,0.12)] relative z-10 cursor-pointer hover:bg-[#ef4f4f] transition-colors"
+          className="live-updates-label flex shrink-0 items-center bg-[#ff5d5d] px-3 sm:px-6 font-extrabold text-white text-xs sm:text-base shadow-[2px_0_8px_rgba(0,0,0,0.12)] relative z-10 cursor-pointer hover:bg-[#ef4f4f] transition-colors"
           aria-label="Jump to live announcements"
         >
           Live Updates
         </a>
         <div className="live-updates-ticker-wrap min-w-0 flex-1 overflow-hidden">
-          <div className="ticker flex h-full items-center whitespace-nowrap font-bold text-sm sm:text-base text-gray-800">
+          <div className="ticker flex h-full items-center whitespace-nowrap font-bold text-xs sm:text-base text-gray-800">
             <span>
               {latestAnnouncement?.title ?? "Live announcements are loading..."}
             </span>
@@ -1480,11 +1745,11 @@ export function HomePage() {
                 />
               </div>
 
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-extrabold leading-tight text-white drop-shadow-lg whitespace-nowrap uppercase tracking-tight">
+              <h1 className="text-xl min-[400px]:text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-extrabold leading-tight text-white drop-shadow-lg uppercase tracking-tight px-2 sm:px-0">
                 Rashtriya Youth Innovation Challenge 2026
               </h1>
 
-              <p className="mt-4 text-xl sm:text-2xl md:text-3xl font-bold text-white/90 tracking-wider uppercase">
+              <p className="mt-4 text-base min-[400px]:text-lg sm:text-2xl md:text-3xl font-bold text-white/90 tracking-wider uppercase">
                 Observe. Ideate. Innovate. Impact.
               </p>
 
