@@ -1493,10 +1493,10 @@ export function HomePage() {
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3 justify-center">
-                <Link to="/team-register" className="inline-flex items-center gap-2 rounded-md bg-[#e53e3e] hover:bg-[#c53030] px-6 py-3 text-base font-extrabold text-white transition-all hover:-translate-y-0.5 shadow-lg">
+                <Link to="/team-register" className="inline-flex items-center gap-2 rounded-md bg-[#e53e3e] hover:bg-[#c53030] px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 shadow-lg">
                   Register Your Team
                 </Link>
-                <a href="#about" className="inline-flex items-center gap-2 rounded-md bg-white/15 hover:bg-white/25 border border-white/30 backdrop-blur-sm px-6 py-3 text-base font-extrabold text-white transition-all hover:-translate-y-0.5">
+                <a href="#about" className="inline-flex items-center gap-2 rounded-md bg-white/15 hover:bg-white/25 border border-white/30 backdrop-blur-sm px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5">
                   Latest Updates
                 </a>
               </div>
@@ -3358,7 +3358,7 @@ export function AboutPage() {
             </section>
 
             {/* 3. PHILOSOPHY */}
-            <section aria-labelledby="philosophy-heading" className="mt-8">
+            <section aria-labelledby="philosophy-heading">
               <h2
                 id="philosophy-heading"
                 className="t-main-heading uppercase"
@@ -3430,16 +3430,16 @@ export function AboutPage() {
                   The Challenge further emphasizes affordability, sustainability, field validation, user feedback and scalability, ensuring that successful innovations are not limited to prototypes but have a clear pathway towards adoption, replication and deployment for the intended beneficiaries.
                 </p>
               </div>
-              <div className="mt-4 sm:mt-6 flex flex-col items-center overflow-hidden">
+              <div className="mt-10 sm:mt-14 flex flex-col items-center">
                 <img
                   src={uniqueFeaturesSvg}
                   alt="Unique Features - Complete Innovation Pathway"
-                  className="w-full h-auto object-contain select-none scale-125"
+                  className="w-full max-w-3xl h-auto object-contain select-none"
                 />
+                <p className="text-center text-gray-800 font-medium text-base sm:text-lg mt-6">
+                  Every solution must demonstrate a complete pathway
+                </p>
               </div>
-              <p className="text-center text-gray-800 font-medium text-base sm:text-lg mt-4">
-                Every solution must demonstrate a complete pathway
-              </p>
             </section>
 
             {/* 7. PURPOSE & BENEFITS */}
@@ -3450,22 +3450,8 @@ export function AboutPage() {
               >
                 PURPOSE &amp; BENEFITS
               </h2>
-              <div className="t-content-block space-y-6 sm:space-y-7 text-gray-800">
-                <p>
-                  The Sewa First Innovation Challenge empowers youth to identify real local and national problems and create innovative, practical and scalable solutions that contribute to nation-building and Viksit Bharat.
-                </p>
-                <p className="font-semibold text-gray-900">
-                  Participants will:
-                </p>
-                <ul className="list-disc list-inside space-y-2 pl-2">
-                  <li>Develop innovation &amp; problem-solving skills</li>
-                  <li>Apply knowledge to real-world challenges</li>
-                  <li>Build teamwork, leadership &amp; entrepreneurial skills</li>
-                  <li>Gain exposure to mentors, experts &amp; industry</li>
-                  <li>Showcase ideas and gain recognition &amp; incubation opportunities</li>
-                  <li>Outstanding innovations will be recognised and awarded.</li>
-                </ul>
-              </div>
+              {/* Space reserved for content */}
+              <div className="py-8 sm:py-14" />
             </section>
           </div>
         </main>

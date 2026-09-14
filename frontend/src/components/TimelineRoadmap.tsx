@@ -104,7 +104,7 @@ const steps: Step[] = [
   {
     number: "01",
     title: "Ideate",
-    dates: "Days 1–15 • 19 Sep – 1 Oct 2026",
+    dates: "Days 1–15 • 15 Sep – 1 Oct 2026",
     body: "Launch of 50 National Problem Statements, online orientation, team registrations, and idea submissions.",
     color: "#F25C22",
     side: "below",
@@ -239,7 +239,6 @@ export function TimelineRoadmap() {
     if (!frame) return;
 
     const observer = new ResizeObserver(([entry]) => {
-      if (!entry) return;
       const width = entry.contentRect.width;
       if (width > 0) setScale(width / STAGE_WIDTH);
     });
