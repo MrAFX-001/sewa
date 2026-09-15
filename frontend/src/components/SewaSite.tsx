@@ -1817,11 +1817,10 @@ export function HomePage() {
                       type="button"
                       onClick={() => setCurrentSlide(idx)}
                       aria-label={`Go to slide ${idx + 1}`}
-                      className={`transition-all duration-300 rounded-full cursor-pointer ${
-                        idx === currentSlide
+                      className={`transition-all duration-300 rounded-full cursor-pointer ${idx === currentSlide
                           ? "w-4 h-1 bg-white"
                           : "size-1 bg-white/40 hover:bg-white/70"
-                      }`}
+                        }`}
                     />
                   ))}
                 </div>
@@ -2797,8 +2796,57 @@ const eventStages: EventStage[] = [
  */
 function StagesTable() {
   return (
-    <div className="mt-10 sm:mt-12 w-full max-w-[1180px] mx-auto flex flex-col gap-[14px]">
-      <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+    <div className="mt-8 sm:mt-12 w-full max-w-[1180px] mx-auto flex flex-col gap-[14px]">
+      {/* ── Mobile Layout (< md): Responsive Stage Cards ── */}
+      <div className="flex flex-col gap-3.5 md:hidden">
+        {eventStages.map((stage) => (
+          <article
+            key={stage.number}
+            className="w-full rounded-2xl border border-[#eaecf0] bg-white p-4.5 sm:p-5 flex flex-col gap-3 shadow-2xs"
+          >
+            {/* Card Header: Stage Number & Stage Name */}
+            <div className="flex items-center gap-3">
+              <div
+                className={`t-content inline-flex size-9 items-center justify-center rounded-full font-bold! text-sm shrink-0 shadow-2xs ${stage.badgeBg} ${stage.badgeText}`}
+              >
+                {stage.number}
+              </div>
+              <h3 className="t-content font-bold! text-[#112347] text-[15px] sm:text-base leading-snug">
+                {stage.name}
+              </h3>
+            </div>
+
+            {/* Stage Period & Days */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#F4F6F9] text-xs sm:text-sm font-bold text-[#14234B] self-start">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 shrink-0">
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              <span>{stage.period}</span>
+              {stage.days && (
+                <span className="font-normal text-gray-500">
+                  ({stage.days})
+                </span>
+              )}
+            </div>
+
+            {/* Stage Activity */}
+            <div className="pt-2 border-t border-black/[0.04]">
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                Activities
+              </span>
+              <p className="t-content text-[#475569] text-sm sm:text-base leading-relaxed">
+                {stage.activity}
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {/* ── Desktop Layout (md: and up): 4-Column Table ── */}
+      <div className="hidden md:block overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
         <div className="min-w-[1160px] md:min-w-0 flex flex-col gap-[14px]">
           {/* Column headers */}
           <div className="w-full min-h-[58px] bg-[#EBF1F8] rounded-[16px] grid grid-cols-[80px_220px_380px_1fr] items-center py-2">
@@ -2854,7 +2902,7 @@ export function EventsPage() {
             <br />
             Launch Event
           </h1>
-          <p className="t-subheading-2 mt-3 text-center text-gray-700">
+          <p className="t-subheading-2 mt-3 text-center text-gray-700 [hyphens:none]">
             SEWA FIRST 2026 National Launch Event at Delhi Technological University
           </p>
           <p className="t-content mx-auto mt-6 max-w-3xl text-gray-700">
@@ -2872,7 +2920,7 @@ export function EventsPage() {
             <br />
             Roadmap
           </h2>
-          <p className="t-subheading-2 mt-3 text-center text-gray-700">The 100-Day Innovation Journey</p>
+          <p className="t-subheading-2 mt-3 text-center text-gray-700 [hyphens:none]">The 100-Day Innovation Journey</p>
           <p className="t-content mx-auto mt-6 max-w-3xl text-gray-700">
             Following the national launch, participants embark on a rigorous, milestone-driven
             pathway from September to December 2026. Moving from initial problem identification
@@ -2884,7 +2932,7 @@ export function EventsPage() {
         {/* Timeline & Stages */}
         <section id="stages" className="scroll-mt-16">
           <h2 className="t-main-heading text-center uppercase">Timeline &amp; Stages</h2>
-          <p className="t-subheading-2 mt-3 text-center text-gray-700">
+          <p className="t-subheading-2 mt-3 text-center text-gray-700 [hyphens:none]">
             Key phases, dates and activities for the national challenge.
           </p>
 
@@ -3807,13 +3855,15 @@ export function AboutPage() {
                   The Challenge further emphasizes affordability, sustainability, field validation, user feedback and scalability, ensuring that successful innovations are not limited to prototypes but have a clear pathway towards adoption, replication and deployment for the intended beneficiaries.
                 </p>
               </div>
-              <div className="mt-10 sm:mt-14 flex flex-col items-center">
-                <img
-                  src={uniqueFeaturesSvg}
-                  alt="Unique Features - Complete Innovation Pathway"
-                  className="w-full max-w-3xl h-auto object-contain select-none"
-                />
-                <p className="text-center text-gray-800 font-medium text-base sm:text-lg mt-6">
+              <div className="mt-8 sm:mt-12 flex flex-col items-center">
+                <div className="w-[calc(100%+1.5rem)] -mx-3 sm:mx-0 sm:w-full max-w-4xl flex justify-center">
+                  <img
+                    src={uniqueFeaturesSvg}
+                    alt="Unique Features - Complete Innovation Pathway"
+                    className="w-full h-auto object-contain select-none"
+                  />
+                </div>
+                <p className="text-center text-gray-800 font-medium text-base sm:text-lg mt-4 sm:mt-6 [hyphens:none]">
                   Every solution must demonstrate a complete pathway
                 </p>
               </div>

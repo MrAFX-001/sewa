@@ -210,7 +210,7 @@ const objectives: Objective[] = [
 ];
 
 const downArrow = (
-  <div aria-hidden="true" className="objectives-arrow flex w-full justify-center py-1.5 pl-24 sm:pl-32">
+  <div aria-hidden="true" className="objectives-arrow flex w-full justify-center py-1.5">
     <svg
       width={18}
       height={18}
@@ -229,49 +229,103 @@ const downArrow = (
 
 export function ObjectivesRoadmap() {
   return (
-    <div className="objectives-grid w-full">
-      {objectives.map((item, i) => (
-        <Fragment key={item.number}>
-          {/* Number badge */}
-          <div
-            className="flex shrink-0 items-center justify-center rounded-full"
-            style={{ width: BADGE, height: BADGE, backgroundColor: item.numberBg }}
-          >
-            <span
-              className="font-bold tracking-tight"
-              style={{ color: item.ink, fontSize: 19, lineHeight: 1 }}
+    <div className="w-full">
+      {/* Mobile View (< 640px) */}
+      <div className="block sm:hidden space-y-3">
+        {objectives.map((item, i) => (
+          <div key={item.number} className="space-y-3">
+            <div className="roadmap-card p-4 sm:p-5">
+              <div className="flex items-center gap-2.5 mb-2.5">
+                <span
+                  className="flex size-9 shrink-0 items-center justify-center rounded-xl font-bold text-sm shadow-2xs"
+                  style={{ backgroundColor: item.numberBg, color: item.ink }}
+                >
+                  {item.number}
+                </span>
+                <span
+                  className="flex size-9 shrink-0 items-center justify-center rounded-xl border shadow-2xs"
+                  style={{
+                    backgroundColor: item.iconBg,
+                    borderColor: item.numberBg,
+                    color: item.ink,
+                  }}
+                >
+                  {item.icon}
+                </span>
+                <h3 className="font-bold text-[15px] sm:text-base text-[#0f172a] leading-snug [hyphens:none]">
+                  {item.title}
+                </h3>
+              </div>
+              <p className="text-sm leading-relaxed text-[#475569] [hyphens:none]">
+                {item.body}
+              </p>
+            </div>
+
+            {i < objectives.length - 1 && (
+              <div aria-hidden="true" className="flex justify-center py-0.5 text-slate-400">
+                <svg
+                  width={18}
+                  height={18}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop / Tablet View (>= 640px) */}
+      <div className="hidden sm:grid objectives-grid w-full">
+        {objectives.map((item, i) => (
+          <Fragment key={item.number}>
+            {/* Number badge */}
+            <div
+              className="flex shrink-0 items-center justify-center rounded-full"
+              style={{ width: BADGE, height: BADGE, backgroundColor: item.numberBg }}
             >
-              {item.number}
-            </span>
-          </div>
+              <span
+                className="font-bold tracking-tight"
+                style={{ color: item.ink, fontSize: 19, lineHeight: 1 }}
+              >
+                {item.number}
+              </span>
+            </div>
 
-          {/* Icon badge */}
-          <div
-            className="flex shrink-0 items-center justify-center rounded-full border"
-            style={{
-              width: BADGE,
-              height: BADGE,
-              backgroundColor: item.iconBg,
-              borderColor: item.numberBg,
-              color: item.ink,
-            }}
-          >
-            {item.icon}
-          </div>
+            {/* Icon badge */}
+            <div
+              className="flex shrink-0 items-center justify-center rounded-full border"
+              style={{
+                width: BADGE,
+                height: BADGE,
+                backgroundColor: item.iconBg,
+                borderColor: item.numberBg,
+                color: item.ink,
+              }}
+            >
+              {item.icon}
+            </div>
 
-          {/* Content card */}
-          <div className="roadmap-card px-5 py-5 sm:px-6">
-            <h2 className="t-content font-bold! mb-2 text-left tracking-tight text-[#0f172a] [hyphens:none]">
-              {item.title}
-            </h2>
-            <p className="t-content text-left text-[#475569] [hyphens:none]">
-              {item.body}
-            </p>
-          </div>
+            {/* Content card */}
+            <div className="roadmap-card px-5 py-5 sm:px-6">
+              <h3 className="t-content font-bold! mb-2 text-left tracking-tight text-[#0f172a] [hyphens:none]">
+                {item.title}
+              </h3>
+              <p className="t-content text-left text-[#475569] [hyphens:none]">
+                {item.body}
+              </p>
+            </div>
 
-          {i < objectives.length - 1 && downArrow}
-        </Fragment>
-      ))}
+            {i < objectives.length - 1 && downArrow}
+          </Fragment>
+        ))}
+      </div>
     </div>
   );
 }

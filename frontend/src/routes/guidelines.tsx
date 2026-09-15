@@ -123,60 +123,94 @@ function GuidelinesPage() {
             ELIGIBILITY
           </h1>
           <div className="w-full max-w-[1180px] mx-auto flex flex-col gap-[14px]">
-            {/* Table Header & Category Rows with horizontal scroll protection on mobile */}
-            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-              <div className="min-w-[880px] md:min-w-0 flex flex-col gap-[14px]">
-                {/* Table Column Headers */}
-                <div className="w-full min-h-[58px] bg-[#EBF1F8] rounded-[16px] grid grid-cols-[115px_330px_1fr] items-center py-2">
-                  <div className="t-content flex items-center justify-center font-bold! text-[#334155]">
-                    #
-                  </div>
-                  <div className="t-content pl-[24px] font-bold! text-[#1F2D48]">
-                    Category
-                  </div>
-                  <div className="t-content pl-[32px] pr-5 font-bold! text-[#1F2D48]">
-                    Eligible Participants
-                  </div>
-                </div>
-
-                {/* Category Rows */}
-                {eligibilityRows.map((row) => (
-                  <article
-                    key={row.number}
-                    className={`w-full min-h-[88px] ${row.rowBg} rounded-[16px] grid grid-cols-[115px_330px_1fr] items-center py-4`}
+            {/* Mobile Category Cards (< md): Native stacked cards matching the info cards below */}
+            <div className="flex flex-col gap-3.5 md:hidden">
+              {eligibilityRows.map((row) => (
+                <article
+                  key={row.number}
+                  className={`w-full ${row.rowBg} rounded-[16px] p-4.5 sm:p-5 flex items-start gap-3.5 sm:gap-4 shadow-xs`}
+                >
+                  <div
+                    className={`size-11 sm:size-12 ${row.badgeBg} rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-xs mt-0.5`}
                   >
-                    <div className="flex items-center pl-[20px]">
-                      <div
-                        className={`size-[52px] ${row.badgeBg} rounded-full flex items-center justify-center text-white font-bold text-[20px] leading-none shadow-[0px_1px_2px_rgba(0,0,0,0.05)]`}
-                      >
-                        {row.number}
-                      </div>
-                    </div>
-                    <div className="pl-[24px] pr-4 h-full flex items-center border-r border-black/[0.04]">
-                      <h3 className="t-content font-bold! text-[#112347]">
-                        {row.category}
-                      </h3>
-                    </div>
-                    <div className="pl-[32px] pr-5 flex items-center">
+                    {row.number}
+                  </div>
+                  <div className="flex flex-col gap-1 min-w-0 flex-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-black/40">
+                      Category {row.number}
+                    </span>
+                    <h3 className="t-content font-bold! text-[#112347] text-[15px] sm:text-base leading-snug">
+                      {row.category}
+                    </h3>
+                    <div className="mt-1 pt-1.5 border-t border-black/[0.05]">
+                      <span className="text-xs font-semibold text-black/60 block mb-0.5">
+                        Eligible Participants:
+                      </span>
                       <p
-                        className={`t-content ${row.boldDesc ? "font-bold! text-[#14234B]" : "text-[#475569]"}`}
+                        className={`t-content text-sm sm:text-base ${
+                          row.boldDesc ? "font-semibold! text-[#14234B]" : "text-[#475569]"
+                        }`}
                       >
                         {row.participants}
                       </p>
                     </div>
-                  </article>
-                ))}
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {/* Desktop Table (md: and up): 3-column structured grid */}
+            <div className="hidden md:flex md:flex-col gap-[14px]">
+              {/* Table Column Headers */}
+              <div className="w-full min-h-[58px] bg-[#EBF1F8] rounded-[16px] grid grid-cols-[115px_330px_1fr] items-center py-2">
+                <div className="t-content flex items-center justify-center font-bold! text-[#334155]">
+                  #
+                </div>
+                <div className="t-content pl-[24px] font-bold! text-[#1F2D48]">
+                  Category
+                </div>
+                <div className="t-content pl-[32px] pr-5 font-bold! text-[#1F2D48]">
+                  Eligible Participants
+                </div>
               </div>
+
+              {/* Category Rows */}
+              {eligibilityRows.map((row) => (
+                <article
+                  key={row.number}
+                  className={`w-full min-h-[88px] ${row.rowBg} rounded-[16px] grid grid-cols-[115px_330px_1fr] items-center py-4`}
+                >
+                  <div className="flex items-center pl-[20px]">
+                    <div
+                      className={`size-[52px] ${row.badgeBg} rounded-full flex items-center justify-center text-white font-bold text-[20px] leading-none shadow-[0px_1px_2px_rgba(0,0,0,0.05)]`}
+                    >
+                      {row.number}
+                    </div>
+                  </div>
+                  <div className="pl-[24px] pr-4 h-full flex items-center border-r border-black/[0.04]">
+                    <h3 className="t-content font-bold! text-[#112347]">
+                      {row.category}
+                    </h3>
+                  </div>
+                  <div className="pl-[32px] pr-5 flex items-center">
+                    <p
+                      className={`t-content ${row.boldDesc ? "font-bold! text-[#14234B]" : "text-[#475569]"}`}
+                    >
+                      {row.participants}
+                    </p>
+                  </div>
+                </article>
+              ))}
             </div>
 
             {/* Info Cards */}
             {eligibilityCards.map((card) => (
               <article
                 key={card.key}
-                className={`w-full ${card.cardBg} min-h-[112px] rounded-[16px] p-6 flex flex-row items-center gap-6`}
+                className={`w-full ${card.cardBg} min-h-[112px] rounded-[16px] p-4 sm:p-6 flex flex-row items-start sm:items-center gap-4 sm:gap-6 shadow-xs`}
               >
                 <div
-                  className={`size-[56px] ${card.badgeBg} rounded-full flex items-center justify-center shrink-0 shadow-[0px_1px_2px_rgba(0,0,0,0.05)]`}
+                  className={`size-[48px] sm:size-[56px] ${card.badgeBg} rounded-full flex items-center justify-center shrink-0 shadow-[0px_1px_2px_rgba(0,0,0,0.05)] mt-0.5 sm:mt-0`}
                 >
                   {card.icon}
                 </div>

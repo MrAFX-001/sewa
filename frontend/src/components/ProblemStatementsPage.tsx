@@ -342,7 +342,139 @@ function TableCard({
         </label>
       </div>
 
-      <div className="w-full rounded-[24px] border border-[rgba(226,232,240,0.8)] bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.03)] overflow-hidden">
+      {/* ── Mobile Layout (< md): Clean responsive cards, no horizontal scroll ── */}
+      <div className="flex flex-col gap-3.5 md:hidden">
+        {visibleCategories.map((row, i) => {
+          const national = row as Partial<NationalCategory>;
+          const hasTwoOptions =
+            showPsColumn &&
+            national.psId !== undefined &&
+            national.openId !== undefined;
+
+          return (
+            <article
+              key={row.idNumber}
+              className="w-full rounded-2xl border border-[rgba(226,232,240,0.9)] bg-white p-4 sm:p-5 shadow-[0px_2px_10px_rgba(0,0,0,0.03)] flex flex-col gap-3"
+            >
+              {/* Card Header: Step number badge + ID badges */}
+              <div className="flex items-center justify-between gap-2">
+                <span
+                  className="t-content-sm font-bold! inline-flex h-8 w-8 items-center justify-center rounded-full shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-xs"
+                  style={{
+                    background: row.badgeBg,
+                    color: row.badgeText,
+                  }}
+                >
+                  {(page - 1) * pageSize + i + 1}
+                </span>
+
+                {hasTwoOptions ? (
+                  <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                    <span className="t-content-sm text-[11px] font-semibold! inline-flex items-center rounded-full bg-[#EAF1F8] px-2.5 py-0.5 text-[#1E2F4D]">
+                      {national.psId}
+                    </span>
+                    <span className="t-content-sm text-[11px] font-semibold! inline-flex items-center rounded-full bg-[#EAF1F8] px-2.5 py-0.5 text-[#1E2F4D]">
+                      {national.openId}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="t-content-sm text-[11px] font-semibold! inline-flex items-center rounded-full bg-[#EAF1F8] px-2.5 py-0.5 text-[#1E2F4D]">
+                    {row.idNumber}
+                  </span>
+                )}
+              </div>
+
+              {/* Category Title */}
+              <h3 className="t-content font-bold! text-[#142340] text-[15px] sm:text-base leading-snug">
+                {row.label}
+              </h3>
+
+              {/* Problem Statement details / actions */}
+              {showPsColumn && hasTwoOptions ? (
+                <div className="pt-2.5 border-t border-[#F1F5F9] flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRow(row)}
+                    className="flex w-full items-center justify-between gap-3 p-2.5 rounded-xl bg-[#FEF2F2]/70 hover:bg-[#FEF2F2] border border-[#FECACA]/70 transition-colors text-left cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="size-7 rounded-lg bg-red-100 flex items-center justify-center shrink-0 text-red-600 shadow-2xs">
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                          <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                      </span>
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-gray-500 uppercase tracking-wider block font-semibold">
+                          Problem Statement
+                        </span>
+                        <span className="text-xs sm:text-sm font-bold text-[#142340] truncate block">
+                          {national.psTitle}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold text-red-600 shrink-0">
+                      View →
+                    </span>
+                  </button>
+
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#ECFDF5]/70 border border-[#BBE3D0]/70">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="size-7 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0 text-emerald-600 shadow-2xs">
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M12 20h9" />
+                          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                        </svg>
+                      </span>
+                      <span className="text-xs font-bold text-emerald-800">
+                        Open Innovation (Propose Your Own)
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-black text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-md uppercase">
+                      Open
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="pt-2 border-t border-[#F1F5F9] flex items-center justify-between">
+                  <span className="text-xs font-medium text-gray-500">
+                    Open Innovation Track
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRow(row)}
+                    className="text-xs font-bold text-[#2368B2] hover:text-[#194c84] inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>View details</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
+
+      {/* ── Desktop Layout (md: and up): Structured Table ── */}
+      <div className="hidden md:block w-full rounded-[24px] border border-[rgba(226,232,240,0.8)] bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="overflow-x-auto">
           <table
             className={`w-full border-collapse ${
@@ -621,7 +753,7 @@ export function ProblemStatementsPage() {
               <section
                 id="national"
                 aria-labelledby="national-heading"
-                className="scroll-mt-28 rounded-[28px] border border-[#eaecf0] bg-white px-6 py-8 shadow-[0_10px_40px_rgba(0,0,0,0.05)] sm:px-10 sm:py-12"
+                className="scroll-mt-28 rounded-2xl sm:rounded-[28px] border border-[#eaecf0] bg-white p-4 sm:p-8 lg:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.05)]"
               >
                 <h2
                   id="national-heading"
@@ -652,7 +784,7 @@ export function ProblemStatementsPage() {
               <section
                 id="community"
                 aria-labelledby="community-heading"
-                className="scroll-mt-28 rounded-[28px] border border-[#eaecf0] bg-white px-6 py-8 shadow-[0_10px_40px_rgba(0,0,0,0.05)] sm:px-10 sm:py-12"
+                className="scroll-mt-28 rounded-2xl sm:rounded-[28px] border border-[#eaecf0] bg-white p-4 sm:p-8 lg:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.05)]"
               >
                 <h2
                   id="community-heading"

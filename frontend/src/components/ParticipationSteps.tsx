@@ -236,22 +236,49 @@ export function ParticipationSteps() {
   }, []);
 
   return (
-    <div
-      ref={frameRef}
-      className="w-full overflow-hidden"
-      style={{ aspectRatio: `${STAGE_WIDTH} / ${STAGE_HEIGHT}` }}
-      role="img"
-      aria-label="How to participate: check eligibility, select innovation track, select theme, select problem statement, form your team, submit innovation proposal"
-    >
+    <div className="w-full">
+      {/* Mobile Layout (< md): Clean responsive vertical step cards */}
+      <div className="flex flex-col gap-3.5 md:hidden">
+        {steps.map((step) => (
+          <article
+            key={step.number}
+            className="w-full bg-white rounded-2xl p-4.5 sm:p-5 border border-gray-100/90 shadow-2xs flex items-start gap-3.5 sm:gap-4"
+          >
+            <div
+              className="size-11 sm:size-12 rounded-full text-white flex items-center justify-center font-extrabold shrink-0 shadow-xs mt-0.5 text-base"
+              style={{ backgroundColor: step.color }}
+            >
+              {step.number}
+            </div>
+            <div className="flex flex-col gap-1 min-w-0 flex-1">
+              <h3 className="t-content font-bold! text-[#112347] leading-snug">
+                {step.title}
+              </h3>
+              <p className="t-content text-[#475569] text-sm sm:text-base leading-relaxed">
+                {step.body}
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {/* Desktop Layout (md: and up): Alternating roadmap stage */}
       <div
-        className="relative select-none"
-        style={{
-          width: STAGE_WIDTH,
-          height: STAGE_HEIGHT,
-          transformOrigin: "top left",
-          transform: `scale(${scale})`,
-        }}
+        ref={frameRef}
+        className="hidden md:block w-full overflow-hidden"
+        style={{ aspectRatio: `${STAGE_WIDTH} / ${STAGE_HEIGHT}` }}
+        role="img"
+        aria-label="How to participate: check eligibility, select innovation track, select theme, select problem statement, form your team, submit innovation proposal"
       >
+        <div
+          className="relative select-none"
+          style={{
+            width: STAGE_WIDTH,
+            height: STAGE_HEIGHT,
+            transformOrigin: "top left",
+            transform: `scale(${scale})`,
+          }}
+        >
         {/* Continuous bar: six equal colour segments */}
         <div
           className="absolute left-0 w-full flex z-0 rounded-full overflow-hidden shadow-sm"
@@ -291,6 +318,7 @@ export function ParticipationSteps() {
           <StepColumn key={`col-${step.number}`} step={step} index={i} />
         ))}
       </div>
+    </div>
     </div>
   );
 }

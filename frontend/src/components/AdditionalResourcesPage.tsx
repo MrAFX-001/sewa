@@ -173,13 +173,42 @@ export function AdditionalResourcesPage() {
 
             {/* ── Technology Readiness Level (TRL) ── */}
             <section id="trl" aria-labelledby="trl-heading" className="scroll-mt-28">
-              <h2 id="trl-heading" className={sectionHeadingClass}>
-                Technology Readiness
-                <br />
-                Level (TRL)
+              <h2 id="trl-heading" className={`${sectionHeadingClass} !mb-3 sm:!mb-8 [hyphens:none]`}>
+                Technology Readiness Level (TRL)
               </h2>
 
-              <div className="mt-10 sm:mt-12 overflow-hidden rounded-2xl border border-[#eaecf0]">
+              {/* ── Mobile Layout (< md): Responsive TRL Cards ── */}
+              <div className="mt-2 sm:mt-6 flex flex-col gap-3 md:hidden">
+                {TRL_ROWS.map((row, index) => {
+                  const badge = BADGE_STYLES[index % BADGE_STYLES.length]!;
+                  return (
+                    <article
+                      key={row.level}
+                      className="w-full rounded-2xl border border-[#eaecf0] bg-white p-4 sm:p-5 flex flex-col gap-2.5 shadow-2xs"
+                    >
+                      {/* Badge + Level Title side-by-side */}
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`t-content text-xs font-bold! inline-flex items-center justify-center whitespace-nowrap rounded-lg px-2.5 py-1 ${badge.bg} ${badge.text} shadow-2xs shrink-0`}
+                        >
+                          {row.level}
+                        </span>
+                        <h3 className="t-content font-bold! text-gray-900 text-[15px] sm:text-base leading-snug [hyphens:none] text-left">
+                          {row.title}
+                        </h3>
+                      </div>
+
+                      {/* Description */}
+                      <p className="t-content text-gray-600 text-sm sm:text-base leading-relaxed pt-2 border-t border-black/[0.04] [hyphens:none] [text-align:left] text-left">
+                        {row.description}
+                      </p>
+                    </article>
+                  );
+                })}
+              </div>
+
+              {/* ── Desktop Layout (md: and up): 3-Column Table ── */}
+              <div className="mt-10 sm:mt-12 hidden md:block overflow-hidden rounded-2xl border border-[#eaecf0]">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[880px] text-left">
                     <thead className="bg-[#1c2b40] text-white">
@@ -191,7 +220,7 @@ export function AdditionalResourcesPage() {
                     </thead>
                     <tbody>
                       {TRL_ROWS.map((row, index) => {
-                        const badge = BADGE_STYLES[index % BADGE_STYLES.length];
+                        const badge = BADGE_STYLES[index % BADGE_STYLES.length]!;
                         return (
                           <tr
                             key={row.level}

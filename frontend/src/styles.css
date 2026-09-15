@@ -585,7 +585,8 @@
   }
 
   .objectives-arrow {
-    grid-column: 1 / -1;
+    grid-column: 3;
+    justify-self: center;
   }
 
   /* Objectives roadmap: one card per step. */

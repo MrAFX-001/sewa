@@ -122,11 +122,107 @@ const arrow = (
   </div>
 );
 
+const phaseGroups = [
+  {
+    phaseNumber: "Phase 1",
+    label: "Explore & Understand",
+    surface: "#e0f0fe",
+    ink: "#0284c7",
+    border: "#bae6fd",
+    stepIndices: [0, 1, 2],
+  },
+  {
+    phaseNumber: "Phase 2",
+    label: "Ideate & Build",
+    surface: "#fde8ec",
+    ink: "#e11d48",
+    border: "#fecdd3",
+    stepIndices: [3, 4],
+  },
+  {
+    phaseNumber: "Phase 3",
+    label: "Validate & Create Impact",
+    surface: "#def5e5",
+    ink: "#166534",
+    border: "#bbf7d0",
+    stepIndices: [5, 6, 7],
+  },
+];
+
 export function InnovationJourney() {
   return (
     <div className="w-full">
-      {/* Horizontal scroller: the sequence must not reflow */}
-      <div className="overflow-x-auto pb-4">
+      {/* Mobile & Tablet Responsive View (< 1024px) */}
+      <div className="block lg:hidden space-y-6">
+        {phaseGroups.map((group, gIdx) => (
+          <div key={group.label} className="space-y-3.5">
+            {/* Phase header */}
+            <div
+              className="flex items-center justify-between px-4 py-2.5 rounded-xl border shadow-2xs"
+              style={{
+                backgroundColor: group.surface,
+                borderColor: group.border,
+                color: group.ink,
+              }}
+            >
+              <span className="text-xs font-black uppercase tracking-wider">
+                {group.phaseNumber}
+              </span>
+              <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wide">
+                {group.label}
+              </span>
+            </div>
+
+            {/* Steps in this phase */}
+            <div className="space-y-3">
+              {group.stepIndices.map((idx, stepPos) => {
+                const step = steps[idx];
+                return (
+                  <div key={step.number} className="space-y-3">
+                    <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs transition-all hover:border-slate-300">
+                      <div
+                        className="size-12 rounded-full shrink-0 flex items-center justify-center font-black text-base shadow-xs"
+                        style={{ backgroundColor: step.surface, color: step.ink }}
+                      >
+                        {step.number}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-sm sm:text-base uppercase tracking-wider text-slate-900 mb-1">
+                          {step.title}
+                        </h4>
+                        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                          {step.body}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Arrow between steps within the phase */}
+                    {stepPos < group.stepIndices.length - 1 && (
+                      <div aria-hidden="true" className="flex justify-center text-slate-300 py-0.5">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                          <path d="M19 14l-7 7m0 0l-7-7m7 7V3" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Arrow between phases */}
+            {gIdx < phaseGroups.length - 1 && (
+              <div aria-hidden="true" className="flex justify-center text-slate-400 pt-2 pb-1">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path d="M19 14l-7 7m0 0l-7-7m7 7V3" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop View (>= 1024px) */}
+      <div className="hidden lg:block overflow-x-auto pb-4">
         <div className="flex min-w-[1180px] flex-col gap-10 lg:gap-12">
           {/* Eight sequential steps */}
           <div className="relative grid grid-cols-8 items-start" aria-label="Eight steps of innovation">
