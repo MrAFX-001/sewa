@@ -115,6 +115,36 @@ export function Brand() {
   );
 }
 
+/**
+ * Compact logo strip for the mobile top bar and the mobile menu sheet:
+ * National Emblem, DTU and SEWA. The wide "Govt. of NCT of Delhi" wordmark
+ * from <Brand /> is left out so the strip fits beside the search and menu
+ * buttons on 360px phones.
+ */
+function MobileLogos({ size = "sm" }: { size?: "sm" | "md" }) {
+  const h = size === "md" ? "h-10" : "h-9";
+  const dtu = size === "md" ? "size-10" : "size-9";
+  return (
+    <span className="flex min-w-0 items-center gap-2">
+      <img
+        src={satymevjayteLogo}
+        alt="Satyamev Jayate"
+        className={`${h} w-auto shrink-0 object-contain dark:invert`}
+      />
+      <img
+        src={dtuLogo}
+        alt="Delhi Technological University"
+        className={`${dtu} shrink-0 object-contain`}
+      />
+      <img
+        src={sewaLogo}
+        alt="SEWA FIRST"
+        className={`${h} w-auto min-w-0 object-contain`}
+      />
+    </span>
+  );
+}
+
 export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" | "guidelines" | "about" | "problems" | "contact" | "faq" | "resources" | "signin" | "signup" | "team-register" | string } = {}) {
   const { user, isSignedIn, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -228,20 +258,16 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
       </div>
 
       {/* Mobile navigation: separate from desktop navigation to preserve desktop layout */}
-      <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-gray-200/80 bg-white px-4 shadow-sm lg:hidden">
+      <header className="sticky top-0 z-50 flex h-14 items-center justify-between gap-3 border-b border-gray-200/80 bg-white px-4 shadow-sm lg:hidden">
         <Link
           to="/"
           className="flex min-w-0 items-center"
           aria-label="SEWA 2026 home"
         >
-          <img
-            src={sewaLogo}
-            alt="SEWA FIRST"
-            className="h-9 w-auto object-contain"
-          />
+          <MobileLogos />
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
@@ -264,9 +290,15 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
 
             <SheetContent side="right" className="w-[85vw] max-w-sm overflow-y-auto px-5">
               <SheetHeader className="pr-8 text-left">
-                <SheetTitle className="text-left text-[#ff4d4f]">
-                  SEWA 2026
-                </SheetTitle>
+                <Link
+                  to="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center"
+                  aria-label="SEWA 2026 home"
+                >
+                  <MobileLogos size="md" />
+                </Link>
+                <SheetTitle className="sr-only">SEWA 2026 navigation</SheetTitle>
               </SheetHeader>
 
               <nav
@@ -456,7 +488,14 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
                   Contact Us
                 </Link>
 
-                <div className="mt-5 border-t border-gray-200 pt-5">
+                <div className="mt-5 flex flex-col gap-3 border-t border-gray-200 pt-5">
+                  <Link
+                    to="/team-register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="inline-flex w-full items-center justify-center rounded-full border-2 border-[#ff4d4f] bg-white px-5 py-2.5 text-sm font-semibold text-[#ff4d4f] shadow-sm transition-colors hover:bg-red-50"
+                  >
+                    Register My Team
+                  </Link>
                   {isSignedIn ? (
                     <div className="flex flex-col gap-3">
                       {user?.firstName && (
@@ -802,7 +841,7 @@ export function Footer() {
         </div>
 
         {/* Column 3: DTU Delhi Interactive Map Card */}
-        <div className="md:col-span-4 flex justify-start md:justify-end">
+        <div className="md:col-span-4 flex justify-center md:justify-end">
           <div className="relative w-full max-w-[340px] sm:max-w-[360px] h-[225px] sm:h-[235px] rounded-2xl overflow-hidden border border-gray-200 hover:border-[#ff4d4f] shadow-md hover:shadow-xl hover:shadow-red-500/10 bg-slate-100 group transition-all duration-300">
             {/* DTU Delhi location hyperlink directly over map (no background card) */}
             <a
@@ -857,11 +896,19 @@ export function Footer() {
 <body>
   <div id="map"></div>
   <script>
+    const DTU = [28.7501, 77.1177];
+    const isTouch = L.Browser.mobile || L.Browser.touch;
     const map = L.map('map', {
-      center: [28.7501, 77.1177],
+      center: DTU,
       zoom: 15,
       zoomControl: false,
-      scrollWheelZoom: true
+      // On phones a one-finger page scroll over the card used to drag the
+      // map away from DTU; lock it there. Desktop keeps drag + wheel zoom.
+      dragging: !isTouch,
+      touchZoom: !isTouch,
+      doubleClickZoom: !isTouch,
+      scrollWheelZoom: !isTouch,
+      tap: false
     });
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
@@ -872,7 +919,19 @@ export function Footer() {
       iconAnchor: [16, 42]
     });
 
-    L.marker([28.7501, 77.1177], { icon: redIcon }).addTo(map);
+    L.marker(DTU, { icon: redIcon }).addTo(map);
+
+    // Centre the pin itself (not just its tip) and re-centre whenever the
+    // iframe changes size - it can lay out at a different width on mobile
+    // before the card settles.
+    function recenter() {
+      map.invalidateSize();
+      map.setView(DTU, map.getZoom(), { animate: false });
+      map.panBy([0, -21], { animate: false });
+    }
+    recenter();
+    window.addEventListener('resize', recenter);
+    window.addEventListener('load', recenter);
   </script>
 </body>
 </html>`}
@@ -1931,7 +1990,7 @@ export function HomePage() {
                 <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search announcements..." className="t-content-sm w-full bg-transparent text-gray-900 placeholder-gray-400 outline-none" />
               </label>
               <label className="flex min-h-[46px] items-center justify-between rounded-xl bg-[#f1f3f5] px-4 text-gray-700 cursor-pointer focus-within:bg-white focus-within:ring-2 focus-within:ring-[#ff5a5f]/20 focus-within:border-[#ff5a5f] border border-transparent transition-all">
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className="t-content-sm w-full bg-transparent font-medium outline-none cursor-pointer">
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="t-content-sm w-full appearance-none bg-transparent pr-2 font-medium outline-none cursor-pointer">
                   <option>All Categories</option>
                   <option>Problem Statements</option>
                   <option>Mentorship</option>
@@ -2109,6 +2168,21 @@ export function HomePage() {
             <h2 className="t-main-heading t-title-gap-wide uppercase">
               Development Team
             </h2>
+
+            {/* Faculty */}
+            <h3 className="t-main-heading uppercase text-[length:calc(var(--fs-main-heading)*0.6)]!">Faculty</h3>
+            <PeopleGrid
+              people={[
+                { name: "Kaustubh Ranjan Singh", designation: "Design and Development Head" },
+                { name: "Prof. Shailender Kumar", designation: "Head, Computer Center" },
+                { name: "Mr. Vikas", designation: "System Manager, Computer Center" },
+                { name: "Dr. Trasha Gupta", designation: "Co-Coordinator" },
+                { name: "Dr. Anshul Arora", designation: "Co-Coordinator" },
+              ]}
+            />
+
+            {/* Students */}
+            <h3 className="t-main-heading uppercase text-[length:calc(var(--fs-main-heading)*0.6)]! mt-14 sm:mt-20">Students</h3>
             <PeopleGrid
               names={[
                 "Narayan Mishra",
@@ -2144,23 +2218,34 @@ export function HomePage() {
 function PeopleGrid({
   rows,
   names,
+  people: roster,
   showDesignation = true,
 }: {
   rows?: number;
   names?: string[];
+  /** Real roster with designations; takes precedence over `names`. */
+  people?: { name: string; designation?: string }[];
   showDesignation?: boolean;
 }) {
   const COLUMNS = 4;
-  const people = names ?? Array.from({ length: (rows ?? 1) * COLUMNS }, () => "Name");
+  const people =
+    roster ??
+    (names ?? Array.from({ length: (rows ?? 1) * COLUMNS }, () => "Name")).map((name) => ({
+      name,
+      designation: "Designation",
+    }));
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 sm:gap-x-12 md:gap-x-16 gap-y-10 sm:gap-y-12 md:gap-y-16 max-w-4xl mx-auto">
-      {people.map((name, idx) => (
-        <div key={`${name}-${idx}`} className="flex flex-col items-center text-center">
+    <div className="flex flex-wrap justify-center gap-x-6 sm:gap-x-12 md:gap-x-16 gap-y-10 sm:gap-y-12 md:gap-y-16 max-w-4xl mx-auto">
+      {people.map(({ name, designation }, idx) => (
+        <div
+          key={`${name}-${idx}`}
+          className="flex w-[calc(50%-0.75rem)] flex-col items-center text-center sm:w-[calc(25%-2.25rem)] md:w-[calc(25%-3rem)]"
+        >
           <div className="size-20 sm:size-24 md:size-28 rounded-full bg-[#d2d2d2] mb-3 sm:mb-3.5 transition-transform duration-200 hover:scale-105" />
           <h3 className="t-subheading-2 text-gray-900">{name}</h3>
-          {showDesignation && (
-            <p className="t-content text-gray-500 mt-1">Designation</p>
+          {showDesignation && designation && (
+            <p className="t-content text-gray-500 mt-1 text-center [hyphens:none]">{designation}</p>
           )}
         </div>
       ))}
@@ -2311,11 +2396,11 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
       <div className="min-h-screen flex flex-col bg-white">
         <Header activeNav="signin" />
 
-        <main className="flex-1 w-full max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 flex items-start justify-center">
-          <div className="w-full flex flex-col lg:flex-row items-stretch gap-6">
+        <main className="flex-1 w-full max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-10 lg:py-14 flex items-start justify-center">
+          <div className="w-full flex flex-col lg:flex-row items-stretch gap-4 sm:gap-6">
 
             {/* Left: Aerial DTU campus photo - same layout as the signup card */}
-            <div className="flex-1 min-h-[440px] sm:min-h-[600px] lg:min-h-[660px] rounded-[18px] overflow-hidden shadow-[0_8px_28px_rgba(0,0,0,0.10)]">
+            <div className="h-36 sm:h-64 lg:h-auto lg:flex-1 lg:min-h-[660px] rounded-[14px] sm:rounded-[18px] overflow-hidden shadow-[0_8px_28px_rgba(0,0,0,0.10)]">
               <img
                 src={campusImage}
                 alt="Delhi Technological University campus aerial view"
@@ -2324,22 +2409,22 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
             </div>
 
             {/* Right: Form card */}
-            <div className="w-full lg:w-[480px] shrink-0 rounded-[18px] border border-[#ff5a5f]/70 bg-white px-8 py-9 shadow-[0_2px_12px_rgba(0,0,0,0.04)] flex flex-col">
+            <div className="w-full lg:w-[480px] shrink-0 rounded-[14px] sm:rounded-[18px] border border-[#ff5a5f]/70 bg-white px-5 py-6 sm:px-8 sm:py-9 shadow-[0_2px_12px_rgba(0,0,0,0.04)] flex flex-col">
               {/* Brand header */}
-              <div className="mb-6">
+              <div className="mb-5 sm:mb-6 overflow-hidden lg:overflow-visible">
                 <Brand />
               </div>
 
               <div className="mb-5">
-                <h2 className="text-xl font-bold text-gray-900">Welcome back</h2>
-                <p className="mt-1.5 text-xs text-gray-500 leading-relaxed">
+                <h2 className="text-2xl lg:text-xl font-bold text-gray-900">Welcome back</h2>
+                <p className="mt-1.5 text-sm lg:text-xs text-gray-500 leading-relaxed">
                   Sign in to access your challenge workspace and submissions.
                 </p>
               </div>
 
-              <form onSubmit={submit} className="space-y-3">
+              <form onSubmit={submit} className="space-y-4 lg:space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Email</label>
+                  <label className="block text-sm lg:text-xs font-semibold text-gray-700 mb-1.5">Email</label>
                   <input
                     required
                     type="email"
@@ -2347,12 +2432,12 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-10 px-3.5 rounded-md bg-[#f2f2f2] border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/25 transition-all"
+                    className="w-full h-12 lg:h-10 px-3.5 rounded-md bg-[#f2f2f2] border-0 text-base lg:text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/25 transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Password</label>
+                  <label className="block text-sm lg:text-xs font-semibold text-gray-700 mb-1.5">Password</label>
                   <div className="relative">
                     <input
                       required
@@ -2361,13 +2446,13 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
                       placeholder="Enter password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full h-10 pl-3.5 pr-10 rounded-md bg-[#f2f2f2] border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/25 transition-all"
+                      className="w-full h-12 lg:h-10 pl-3.5 pr-11 lg:pr-10 rounded-md bg-[#f2f2f2] border-0 text-base lg:text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/25 transition-all"
                     />
                     <button
                       type="button"
                       onClick={() => setVisible(!visible)}
                       aria-label={visible ? "Hide password" : "Show password"}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"
+                      className="absolute right-1.5 lg:right-3 top-1/2 -translate-y-1/2 p-2 lg:p-0 text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"
                     >
                       {visible ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -2389,9 +2474,9 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
                           }`}
                       />
                     </button>
-                    <span className="text-xs text-gray-700">Remember me</span>
+                    <span className="text-sm lg:text-xs text-gray-700">Remember me</span>
                   </label>
-                  <Link to="/forgot-password" className="text-xs text-[#1890ff] hover:underline font-medium">
+                  <Link to="/forgot-password" className="text-sm lg:text-xs text-[#1890ff] hover:underline font-medium py-1 lg:py-0">
                     Forgot password?
                   </Link>
                 </div>
@@ -2399,7 +2484,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="w-full h-10 rounded-md bg-[#ff5a5f] text-white font-semibold text-sm hover:bg-[#ff3f45] active:scale-[0.99] transition-all flex items-center justify-center cursor-pointer mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-12 lg:h-10 rounded-md bg-[#ff5a5f] text-white font-semibold text-base lg:text-sm hover:bg-[#ff3f45] active:scale-[0.99] transition-all flex items-center justify-center cursor-pointer mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {busy ? "Signing in…" : "Sign in"}
                 </button>
@@ -2415,7 +2500,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
                   </p>
                 )}
 
-                <p className="pt-1 text-center text-xs text-gray-600">
+                <p className="pt-1 text-center text-sm lg:text-xs text-gray-600">
                   Don't have an account?{" "}
                   <Link to="/signup" className="text-[#1890ff] hover:underline font-medium">
                     Sign up
@@ -2437,11 +2522,11 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
     <div className="min-h-screen flex flex-col bg-white">
       <Header activeNav="signup" />
 
-      <main className="flex-1 w-full max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 flex items-start justify-center">
-        <div className="w-full flex flex-col lg:flex-row items-stretch gap-6">
+      <main className="flex-1 w-full max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-10 lg:py-14 flex items-start justify-center">
+        <div className="w-full flex flex-col lg:flex-row items-stretch gap-4 sm:gap-6">
 
           {/* Left: Aerial DTU campus photo */}
-          <div className="flex-1 min-h-[440px] sm:min-h-[600px] lg:min-h-[660px] rounded-[18px] overflow-hidden shadow-[0_8px_28px_rgba(0,0,0,0.10)]">
+          <div className="h-36 sm:h-64 lg:h-auto lg:flex-1 lg:min-h-[660px] rounded-[14px] sm:rounded-[18px] overflow-hidden shadow-[0_8px_28px_rgba(0,0,0,0.10)]">
             <img
               src={campusImage}
               alt="Delhi Technological University campus aerial view"
@@ -2450,9 +2535,9 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
           </div>
 
           {/* Right: Form card - switches between signup form and OTP verification */}
-          <div className="w-full lg:w-[480px] shrink-0 rounded-[18px] border border-[#ff5a5f]/70 bg-white px-8 py-9 shadow-[0_2px_12px_rgba(0,0,0,0.04)] flex flex-col justify-center">
+          <div className="w-full lg:w-[480px] shrink-0 rounded-[14px] sm:rounded-[18px] border border-[#ff5a5f]/70 bg-white px-5 py-6 sm:px-8 sm:py-9 shadow-[0_2px_12px_rgba(0,0,0,0.04)] flex flex-col justify-center">
             {/* Brand header */}
-            <div className="mb-6">
+            <div className="mb-5 sm:mb-6 overflow-hidden lg:overflow-visible">
               <Brand />
             </div>
 
@@ -2460,8 +2545,8 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
               /* ── EMAIL OTP VERIFICATION SCREEN ── */
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900">Two-Step Verification</h2>
-                  <p className="mt-1.5 text-xs text-gray-500 leading-relaxed">
+                  <h2 className="text-xl lg:text-lg font-bold text-gray-900">Two-Step Verification</h2>
+                  <p className="mt-1.5 text-sm lg:text-xs text-gray-500 leading-relaxed">
                     We've sent a 6-digit verification code to your registered email/phone number{" "}
                     <span className="font-semibold text-gray-700">
                       {email ? `${email[0]}***@${email.split("@")[1] ?? "dtu.ac.in"}` : "e***@dtu.ac.in"}
@@ -2471,7 +2556,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
                 </div>
 
                 {/* 6 digit boxes */}
-                <div className="flex gap-2.5 justify-between">
+                <div className="flex gap-2 sm:gap-2.5 justify-between">
                   {emailDigits.map((d, i) => (
                     <input
                       key={i}
@@ -2483,14 +2568,15 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
                       onChange={(e) => handleDigitInput(i, e.target.value)}
                       onKeyDown={(e) => handleDigitKeyDown(i, e)}
                       onFocus={(e) => e.target.select()}
-                      className={`w-11 h-12 rounded-lg border text-center text-base font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/40 transition-all
+                      autoComplete={i === 0 ? "one-time-code" : "off"}
+                      className={`min-w-0 flex-1 max-w-12 lg:flex-none lg:w-11 h-12 rounded-lg border text-center text-lg lg:text-base font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/40 transition-all
                         ${d ? "border-[#ff4d4f] bg-[#fff5f5]" : "border-gray-200 bg-[#f7f7f7]"}`}
                     />
                   ))}
                 </div>
 
                 {/* Timer + Resend row */}
-                <div className="flex items-center justify-between text-xs text-gray-500">
+                <div className="flex items-center justify-between text-sm lg:text-xs text-gray-500">
                   <span>
                     Resend code in{" "}
                     <span className={`font-semibold ${emailOtpTimer > 0 ? "text-gray-700" : "text-[#ff4d4f]"}`}>
@@ -2512,7 +2598,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
                   type="button"
                   onClick={handleVerifyOtp}
                   disabled={busy || emailDigits.join("").length < 6}
-                  className="w-full h-11 rounded-md bg-[#ff5a5f] text-white font-semibold text-sm hover:bg-[#ff3f45] active:scale-[0.99] transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-12 lg:h-11 rounded-md bg-[#ff5a5f] text-white font-semibold text-sm hover:bg-[#ff3f45] active:scale-[0.99] transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {busy ? "Verifying…" : "Verify & Proceed"}
                 </button>
@@ -2530,7 +2616,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
                 )}
 
                 {/* Bottom links */}
-                <div className="flex items-center justify-between text-xs pt-1">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-sm lg:text-xs pt-1">
                   <Link
                     to="/signin"
                     className="flex items-center gap-1 text-gray-500 hover:text-gray-800 transition-colors"
@@ -2549,79 +2635,86 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
               </div>
             ) : (
 
-              <form onSubmit={submit} className="space-y-3">
+              <form onSubmit={submit} className="space-y-4 lg:space-y-3">
                 {/* Name */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                  <label className="block text-sm lg:text-xs font-semibold text-gray-700 mb-1.5">
                     Name
                   </label>
                   <input
                     required
                     type="text"
+                    autoComplete="given-name"
                     placeholder="First name"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full h-10 px-3.5 rounded-md bg-[#f2f2f2] border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/25 transition-all mb-2"
+                    className="w-full h-12 lg:h-10 px-3.5 rounded-md bg-[#f2f2f2] border-0 text-base lg:text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/25 transition-all mb-2"
                   />
                   <input
                     required
                     type="text"
+                    autoComplete="family-name"
                     placeholder="Last name"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="w-full h-10 px-3.5 rounded-md bg-[#f2f2f2] border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/25 transition-all"
+                    className="w-full h-12 lg:h-10 px-3.5 rounded-md bg-[#f2f2f2] border-0 text-base lg:text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/25 transition-all"
                   />
                 </div>
 
                 {/* Phone */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                  <label className="block text-sm lg:text-xs font-semibold text-gray-700 mb-1.5">
                     Phone
                   </label>
                   <input
                     required
                     type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
                     placeholder="Telephone number"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full h-10 px-3.5 rounded-md bg-[#f2f2f2] border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/25 transition-all"
+                    className="w-full h-12 lg:h-10 px-3.5 rounded-md bg-[#f2f2f2] border-0 text-base lg:text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/25 transition-all"
                   />
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                  <label className="block text-sm lg:text-xs font-semibold text-gray-700 mb-1.5">
                     Email
                   </label>
                   <input
                     required
                     type="email"
+                    autoComplete="email"
+                    inputMode="email"
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-10 px-3.5 rounded-md bg-[#f2f2f2] border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/25 transition-all"
+                    className="w-full h-12 lg:h-10 px-3.5 rounded-md bg-[#f2f2f2] border-0 text-base lg:text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/25 transition-all"
                   />
                 </div>
 
                 {/* Password */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                  <label className="block text-sm lg:text-xs font-semibold text-gray-700 mb-1.5">
                     Password
                   </label>
                   <div className="relative">
                     <input
                       required
                       type={visible ? "text" : "password"}
+                      autoComplete="new-password"
                       placeholder="Enter password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full h-10 pl-3.5 pr-10 rounded-md bg-[#f2f2f2] border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/25 transition-all"
+                      className="w-full h-12 lg:h-10 pl-3.5 pr-11 lg:pr-10 rounded-md bg-[#f2f2f2] border-0 text-base lg:text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/25 transition-all"
                     />
                     <button
                       type="button"
                       onClick={() => setVisible(!visible)}
                       aria-label={visible ? "Hide password" : "Show password"}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"
+                      className="absolute right-1.5 lg:right-3 top-1/2 -translate-y-1/2 p-2 lg:p-0 text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"
                     >
                       {visible ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -2644,7 +2737,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
                           }`}
                       />
                     </button>
-                    <span className="text-xs text-gray-700">Remember me</span>
+                    <span className="text-sm lg:text-xs text-gray-700">Remember me</span>
                   </label>
                 </div>
 
@@ -2652,7 +2745,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="w-full h-10 rounded-md bg-[#ff5a5f] text-white font-semibold text-sm hover:bg-[#ff3f45] active:scale-[0.99] transition-all flex items-center justify-center cursor-pointer mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-12 lg:h-10 rounded-md bg-[#ff5a5f] text-white font-semibold text-base lg:text-sm hover:bg-[#ff3f45] active:scale-[0.99] transition-all flex items-center justify-center cursor-pointer mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {busy ? "Creating account…" : "Create account"}
                 </button>
@@ -2670,7 +2763,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
                 )}
 
                 {/* Footer link */}
-                <p className="pt-1 text-center text-xs text-gray-600">
+                <p className="pt-1 text-center text-sm lg:text-xs text-gray-600">
                   Have an account.{" "}
                   <Link to="/signin" className="text-[#1890ff] hover:underline font-medium">
                     Login
@@ -3606,54 +3699,6 @@ const faqData = [
   },
   {
     q: "Can I propose a solution to a local problem?",
-    a: "Yes. Local and community-level problems are strongly encouraged. Solutions should be affordable, sustainable, practical and capable of being replicated or scaled. Broad area categories may be referred to in the Problem Statements page",
-  },
-  {
-    q: "How will the innovations be evaluated?",
-    a: "Evaluation will be done in stages by eminent jury members on the basis of rubrics.",
-  },
-  {
-    q: "Can interdisciplinary teams participate?",
-    a: "Yes. Interdisciplinary teams are encouraged to combine expertise through team members across from technology, engineering, design, entrepreneurship and other relevant domains to create stronger solutions.",
-  },
-  {
-    q: "Will participants receive mentorship?",
-    a: "Participants will get opportunities to interact with mentors, innovators, academia, industry, startups and government stakeholders for technical guidance and further development of their innovations.",
-  },
-  {
-    q: "Can outside college students and inter-college teams register?",
-    a: "Yes. Students from different colleges can form an inter-college team, subject to the eligibility criteria and submission requirements specified in the Challenge guidelines. Teams should nominate one member as the designated team representative for communication and coordination.",
-  },
-  {
-    q: "How can teams submit complaints or technical grievances regarding evaluation?",
-    a: "Teams can submit their complaints or technical grievances through the \"Contact Us\" form on the official Challenge website or by emailing the designated grievance email address. All grievances should include the team details, issue description and relevant supporting information.",
-  },
-  {
-    q: "How can I register for the Challenge?",
-    a: "Participants can register through the SEWA FIRST registration portal during the specified registration period. Applicants should provide the required participant, team and innovation details and complete the submission process.",
-  },
-  {
-    q: "How will I be notified about various updates?",
-    a: "Registered participants will receive important updates through their registered email address and official SEWA FIRST communication channels. Participants are advised to regularly check the official website and their email for announcements, deadlines and other updates.",
-  },
-  {
-    q: "What is SEWA FIRST – Rashtriya Youth Innovation Challenge 2026?",
-    a: "SEWA FIRST is a national youth innovation initiative that encourages young minds to identify real-world challenges and develop affordable, sustainable and implementable solutions for society and the nation.",
-  },
-  {
-    q: "Who can participate in the Challenge?",
-    a: "Students, young innovators, researchers, technology teams, startups and eligible institutions can participate, subject to the eligibility criteria specified in the Challenge guidelines.",
-  },
-  {
-    q: "Who is the Regional Coordinator for the Northern Region?",
-    a: "Delhi Technological University (DTU) is the Regional Coordinator for the Northern Region. The region includes J&K, Ladakh, Himachal Pradesh, Uttarakhand, Chandigarh, Delhi, Punjab, Haryana and Uttar Pradesh.",
-  },
-  {
-    q: "Do I need a fully developed product to participate?",
-    a: "No. Participants can begin with an early-stage idea (TRL 1-3) for local/regional/state and TRL (4-6) for national level may participate and progressively develop it through the Challenge towards a functional prototype.",
-  },
-  {
-    q: "Can I propose a solution to a local problem?",
     a: "Yes. Local and community-level problems are strongly encouraged. Solutions should be affordable, sustainable, practical and capable of being replicated or scaled. Broad area categories may be referred to in the Problem Statements page.",
   },
   {
@@ -3667,6 +3712,14 @@ const faqData = [
   {
     q: "Will participants receive mentorship?",
     a: "Participants will get opportunities to interact with mentors, innovators, academia, industry, startups and government stakeholders for technical guidance and further development of their innovations.",
+  },
+  {
+    q: "Can outside college students and inter-college teams register?",
+    a: "Yes. Students from different colleges can form an inter-college team, subject to the eligibility criteria and submission requirements specified in the Challenge guidelines. Teams should nominate one member as the designated team representative for communication and coordination.",
+  },
+  {
+    q: "How can teams submit complaints or technical grievances regarding evaluation?",
+    a: "Teams can submit their complaints or technical grievances through the \"Contact Us\" form on the official Challenge website or by emailing the designated grievance email address. All grievances should include the team details, issue description and relevant supporting information.",
   },
   {
     q: "How can I register for the Challenge?",
@@ -3884,13 +3937,13 @@ export function AboutPage() {
                 <p>
                   Participants will:
                 </p>
-                <ul className="space-y-2 sm:space-y-2.5 list-none p-0 m-0">
+                <ul className="space-y-2 sm:space-y-2.5 list-disc pl-5 sm:pl-6 m-0 marker:text-[#ff4d4f]">
                   <li>Develop innovation &amp; problem-solving skills</li>
                   <li>Apply knowledge to real-world challenges</li>
                   <li>Build teamwork, leadership &amp; entrepreneurial skills</li>
                   <li>Gain exposure to mentors, experts &amp; industry</li>
                   <li>Showcase ideas and gain recognition &amp; incubation opportunities</li>
-                  <li>Outstanding innovations will be recognised and awarded.</li>
+                  <li>Outstanding innovations will be recognised and awarded</li>
                 </ul>
               </div>
             </section>

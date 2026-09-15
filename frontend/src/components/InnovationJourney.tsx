@@ -152,13 +152,16 @@ const phaseGroups = [
 export function InnovationJourney() {
   return (
     <div className="w-full">
-      {/* Mobile & Tablet Responsive View (< 1024px) */}
-      <div className="block lg:hidden space-y-6">
+      {/* Mobile & Tablet Responsive View (< 1024px)
+          One flat vertical flow: every card and every arrow sits in the same
+          flex column with a single gap, so spacing is identical between
+          steps and across phase boundaries. */}
+      <div className="flex flex-col gap-2 lg:hidden">
         {phaseGroups.map((group, gIdx) => (
-          <div key={group.label} className="space-y-3.5">
+          <div key={group.label} className="contents">
             {/* Phase header */}
             <div
-              className="flex items-center justify-between px-4 py-2.5 rounded-xl border shadow-2xs"
+              className="flex items-center justify-between rounded-xl border px-4 py-2.5 shadow-2xs"
               style={{
                 backgroundColor: group.surface,
                 borderColor: group.border,
@@ -173,50 +176,41 @@ export function InnovationJourney() {
               </span>
             </div>
 
-            {/* Steps in this phase */}
-            <div className="space-y-3">
-              {group.stepIndices.map((idx, stepPos) => {
-                const step = steps[idx];
-                return (
-                  <div key={step.number} className="space-y-3">
-                    <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs transition-all hover:border-slate-300">
-                      <div
-                        className="size-12 rounded-full shrink-0 flex items-center justify-center font-black text-base shadow-xs"
-                        style={{ backgroundColor: step.surface, color: step.ink }}
-                      >
-                        {step.number}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-sm sm:text-base uppercase tracking-wider text-slate-900 mb-1">
-                          {step.title}
-                        </h4>
-                        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                          {step.body}
-                        </p>
-                      </div>
+            {group.stepIndices.map((idx, stepPos) => {
+              const step = steps[idx];
+              if (!step) return null;
+              const isLastStepOverall =
+                gIdx === phaseGroups.length - 1 && stepPos === group.stepIndices.length - 1;
+              return (
+                <div key={step.number} className="contents">
+                  <div className="flex items-start gap-3.5 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs transition-all hover:border-slate-300">
+                    <div
+                      className="flex size-12 shrink-0 items-center justify-center rounded-full text-base font-black shadow-xs"
+                      style={{ backgroundColor: step.surface, color: step.ink }}
+                    >
+                      {step.number}
                     </div>
-
-                    {/* Arrow between steps within the phase */}
-                    {stepPos < group.stepIndices.length - 1 && (
-                      <div aria-hidden="true" className="flex justify-center text-slate-300 py-0.5">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                          <path d="M19 14l-7 7m0 0l-7-7m7 7V3" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </div>
-                    )}
+                    <div className="min-w-0 flex-1">
+                      <h4 className="mb-1 text-sm font-bold uppercase tracking-wider text-slate-900 sm:text-base">
+                        {step.title}
+                      </h4>
+                      <p className="text-xs leading-relaxed text-slate-600 sm:text-sm">
+                        {step.body}
+                      </p>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
 
-            {/* Arrow between phases */}
-            {gIdx < phaseGroups.length - 1 && (
-              <div aria-hidden="true" className="flex justify-center text-slate-400 pt-2 pb-1">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path d="M19 14l-7 7m0 0l-7-7m7 7V3" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-            )}
+                  {/* Same arrow everywhere: between steps and before the next phase */}
+                  {!isLastStepOverall && (
+                    <div aria-hidden="true" className="flex justify-center text-slate-400">
+                      <svg className="size-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                        <path d="M19 14l-7 7m0 0l-7-7m7 7V3" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         ))}
       </div>
