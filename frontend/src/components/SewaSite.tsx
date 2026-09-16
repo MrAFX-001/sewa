@@ -498,7 +498,7 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
 
                 <div className="mt-5 flex flex-col gap-3 border-t border-gray-200 pt-5">
                   <Link
-                    to="/team-register"
+                    to="/event-register"
                     onClick={() => setMobileMenuOpen(false)}
                     className="inline-flex w-full items-center justify-center rounded-full border-2 border-[#ff4d4f] bg-white px-5 py-2.5 text-sm font-semibold text-[#ff4d4f] shadow-sm transition-colors hover:bg-red-50"
                   >
@@ -1829,7 +1829,7 @@ export function HomePage() {
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3 justify-center">
-                <Link to="/team-register" className="inline-flex items-center gap-2 rounded-md bg-[#e53e3e] hover:bg-[#c53030] px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 shadow-lg">
+                <Link to="/event-register" className="inline-flex items-center gap-2 rounded-md bg-[#e53e3e] hover:bg-[#c53030] px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 shadow-lg">
                   Register Your Team
                 </Link>
                 <a href="#about" className="inline-flex items-center gap-2 rounded-md bg-white/15 hover:bg-white/25 border border-white/30 backdrop-blur-sm px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5">
@@ -2126,16 +2126,56 @@ export function HomePage() {
             <h2 className="t-main-heading t-title-gap-wide uppercase">
               Organizing Committee
             </h2>
-            <PeopleGrid rows={1} />
-
-            {/* Patron */}
-            <h3 className="t-main-heading uppercase text-[length:calc(var(--fs-main-heading)*0.6)]! mt-14 sm:mt-20">Patron</h3>
-            <PeopleGrid
-              people={[{ name: "Prof. Prateek Kumar", designation: "Vice Chancellor, DTU Delhi", image: teamPhoto("mrvc") }]}
-            />
+            {/* Patrons - Hierarchical Order (1 Person Per Line) */}
+            <h3 className="t-main-heading uppercase text-[length:calc(var(--fs-main-heading)*0.6)]! mt-8 sm:mt-10 mb-8 sm:mb-12">
+              Patrons
+            </h3>
+            <div className="flex flex-col items-center gap-10 sm:gap-12 max-w-md mx-auto">
+              {[
+                {
+                  name: "Shri Narendra Modi",
+                  designation: "Hon'ble Prime Minister of India",
+                  image: teamPhoto("pm-modi"),
+                },
+                {
+                  name: "Smt. Atishi",
+                  designation: "Hon'ble Chief Minister of Delhi",
+                  image: teamPhoto("cm-delhi"),
+                },
+                {
+                  name: "Shri Dharmendra Pradhan",
+                  designation: "Hon'ble Minister of Education, Govt. of India",
+                  image: teamPhoto("education-minister"),
+                },
+                {
+                  name: "Prof. Prateek Kumar",
+                  designation: "Vice Chancellor, DTU Delhi",
+                  image: teamPhoto("mrvc"),
+                },
+              ].map(({ name, designation, image }) => (
+                <div key={name} className="flex flex-col items-center text-center">
+                  {image ? (
+                    <img
+                      src={image}
+                      alt={name}
+                      loading="lazy"
+                      decoding="async"
+                      className="size-24 sm:size-28 md:size-32 rounded-full bg-[#d2d2d2] object-cover object-top mb-3 sm:mb-3.5 shadow-md ring-1 ring-black/10 transition-transform duration-200 hover:scale-105"
+                    />
+                  ) : (
+                    <div className="size-24 sm:size-28 md:size-32 rounded-full bg-[#d2d2d2] mb-3 sm:mb-3.5" />
+                  )}
+                  <h4 className="t-subheading-2 text-gray-900 font-bold text-base sm:text-lg">{name}</h4>
+                  <p className="t-content text-gray-500 mt-1 text-center [hyphens:none] text-sm sm:text-base">{designation}</p>
+                </div>
+              ))}
+            </div>
 
             {/* Coordinators */}
-            <div className="mt-12 sm:mt-16">
+            <div className="mt-14 sm:mt-20">
+              <h3 className="t-main-heading uppercase text-[length:calc(var(--fs-main-heading)*0.6)]! mb-8 sm:mb-10 text-center">
+                Coordinators
+              </h3>
               <PeopleGrid
                 people={[
                   { name: "Prof. K.C. Tiwari", designation: "Coordinator-1", image: teamPhoto("mrkctiwari") },
