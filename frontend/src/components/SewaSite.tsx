@@ -1722,11 +1722,18 @@ export function HomePage() {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+
+    const touch = e.targetTouches[0];
+    if (touch) {
+      setTouchStart(touch.clientX);
+    }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    const touch = e.targetTouches[0];
+    if (touch) {
+      setTouchEnd(touch.clientX);
+    }
   };
 
   const handleTouchEnd = () => {
@@ -2345,7 +2352,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
     try {
       // A successful verify sets the session cookie server-side, so the
       // user is signed in from here - no separate signin call needed.
-      await authApi.verifyOtp(email, code);
+      await authApi.verifyOtp(email, code, password);
       await refresh();
       setMessage("Email verified! Welcome to SEWA 2026.");
       navigate({ to: "/team-register" });

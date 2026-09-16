@@ -2,18 +2,17 @@ import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
 
 export interface SessionPayload {
-  sub: string; // user id
+  sub: string;
   email: string;
+  ver: number;
 }
 
 export function signSession(payload: SessionPayload): string {
   const options: jwt.SignOptions = {
-    // jsonwebtoken's type for expiresIn is narrower than `string`; env
-    // validation already guarantees this is a valid duration string
-    // (e.g. "7d"), so the cast is safe.
     expiresIn: env.JWT_EXPIRES_IN as jwt.SignOptions["expiresIn"],
     algorithm: "HS256",
   };
+
   return jwt.sign(payload, env.JWT_SECRET, options);
 }
 

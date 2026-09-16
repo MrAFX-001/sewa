@@ -36,6 +36,11 @@ function fileFilter(
   file: Express.Multer.File,
   cb: multer.FileFilterCallback,
 ) {
+  if (file.originalname.length > 255) {
+    cb(new AppError(400, "Filename is too long."));
+    return;
+  }
+
   const ext = path.extname(file.originalname).toLowerCase();
 
   if (!ALLOWED_MIME_TYPES.has(file.mimetype) || !ALLOWED_EXTENSIONS.has(ext)) {
@@ -56,6 +61,9 @@ export const uploadIdCard = multer({
   limits: {
     fileSize: MAX_FILE_SIZE_BYTES,
     files: 1,
+    fields: 20,
+    fieldSize: 16 * 1024,
+    parts: 25,
   },
   fileFilter,
 }).single("idCard");

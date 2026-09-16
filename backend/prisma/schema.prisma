@@ -47,6 +47,7 @@ model User {
   passwordHash    String   @map("password_hash")
   emailVerified   Boolean  @default(false) @map("email_verified")
   status          UserStatus @default(pending)
+  tokenVersion Int @default(0) @map("token_version")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
@@ -55,7 +56,7 @@ model User {
   teamMemberships TeamMember[]
   auditLogs       AuditLog[]
   candidateProfile CandidateProfile?
-
+  
   @@map("users")
 }
 

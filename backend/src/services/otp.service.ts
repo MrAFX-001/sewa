@@ -53,7 +53,11 @@ export async function issueOtp(userId: string, email: string, purpose: OtpPurpos
  * call (success or failure) so a code can't be brute-forced indefinitely,
  * and consumes the code on success so it can't be replayed.
  */
-export async function consumeOtp(userId: string, purpose: OtpPurpose, code: string): Promise<boolean> {
+export async function consumeOtp(
+  userId: string,
+  purpose: OtpPurpose,
+  code: string,
+): Promise<boolean> {
   const otp = await prisma.otpVerification.findFirst({
     where: { userId, purpose, consumedAt: null },
     orderBy: { createdAt: "desc" },
@@ -67,19 +71,42 @@ export async function consumeOtp(userId: string, purpose: OtpPurpose, code: stri
     throw new AppError(400, "Code has expired. Please request a new one.");
   }
 
-  if (otp.attempts >= otp.maxAttempts) {
-    throw new AppError(429, "Too many incorrect attempts. Please request a new code.");
-  }
-
   const isValid = await verifyOtp(code, otp.codeHash);
 
-  await prisma.otpVerification.update({
-    where: { id: otp.id },
+  if (isValid) {
+    const consumed = await prisma.otpVerification.updateMany({
+      where: {
+        id: otp.id,
+        consumedAt: null,
+        attempts: { lt: otp.maxAttempts },
+      },
+      data: {
+        attempts: { increment: 1 },
+        consumedAt: new Date(),
+      },
+    });
+
+    if (consumed.count !== 1) {
+      throw new AppError(429, "Too many incorrect attempts. Please request a new code.");
+    }
+
+    return true;
+  }
+
+  const attempted = await prisma.otpVerification.updateMany({
+    where: {
+      id: otp.id,
+      consumedAt: null,
+      attempts: { lt: otp.maxAttempts },
+    },
     data: {
       attempts: { increment: 1 },
-      consumedAt: isValid ? new Date() : undefined,
     },
   });
 
-  return isValid;
+  if (attempted.count !== 1) {
+    throw new AppError(429, "Too many incorrect attempts. Please request a new code.");
+  }
+
+  return false;
 }
