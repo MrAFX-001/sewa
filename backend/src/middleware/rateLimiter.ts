@@ -80,6 +80,23 @@ function emailLimiter(name: string, windowMs: number, max: number, message: stri
   });
 }
 
+function userLimiter(
+  name: string,
+  windowMs: number,
+  max: number,
+  message: string,
+): RequestHandler {
+  return makeLimiter(`${name}:user`, {
+    windowMs,
+    max,
+    keyGenerator: (req) => {
+      if (req.user?.id) return req.user.id;
+      return req.ip ?? "unknown";
+    },
+    message: { error: message },
+  });
+}
+
 function limit(
   name: string,
   windowMs: number,
@@ -114,3 +131,10 @@ export const passwordResetConfirmLimiter = limit("pw-reset-confirm", QUARTER_HOU
 
 export const contactLimiter = limit("contact", HOUR, 3, 20,
   "Too many messages sent. Please try again later.");
+
+export const teamMemberAddLimiter = userLimiter(
+  "team-member-add",
+  HOUR,
+  10,
+  "Too many team member additions. Please try again later.",
+);

@@ -12,7 +12,9 @@ export const app = express();
 
 // Nginx is the only hop that sets X-Forwarded-For (Cloudflare IP is resolved by Nginx real_ip).
 // Verify req.ip in logs shows visitor IPs, not Cloudflare edge IPs.
-app.set("trust proxy", env.TRUST_PROXY_HOPS);
+app.set("trust proxy", (ip: string) => {
+  return ip === "127.0.0.1" || ip === "::1";
+});
 
 app.use(helmet());
 app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));

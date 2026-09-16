@@ -1,8 +1,9 @@
 import { prisma } from "../config/prisma.js";
-import { hashPassword, verifyPassword } from "../utils/hash.js";
+import { hashPassword, verifyPassword, verifyOtpAgainstDummy } from "../utils/hash.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { issueOtp, consumeOtp } from "./otp.service.js";
 import type { ResetPasswordInput, SignupInput, SigninInput } from "../schemas/auth.schema.js";
+
 
 export async function signupUser(input: SignupInput) {
   const existing = await prisma.user.findUnique({
@@ -60,7 +61,8 @@ export async function verifySignupOtp(
   });
 
   if (!user) {
-    throw new AppError(400, "Invalid request.");
+    await verifyOtpAgainstDummy(code);
+    throw new AppError(400, "Incorrect or expired code.");
   }
 
   if (user.status === "suspended") {

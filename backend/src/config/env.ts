@@ -51,7 +51,6 @@ const envSchema = z.object({
   // Proxies in front of the app that set X-Forwarded-For. On the VM only
   // Nginx does (Cloudflare IP is resolved by Nginx real_ip), so this is 1.
   // Wrong value => req.ip is wrong => rate limits key on the proxy's IP.
-  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(1),
   // Only ONE replica should run the OTP cleanup cron.
   ENABLE_IN_PROCESS_CRON: boolFromEnv.default("true"),
 

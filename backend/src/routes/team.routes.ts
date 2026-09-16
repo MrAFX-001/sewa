@@ -7,7 +7,7 @@ import { createTeamSchema, updateTeamSchema, addMemberSchema } from "../schemas/
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { cleanupRejectedUpload } from "../middleware/uploadCleanup.middleware.js";
 export const teamRouter = Router();
-
+import { teamMemberAddLimiter } from "../middleware/rateLimiter.js";
 // Every route here requires a signed-in, email-verified user - team
 // registration is only reachable after signup + OTP verification + signin.
 teamRouter.use(requireAuth, requireVerifiedEmail);
@@ -34,6 +34,7 @@ teamRouter.patch(
 );
 teamRouter.post(
   "/:teamId/members",
+  teamMemberAddLimiter,
   validateBody(addMemberSchema),
   asyncHandler(teamController.addMember),
 );
