@@ -15,21 +15,22 @@ apiRouter.use("/profile", profileRouter);
 apiRouter.use("/contact", contactRouter);
 apiRouter.use("/announcements", announcementsRouter);
 
+// Liveness: is the process alive? No DB check, otherwise a DB blip makes
+// k8s restart every pod at once.
+apiRouter.get("/healthz", (_req, res) => {
+  res.status(200).json({ status: "OK" });
+});
+
+// Readiness: can this pod serve traffic? Failing just removes it from the LB.
 apiRouter.get("/health", async (_req, res) => {
   try {
-    // Test database connection with a simple query
     await prisma.$queryRaw`SELECT 1`;
-
     res.status(200).json({
       status: "OK",
       message: "SEWA 2026 backend and database are connected!",
     });
   } catch (err) {
     logger.error({ err }, "health_check_failed");
-
-    res.status(500).json({
-      status: "ERROR",
-      message: "Database connection failed",
-    });
+    res.status(503).json({ status: "ERROR", message: "Database connection failed" });
   }
 });

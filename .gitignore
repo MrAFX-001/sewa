@@ -1,2 +1,6 @@
 digest.txt
 *.patch
+backend/uploads/
+.env
+.env.*
+!.env.example
