@@ -3,6 +3,10 @@ import { z } from "zod";
 
 // Fail fast: an invalid/missing env var should crash startup, not surface
 // as a mysterious runtime bug in a government-facing service.
+const boolFromEnv = z
+  .enum(["true", "false", "1", "0"])
+  .transform((v) => v === "true" || v === "1");
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.coerce.number().int().positive().default(4000),
@@ -26,11 +30,20 @@ const envSchema = z.object({
   SMTP_PASS: z.string().min(1),
   SMTP_FROM: z.string().min(1),
 
-  // Where uploaded team ID cards are written. A relative path is resolved
-  // from the process's working directory (typically the backend/ root) -
-  // use an absolute path in production if the working directory isn't
-  // guaranteed stable across deploys.
   UPLOAD_DIR: z.string().default("uploads/id-cards"),
+
+  // Bind address. 127.0.0.1 in production so only Nginx can reach the API.
+  HOST: z.string().default("0.0.0.0"),
+
+  // --- multi-instance deployment ---
+  // Shared rate-limit store. Unset = in-memory (fine for local dev only).
+  REDIS_URL: z.string().url().optional(),
+  // Proxies in front of the app that set X-Forwarded-For. On the VM only
+  // Nginx does (Cloudflare IP is resolved by Nginx real_ip), so this is 1.
+  // Wrong value => req.ip is wrong => rate limits key on the proxy's IP.
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(1),
+  // Only ONE replica should run the OTP cleanup cron.
+  ENABLE_IN_PROCESS_CRON: boolFromEnv.default("true"),
 });
 
 const parsed = envSchema.safeParse(process.env);
