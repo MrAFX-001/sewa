@@ -1,0 +1,59 @@
+# Put these inside the `server { listen 443 ssl; ... }` block for
+# sewafirstryic.dtu.ac.in, replacing the existing `location /api/` and
+# `location /` blocks. Keep your ssl_certificate / server_name lines as they are.
+
+# Max simultaneous connections from one IP (HTTP/2 multiplexes, so this is generous)
+limit_conn sewa_conn 100;
+
+# JSON body for 429s so the frontend's ApiError shows a normal message
+error_page 429 = @sewa_ratelimited;
+location @sewa_ratelimited {
+    default_type application/json;
+    add_header Retry-After 5 always;
+    return 429 '{"error":"Too many requests. Please slow down and try again."}';
+}
+
+# ---- Announcements: public, same for everyone -> cached for 30s ----
+# 100,000 requests hit Postgres at most once every 30 seconds.
+location = /api/announcements {
+    limit_req zone=sewa_api burst=40 nodelay;
+
+    proxy_cache            sewa_api_cache;
+    proxy_cache_key        "$request_method$host$request_uri";   # no cookies in key
+    proxy_cache_methods    GET HEAD;
+    proxy_cache_valid      200 30s;
+    proxy_cache_lock       on;          # on expiry, only ONE request goes to Node
+    proxy_cache_use_stale  error timeout updating http_500 http_502 http_503;
+    proxy_cache_background_update on;
+    add_header X-Cache $upstream_cache_status always;   # HIT / MISS / STALE
+
+    include /etc/nginx/snippets/sewa-proxy.conf;
+}
+
+# ---- Health: runs a DB query, so tightly limited ----
+location = /api/health {
+    limit_req zone=sewa_health burst=5 nodelay;
+    include /etc/nginx/snippets/sewa-proxy.conf;
+}
+
+# ---- Rest of the API ----
+location /api/ {
+    limit_req zone=sewa_api burst=40 nodelay;
+    client_max_body_size 6m;            # 5 MB ID card + form fields
+    include /etc/nginx/snippets/sewa-proxy.conf;
+}
+
+# ---- Frontend (SSR pages + assets) ----
+# A single page load pulls many assets at once, hence the large burst.
+location / {
+    limit_req zone=sewa_pages burst=150 nodelay;
+
+    proxy_pass http://127.0.0.1:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $connection_upgrade_or_close;
+}

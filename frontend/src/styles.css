@@ -157,7 +157,10 @@
     font-family: var(--font-sans);
     font-size: 1rem;
     line-height: 1.6;
+    /* clip (not hidden) so body never becomes a scroll container - keeps
+       the sticky desktop nav bar and mobile header working. */
     overflow-x: hidden;
+    overflow-x: clip;
   }
 
   /*
@@ -1094,7 +1097,11 @@
  * browsers without ::-webkit-scrollbar support.
  * ------------------------------------------------------------------------ */
 html {
-  overflow-y: scroll;
+  /* Reserve the scrollbar gutter instead of forcing overflow-y: scroll.
+     Setting overflow on <html> stops body's overflow-x from propagating to
+     the viewport, which turns <body> into a scroll container and breaks
+     every position: sticky header on the site. */
+  scrollbar-gutter: stable;
 }
 
 ::-webkit-scrollbar {
