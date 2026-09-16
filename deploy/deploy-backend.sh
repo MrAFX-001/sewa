@@ -15,7 +15,7 @@ wait_healthy() {  # $1 = port
 }
 
 echo "==> pull"
-git -C .. pull --ff-only origin main
+git -C .. pull --ff-only origin master
 
 echo "==> build images"
 docker compose build api-1 migrate

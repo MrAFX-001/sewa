@@ -44,7 +44,7 @@ If Docker Hub pulls are blocked on the DTU network, check with the DTU network t
 
 ```bash
 cd /home/sewa/sewa
-git stash push -m "server-local changes" && git pull --ff-only origin main && git stash pop
+git stash push -m "server-local changes" && git pull --ff-only origin master && git stash pop
 cd deploy
 export SEWA_UID=$(id -u) SEWA_GID=$(id -g)
 docker compose config >/dev/null          # validates backend/.env parsing too
