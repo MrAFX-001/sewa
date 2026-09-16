@@ -36,7 +36,7 @@ export default defineConfig(({ command }) => ({
     tanstackStart({
       server: { entry: "server" },
     }),
-    command === "build" && nitro({ defaultPreset: "cloudflare-module" }),
+    command === "build" && nitro({ defaultPreset: "node-server" }),
     viteReact(),
   ].filter(Boolean),
 }));
