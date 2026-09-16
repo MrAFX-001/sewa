@@ -32,8 +32,9 @@ export async function sendOtpEmail(
 ): Promise<void> {
   const { subject, lead } = COPY[purpose];
 
-  // In development, immediately print OTP to terminal so signup/testing is instant
-  if (env.NODE_ENV !== "production") {
+  // Local development only (DEV_PRINT_OTP=true, refused in production):
+  // print the OTP so signup can be tested without SMTP.
+  if (env.DEV_PRINT_OTP) {
     // eslint-disable-next-line no-console
     console.log(`\n==============================================\n🔑 [DEV MODE] OTP for ${to}: ${code}\n==============================================\n`);
   }
@@ -49,7 +50,7 @@ export async function sendOtpEmail(
     });
     logger.info({ to, purpose }, "otp_email_sent");
   } catch (err) {
-    if (env.NODE_ENV === "development") {
+    if (env.DEV_PRINT_OTP) {
       logger.warn({ err: (err as Error).message, to }, "SMTP delivery failed/timed out in development. Use terminal OTP above.");
     } else {
       throw err;
