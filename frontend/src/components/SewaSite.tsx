@@ -25,13 +25,13 @@ import {
   Search,
   Send,
   ShieldCheck,
-  Twitter,
   UploadCloud,
   User,
   Server,
   X,
+  ArrowUpRight,
 } from "lucide-react";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { ApiError, authApi, contactApi, announcementsApi, CONTACT_CATEGORIES, type ContactCategory, type Announcement } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import campusImage from "../assets/dtu-campus-aerial.jpeg";
@@ -50,6 +50,7 @@ import { InnovationJourney } from "./InnovationJourney";
 import { ObjectivesRoadmap } from "./ObjectivesRoadmap";
 import { ParticipationBenefits } from "./ParticipationBenefits";
 import { SearchModal } from "./SearchModal";
+import { StatSummaryModal, STAT_META, type StatKey } from "./StatSummaryModal";
 import { TimelineRoadmap } from "./TimelineRoadmap";
 import {
   Sheet,
@@ -145,6 +146,15 @@ function MobileLogos({ size = "sm" }: { size?: "sm" | "md" }) {
   );
 }
 
+/** X (formerly Twitter) logo. lucide-react only ships the old bird icon. */
+function XLogo({ className = "size-3.5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
 export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" | "guidelines" | "about" | "problems" | "contact" | "faq" | "resources" | "signin" | "signup" | "team-register" | string } = {}) {
   const { user, isSignedIn, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -204,10 +214,8 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
             <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook" className="hover:opacity-80 transition-opacity">
               <Facebook size={16} fill="currentColor" strokeWidth={0} />
             </a>
-            <a href="https://x.com" target="_blank" rel="noreferrer" aria-label="X (Twitter)" className="hover:opacity-80 transition-opacity flex items-center">
-              <svg className="size-3.5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
+            <a href="https://x.com" target="_blank" rel="noreferrer" aria-label="X" className="hover:opacity-80 transition-opacity flex items-center">
+              <XLogo className="size-3.5" />
             </a>
             <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram" className="hover:opacity-80 transition-opacity">
               <Instagram size={16} strokeWidth={2} />
@@ -784,12 +792,12 @@ export function Footer() {
             </a>
             <a
               className="size-8 rounded-full bg-white border border-gray-200/90 shadow-2xs flex items-center justify-center text-[#ff4d4f] hover:bg-gray-50 hover:scale-105 active:scale-95 transition-all"
-              href="https://twitter.com"
+              href="https://x.com"
               target="_blank"
               rel="noreferrer"
               aria-label="X"
             >
-              <Twitter size={14} fill="currentColor" />
+              <XLogo className="size-3" />
             </a>
             <a
               className="size-8 rounded-full bg-white border border-gray-200/90 shadow-2xs flex items-center justify-center text-[#ff4d4f] hover:bg-gray-50 hover:scale-105 active:scale-95 transition-all"
@@ -1444,7 +1452,18 @@ export function VideoShowcaseSection() {
   );
 }
 
+const STAT_TILES: { key: StatKey; value: string; icon: typeof User }[] = [
+  { key: "entries", value: "0", icon: User },
+  { key: "shortlisted", value: "0", icon: MapPin },
+  { key: "mentored", value: "0", icon: Server },
+  { key: "prototypes", value: "0", icon: User },
+  { key: "tested", value: "0", icon: MapPin },
+  { key: "validated", value: "0", icon: Server },
+];
+
 export function StatisticsSection() {
+  const [openStat, setOpenStat] = useState<StatKey | null>(null);
+  const closeStat = useCallback(() => setOpenStat(null), []);
   return (
     <section id="statistics" className="t-section-band bg-white scroll-mt-20">
       <div className="site-shell max-w-6xl">
@@ -1453,92 +1472,51 @@ export function StatisticsSection() {
           STATISTICS
         </h2>
 
-        {/* 6 Key Metrics Grid: 2 rows x 3 columns */}
-        <div className="max-w-4xl mx-auto">
-          {/* Row 1 */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-0 pb-6 sm:pb-8">
-            {/* 1. 9000 Entries */}
-            <div className="flex items-center gap-3.5 sm:gap-4 sm:pr-8 sm:border-r border-gray-200">
-              <div className="size-11 sm:size-12 rounded-full bg-[#fde8e8] flex items-center justify-center text-[#ff3366] shrink-0">
-                <User size={20} strokeWidth={2.5} />
+        {/* 6 Key Metrics Grid: 2 rows x 3 columns. Each tile opens its
+            state-wise summary popup (see StatSummaryModal). */}
+        <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-y-4 sm:gap-x-0">
+          {STAT_TILES.map(({ key, value, icon: TileIcon }, i) => {
+            const col = i % 3;
+            const colClasses =
+              col === 0
+                ? "sm:pr-6 sm:border-r"
+                : col === 1
+                  ? "sm:px-6 sm:border-r"
+                  : "sm:pl-6";
+            return (
+              <div key={key} className={`border-gray-200 ${colClasses}`}>
+                <button
+                  type="button"
+                  onClick={() => setOpenStat(key)}
+                  aria-haspopup="dialog"
+                  aria-label={`${STAT_META[key].label}: ${value}. View state-wise summary`}
+                  className="group flex w-full cursor-pointer items-center gap-3.5 sm:gap-4 rounded-xl border border-gray-200 sm:border-transparent px-3.5 py-3 sm:px-2 sm:-mx-2 text-left transition-colors hover:bg-[#fff5f6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff3366]/40"
+                >
+                  <div className="size-11 sm:size-12 rounded-full bg-[#fde8e8] flex items-center justify-center text-[#ff3366] shrink-0">
+                    <TileIcon size={20} strokeWidth={2.5} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="t-subheading-2 text-black">{value}</span>
+                      {/* Arrow cue that the tile opens a popup */}
+                      <span
+                        aria-hidden="true"
+                        className="flex size-6 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-all duration-200 group-hover:bg-[#ff3366] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-focus-visible:bg-[#ff3366] group-focus-visible:text-white"
+                      >
+                        <ArrowUpRight size={14} strokeWidth={2.6} />
+                      </span>
+                    </div>
+                    <div className="t-content font-semibold! text-gray-500 tracking-wider uppercase mt-1">
+                      {STAT_META[key].label}
+                    </div>
+                  </div>
+                </button>
               </div>
-              <div>
-                <div className="t-subheading-2 text-black">9000</div>
-                <div className="t-content font-semibold! text-gray-500 tracking-wider uppercase mt-1">
-                  ENTRIES
-                </div>
-              </div>
-            </div>
-
-            {/* 2. 30+ Shortlisted */}
-            <div className="flex items-center gap-3.5 sm:gap-4 sm:px-8 sm:border-r border-gray-200">
-              <div className="size-11 sm:size-12 rounded-full bg-[#fde8e8] flex items-center justify-center text-[#ff3366] shrink-0">
-                <MapPin size={20} strokeWidth={2.5} />
-              </div>
-              <div>
-                <div className="t-subheading-2 text-black">30+</div>
-                <div className="t-content font-semibold! text-gray-500 tracking-wider uppercase mt-1">
-                  SHORTLISTED
-                </div>
-              </div>
-            </div>
-
-            {/* 3. 1 lakh + Mentored */}
-            <div className="flex items-center gap-3.5 sm:gap-4 sm:pl-8">
-              <div className="size-11 sm:size-12 rounded-full bg-[#fde8e8] flex items-center justify-center text-[#ff3366] shrink-0">
-                <Server size={20} strokeWidth={2.5} />
-              </div>
-              <div>
-                <div className="t-subheading-2 text-black">1 lakh +</div>
-                <div className="t-content font-semibold! text-gray-500 tracking-wider uppercase mt-1">
-                  MENTORED
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Row 2 */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-0 pt-2 sm:pt-4">
-            {/* 4. 9000 Prototypes */}
-            <div className="flex items-center gap-3.5 sm:gap-4 sm:pr-8 sm:border-r border-gray-200">
-              <div className="size-11 sm:size-12 rounded-full bg-[#fde8e8] flex items-center justify-center text-[#ff3366] shrink-0">
-                <User size={20} strokeWidth={2.5} />
-              </div>
-              <div>
-                <div className="t-subheading-2 text-black">9000</div>
-                <div className="t-content font-semibold! text-gray-500 tracking-wider uppercase mt-1">
-                  PROTOTYPES
-                </div>
-              </div>
-            </div>
-
-            {/* 5. 30+ Tested */}
-            <div className="flex items-center gap-3.5 sm:gap-4 sm:px-8 sm:border-r border-gray-200">
-              <div className="size-11 sm:size-12 rounded-full bg-[#fde8e8] flex items-center justify-center text-[#ff3366] shrink-0">
-                <MapPin size={20} strokeWidth={2.5} />
-              </div>
-              <div>
-                <div className="t-subheading-2 text-black">30+</div>
-                <div className="t-content font-semibold! text-gray-500 tracking-wider uppercase mt-1">
-                  TESTED
-                </div>
-              </div>
-            </div>
-
-            {/* 6. 1 lakh + Validated */}
-            <div className="flex items-center gap-3.5 sm:gap-4 sm:pl-8">
-              <div className="size-11 sm:size-12 rounded-full bg-[#fde8e8] flex items-center justify-center text-[#ff3366] shrink-0">
-                <Server size={20} strokeWidth={2.5} />
-              </div>
-              <div>
-                <div className="t-subheading-2 text-black">1 lakh +</div>
-                <div className="t-content font-semibold! text-gray-500 tracking-wider uppercase mt-1">
-                  VALIDATED
-                </div>
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
+
+        {openStat && <StatSummaryModal stat={openStat} onClose={closeStat} />}
 
         {/* Charts Container with light background */}
         <div className="mt-14 sm:mt-18 rounded-2xl p-4 sm:p-6 lg:p-8">
@@ -1555,20 +1533,20 @@ export function StatisticsSection() {
                     <path
                       d="M 80 18 A 62 62 0 0 0 80 142"
                       fill="none"
-                      stroke="#2f70f2"
+                      stroke="#e5e7eb"
                       strokeWidth="24"
                     />
                     {/* Right half - Pink-Red (Local) */}
                     <path
                       d="M 80 18 A 62 62 0 0 1 80 142"
                       fill="none"
-                      stroke="#ff3366"
+                      stroke="#e5e7eb"
                       strokeWidth="24"
                     />
                   </svg>
                   {/* Center Text */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
-                    <span className="text-sm font-bold text-gray-800 leading-tight">50%</span>
+                    <span className="text-sm font-bold text-gray-800 leading-tight">0%</span>
                     <span className="text-[11px] text-gray-500 font-medium">National</span>
                   </div>
                 </div>
@@ -1576,11 +1554,11 @@ export function StatisticsSection() {
                 <div className="t-content flex items-center justify-center gap-5 text-gray-600 mt-3">
                   <div className="flex items-center gap-1.5">
                     <span className="size-2.5 rounded-full bg-[#2f70f2]" />
-                    <span>National (50%)</span>
+                    <span>National (0%)</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="size-2.5 rounded-full bg-[#ff3366]" />
-                    <span>Local (50%)</span>
+                    <span>Local (0%)</span>
                   </div>
                 </div>
               </div>
@@ -1607,18 +1585,18 @@ export function StatisticsSection() {
                   <line x1="28" y1="170" x2="305" y2="170" stroke="#f3f4f6" strokeDasharray="3 3" />
 
                   {/* Bar 1: School (Blue) */}
-                  <text x="85" y="62" fontSize="11" fontWeight="600" fill="#1f2937" textAnchor="middle">1</text>
-                  <rect x="67" y="74" width="36" height="96" fill="#2f70f2" rx="2" />
+                  <text x="85" y="162" fontSize="11" fontWeight="600" fill="#1f2937" textAnchor="middle">0</text>
+                  <rect x="67" y="170" width="36" height="0" fill="#2f70f2" rx="2" />
                   <text x="85" y="190" fontSize="11" fill="#6b7280" textAnchor="middle">School</text>
 
                   {/* Bar 2: HEI (Pink-Red) */}
-                  <text x="170" y="62" fontSize="11" fontWeight="600" fill="#1f2937" textAnchor="middle">1</text>
-                  <rect x="152" y="74" width="36" height="96" fill="#ff3366" rx="2" />
+                  <text x="170" y="162" fontSize="11" fontWeight="600" fill="#1f2937" textAnchor="middle">0</text>
+                  <rect x="152" y="170" width="36" height="0" fill="#ff3366" rx="2" />
                   <text x="170" y="190" fontSize="11" fill="#6b7280" textAnchor="middle">HEI</text>
 
                   {/* Bar 3: Industry (Green) */}
-                  <text x="255" y="62" fontSize="11" fontWeight="600" fill="#1f2937" textAnchor="middle">1</text>
-                  <rect x="237" y="74" width="36" height="96" fill="#00c48c" rx="2" />
+                  <text x="255" y="162" fontSize="11" fontWeight="600" fill="#1f2937" textAnchor="middle">0</text>
+                  <rect x="237" y="170" width="36" height="0" fill="#00c48c" rx="2" />
                   <text x="255" y="190" fontSize="11" fill="#6b7280" textAnchor="middle">Industry</text>
                 </svg>
               </div>
@@ -1656,13 +1634,13 @@ export function StatisticsSection() {
 
                   {/* Area fill */}
                   <polygon
-                    points="38,152 90,133 142,115 195,96 248,77 300,59 300,170 38,170"
+                    points="38,170 300,170 300,170 38,170"
                     fill="url(#redAreaGrad)"
                   />
 
                   {/* Line */}
                   <polyline
-                    points="38,152 90,133 142,115 195,96 248,77 300,59"
+                    points="38,170 90,170 142,170 195,170 248,170 300,170"
                     fill="none"
                     stroke="#ff3366"
                     strokeWidth="2.5"
@@ -1671,34 +1649,34 @@ export function StatisticsSection() {
                   />
 
                   {/* Points & Values */}
-                  {/* W1: 1 */}
-                  <text x="38" y="142" fontSize="11" fontWeight="600" fill="#ff3366" textAnchor="middle">1</text>
-                  <circle cx="38" cy="152" r="3.5" fill="#fff" stroke="#ff3366" strokeWidth="2" />
+                  {/* W1: 0 */}
+                  <text x="38" y="160" fontSize="11" fontWeight="600" fill="#ff3366" textAnchor="middle">0</text>
+                  <circle cx="38" cy="170" r="3.5" fill="#fff" stroke="#ff3366" strokeWidth="2" />
                   <text x="38" y="188" fontSize="11" fill="#6b7280" textAnchor="middle">W1</text>
 
-                  {/* W2: 2 */}
-                  <text x="90" y="123" fontSize="11" fontWeight="600" fill="#ff3366" textAnchor="middle">2</text>
-                  <circle cx="90" cy="133" r="3.5" fill="#fff" stroke="#ff3366" strokeWidth="2" />
+                  {/* W2: 0 */}
+                  <text x="90" y="160" fontSize="11" fontWeight="600" fill="#ff3366" textAnchor="middle">0</text>
+                  <circle cx="90" cy="170" r="3.5" fill="#fff" stroke="#ff3366" strokeWidth="2" />
                   <text x="90" y="188" fontSize="11" fill="#6b7280" textAnchor="middle">W2</text>
 
-                  {/* W3: 3 */}
-                  <text x="142" y="105" fontSize="11" fontWeight="600" fill="#ff3366" textAnchor="middle">3</text>
-                  <circle cx="142" cy="115" r="3.5" fill="#fff" stroke="#ff3366" strokeWidth="2" />
+                  {/* W3: 0 */}
+                  <text x="142" y="160" fontSize="11" fontWeight="600" fill="#ff3366" textAnchor="middle">0</text>
+                  <circle cx="142" cy="170" r="3.5" fill="#fff" stroke="#ff3366" strokeWidth="2" />
                   <text x="142" y="188" fontSize="11" fill="#6b7280" textAnchor="middle">W3</text>
 
-                  {/* W4: 4 */}
-                  <text x="195" y="86" fontSize="11" fontWeight="600" fill="#ff3366" textAnchor="middle">4</text>
-                  <circle cx="195" cy="96" r="3.5" fill="#fff" stroke="#ff3366" strokeWidth="2" />
+                  {/* W4: 0 */}
+                  <text x="195" y="160" fontSize="11" fontWeight="600" fill="#ff3366" textAnchor="middle">0</text>
+                  <circle cx="195" cy="170" r="3.5" fill="#fff" stroke="#ff3366" strokeWidth="2" />
                   <text x="195" y="188" fontSize="11" fill="#6b7280" textAnchor="middle">W4</text>
 
-                  {/* W5: 5 */}
-                  <text x="248" y="67" fontSize="11" fontWeight="600" fill="#ff3366" textAnchor="middle">5</text>
-                  <circle cx="248" cy="77" r="3.5" fill="#fff" stroke="#ff3366" strokeWidth="2" />
+                  {/* W5: 0 */}
+                  <text x="248" y="160" fontSize="11" fontWeight="600" fill="#ff3366" textAnchor="middle">0</text>
+                  <circle cx="248" cy="170" r="3.5" fill="#fff" stroke="#ff3366" strokeWidth="2" />
                   <text x="248" y="188" fontSize="11" fill="#6b7280" textAnchor="middle">W5</text>
 
-                  {/* W6: 6 */}
-                  <text x="300" y="49" fontSize="11" fontWeight="600" fill="#ff3366" textAnchor="middle">6</text>
-                  <circle cx="300" cy="59" r="3.5" fill="#fff" stroke="#ff3366" strokeWidth="2" />
+                  {/* W6: 0 */}
+                  <text x="300" y="160" fontSize="11" fontWeight="600" fill="#ff3366" textAnchor="middle">0</text>
+                  <circle cx="300" cy="170" r="3.5" fill="#fff" stroke="#ff3366" strokeWidth="2" />
                   <text x="300" y="188" fontSize="11" fill="#6b7280" textAnchor="middle">W6</text>
                 </svg>
               </div>
@@ -2148,7 +2126,23 @@ export function HomePage() {
             <h2 className="t-main-heading t-title-gap-wide uppercase">
               Organizing Committee
             </h2>
-            <PeopleGrid rows={2} />
+            <PeopleGrid rows={1} />
+
+            {/* Patron */}
+            <h3 className="t-main-heading uppercase text-[length:calc(var(--fs-main-heading)*0.6)]! mt-14 sm:mt-20">Patron</h3>
+            <PeopleGrid
+              people={[{ name: "Prof. Prateek Kumar", designation: "Vice Chancellor, DTU Delhi", image: teamPhoto("mrvc") }]}
+            />
+
+            {/* Coordinators */}
+            <div className="mt-12 sm:mt-16">
+              <PeopleGrid
+                people={[
+                  { name: "Prof. K.C. Tiwari", designation: "Coordinator-1", image: teamPhoto("mrkctiwari") },
+                  { name: "Prof. Girish Kumar", designation: "Coordinator-2", image: teamPhoto("mrgirish") },
+                ]}
+              />
+            </div>
           </div>
         </section>
 
@@ -2173,28 +2167,36 @@ export function HomePage() {
             <h3 className="t-main-heading uppercase text-[length:calc(var(--fs-main-heading)*0.6)]!">Faculty</h3>
             <PeopleGrid
               people={[
-                { name: "Kaustubh Ranjan Singh", designation: "Design and Development Head" },
-                { name: "Prof. Shailender Kumar", designation: "Head, Computer Center" },
-                { name: "Mr. Vikas", designation: "System Manager, Computer Center" },
-                { name: "Dr. Trasha Gupta", designation: "Co-Coordinator" },
-                { name: "Dr. Anshul Arora", designation: "Co-Coordinator" },
+                { name: "Kaustubh Ranjan Singh", designation: "Design and Development Head", image: teamPhoto("mrkaustubh") },
+                { name: "Prof. Shailender Kumar", designation: "Head, Computer Center", image: teamPhoto("mrshailendra") },
+                { name: "Dr. Anamika Chauhan", designation: "Co-Coordinator", image: teamPhoto("msanamika") },
               ]}
             />
+            {/* Second row; top margin matches the grid's row gap */}
+            <div className="mt-10 sm:mt-12 md:mt-16">
+              <PeopleGrid
+                people={[
+                  { name: "Dr. Trasha Gupta", designation: "Co-Coordinator", image: teamPhoto("mstrasha") },
+                  { name: "Dr. Anshul Arora", designation: "Co-Coordinator", image: teamPhoto("mranshul") },
+                  { name: "Mr. Vikas", designation: "System Manager, Computer Center", image: teamPhoto("mrvikas") },
+                ]}
+              />
+            </div>
 
             {/* Students */}
             <h3 className="t-main-heading uppercase text-[length:calc(var(--fs-main-heading)*0.6)]! mt-14 sm:mt-20">Students</h3>
             <PeopleGrid
-              names={[
-                "Narayan Mishra",
-                "Daksh Shailesh Panchal",
-                "Ankit Kumar Roy",
-                "Vedant Singh",
-                "Afroz",
-                "Ilisha Dabas",
-                "Suraj Jaiswal",
-                "Prakhar Awasthi",
-                "Soumya Saurav Das",
-                "Sudhanshu Shekhar",
+              people={[
+                { name: "Narayan Mishra", image: teamPhoto("mrnarayan") },
+                { name: "Daksh Panchal", image: teamPhoto("mrdaksh") },
+                { name: "Ankit Kumar Roy", image: teamPhoto("mrankit") },
+                { name: "Vedant Singh", image: teamPhoto("mrvedant") },
+                { name: "Afroz Hadil Pookkodan", image: teamPhoto("mrafroz") },
+                { name: "Ilisha Dabas", image: teamPhoto("msilisha") },
+                { name: "Suraj Jaiswal", image: teamPhoto("mrsuraj") },
+                { name: "Prakhar Awasthi", image: teamPhoto("mrprakhar") },
+                { name: "Soumya Saurav Das", image: teamPhoto("mrsoumya") },
+                { name: "Sudhanshu Shekhar", image: teamPhoto("mrsudhanshu") },
               ]}
               showDesignation={false}
             />
@@ -2215,6 +2217,26 @@ export function HomePage() {
  * Still placeholder content: swap the Array.from for the real roster when the
  * names and photos land.
  */
+/**
+ * Team photos live in src/assets (any subfolder). They're looked up by file
+ * name without extension, case-insensitive, via import.meta.glob, so a
+ * missing or renamed photo just falls back to the grey circle instead of
+ * breaking the build the way a hard `import` would.
+ */
+const assetImages = import.meta.glob("../assets/**/*.{png,jpg,jpeg,webp,avif,PNG,JPG,JPEG,WEBP}", {
+  eager: true,
+  import: "default",
+}) as Record<string, string>;
+
+const photoByStem: Record<string, string> = {};
+for (const [path, url] of Object.entries(assetImages)) {
+  const stem = path.split("/").pop()!.replace(/\.[^.]+$/, "").toLowerCase();
+  photoByStem[stem] = url;
+}
+
+/** teamPhoto("mrvc") -> URL of src/assets/mrvc.jpeg (or undefined if absent). */
+const teamPhoto = (stem: string): string | undefined => photoByStem[stem.toLowerCase()];
+
 function PeopleGrid({
   rows,
   names,
@@ -2224,7 +2246,7 @@ function PeopleGrid({
   rows?: number;
   names?: string[];
   /** Real roster with designations; takes precedence over `names`. */
-  people?: { name: string; designation?: string }[];
+  people?: { name: string; designation?: string | undefined; image?: string | undefined }[];
   showDesignation?: boolean;
 }) {
   const COLUMNS = 4;
@@ -2233,22 +2255,36 @@ function PeopleGrid({
     (names ?? Array.from({ length: (rows ?? 1) * COLUMNS }, () => "Name")).map((name) => ({
       name,
       designation: "Designation",
+      image: undefined as string | undefined,
     }));
 
   return (
     <div className="flex flex-wrap justify-center gap-x-6 sm:gap-x-12 md:gap-x-16 gap-y-10 sm:gap-y-12 md:gap-y-16 max-w-4xl mx-auto">
-      {people.map(({ name, designation }, idx) => (
+      {people.map(({ name, designation, image }, idx) => {
+        const photo = image;
+        return (
         <div
           key={`${name}-${idx}`}
           className="flex w-[calc(50%-0.75rem)] flex-col items-center text-center sm:w-[calc(25%-2.25rem)] md:w-[calc(25%-3rem)]"
         >
-          <div className="size-20 sm:size-24 md:size-28 rounded-full bg-[#d2d2d2] mb-3 sm:mb-3.5 transition-transform duration-200 hover:scale-105" />
+          {photo ? (
+            <img
+              src={photo}
+              alt={name}
+              loading="lazy"
+              decoding="async"
+              className="size-20 sm:size-24 md:size-28 rounded-full bg-[#d2d2d2] object-cover object-top mb-3 sm:mb-3.5 shadow-sm ring-1 ring-black/5 transition-transform duration-200 hover:scale-105"
+            />
+          ) : (
+            <div className="size-20 sm:size-24 md:size-28 rounded-full bg-[#d2d2d2] mb-3 sm:mb-3.5 transition-transform duration-200 hover:scale-105" />
+          )}
           <h3 className="t-subheading-2 text-gray-900">{name}</h3>
           {showDesignation && designation && (
             <p className="t-content text-gray-500 mt-1 text-center [hyphens:none]">{designation}</p>
           )}
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -2999,7 +3035,7 @@ export function EventsPage() {
             SEWA FIRST 2026 National Launch Event at Delhi Technological University
           </p>
           <p className="t-content mx-auto mt-6 max-w-3xl text-gray-700">
-            Join us on 17 September 2026 for the grand inaugural ceremony and National Innovation
+            Join us on 19 September 2026 for the grand inaugural ceremony and National Innovation
             Festival at DTU. The launch brings together leadership from ministries, academia, and
             industry to unveil the national innovation portal, release the 50 flagship problem
             statements, and kick off the nationwide 100-day innovation journey toward Viksit Bharat.
@@ -3341,12 +3377,12 @@ export function ContactPage() {
             <div className="grid grid-cols-1 md:grid-cols-[360px_1fr] gap-6 sm:gap-7 items-start">
               {/* Left Info Card */}
               <div className="rounded-[20px] bg-white border border-gray-200/80 p-5 sm:p-6 space-y-6">
-                {/* Norther Region Coordinator */}
+                {/* Northern Region Coordinator */}
                 <div className="flex items-start gap-3">
                   <MapPin size={17} className="text-[#ff4d4f] shrink-0 mt-0.5" strokeWidth={1.8} />
                   <div>
                     <h3 className="text-[18px] font-bold leading-snug text-gray-900">
-                      Norther Region Coordinator
+                      Northern Region Coordinator
                     </h3>
                     <p className="mt-1 text-left text-[16px] leading-relaxed text-gray-500">
                       Delhi Technological University, Shahbad Daulatpur, Bawana Road, Rohini, Delhi-110042, India
