@@ -21,6 +21,8 @@ const v4 = Math.max(60, Math.round(maxVus * 0.50));  // ~250 VUs
 const v5 = maxVus;                                   // ~500 VUs
 
 export const options = {
+  insecureSkipTLSVerify: true,
+  summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
   stages: [
     { duration: '1m', target: v1 },  // Warm-up to 10 VUs
     { duration: '2m', target: v1 },  // Steady at initial stage

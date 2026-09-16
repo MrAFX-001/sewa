@@ -52,11 +52,13 @@ if [[ -z "$SCENARIO" ]]; then
   echo "  load      - Gradual stepped ramp-up (10 -> 50 -> 100 -> 250 -> 500 VUs)"
   echo "  stress    - Progressive capacity test to breaking point (configurable MAX_VUS)"
   echo "  spike     - Rapid surge to 500+ VUs and fast recovery observation"
-  echo "  soak      - Extended reliability & leak test (configurable SOAK_DURATION)"
+  echo "  scale10k  - 10,000 Virtual Users progressive stepped scale test (1k -> 10k VUs)"
+  echo "  arrival10k- 10,000 Concurrent Visitors open-model arrival rate (~2,000 journeys/sec)"
   echo ""
   echo "Environment Variables:"
   echo "  BASE_URL       Target base URL (default: http://10.50.0.80)"
-  echo "  MAX_VUS        Maximum VUs for stress test (default: 500)"
+  echo "  MAX_VUS        Maximum VUs for stress/scale tests (default: 500 / 10000)"
+  echo "  SCALE_RATE     Peak arrival rate for arrival10k (default: 2000/sec)"
   echo "  SOAK_DURATION  Duration for soak test (default: 30m)"
   echo "  K6_TOKEN       Session token for 'sewa_session' cookie (optional)"
   echo "  K6_USERNAME    User email for automated login in setup() (optional)"
@@ -65,12 +67,29 @@ if [[ -z "$SCENARIO" ]]; then
   exit 1
 fi
 
+# Normalize alias names
+if [[ "$SCENARIO" == "scale10k" ]]; then
+  SCENARIO="scale-10k"
+elif [[ "$SCENARIO" == "arrival10k" ]]; then
+  SCENARIO="arrival-10k"
+fi
+
 TARGET_FILE="$SCRIPT_DIR/scenarios/${SCENARIO}.js"
 
 if [[ ! -f "$TARGET_FILE" ]]; then
   echo "[ERROR] Unknown scenario '$SCENARIO'. File not found: $TARGET_FILE"
-  echo "Valid choices: smoke, baseline, load, stress, spike, soak"
+  echo "Valid choices: smoke, baseline, load, stress, spike, soak, scale10k, arrival10k"
   exit 1
+fi
+
+# Check open file descriptor limits for high concurrency runs
+CURRENT_ULIMIT=$(ulimit -n || echo "1024")
+if [[ ("$SCENARIO" == "scale-10k" || "$SCENARIO" == "arrival-10k") && $CURRENT_ULIMIT -lt 65535 ]]; then
+  echo "--------------------------------------------------------------------------------"
+  echo "[NOTICE] Current open file descriptor limit (ulimit -n) is $CURRENT_ULIMIT."
+  echo "For 10,000 concurrent user tests, it is strongly recommended to set:"
+  echo "  ulimit -n 65535"
+  echo "--------------------------------------------------------------------------------"
 fi
 
 # 3. Create results directory if needed
@@ -113,11 +132,14 @@ echo "==========================================================================
 # Extra parameters passed to the script are forwarded directly to k6
 shift || true
 exec k6 run \
+  --insecure-skip-tls-verify \
   -e BASE_URL="$BASE_URL" \
+  -e RESULTS_DIR="$RESULTS_DIR" \
   ${K6_TOKEN:+-e K6_TOKEN="$K6_TOKEN"} \
   ${K6_USERNAME:+-e K6_USERNAME="$K6_USERNAME"} \
   ${K6_PASSWORD:+-e K6_PASSWORD="$K6_PASSWORD"} \
   ${MAX_VUS:+-e MAX_VUS="$MAX_VUS"} \
+  ${SCALE_RATE:+-e SCALE_RATE="$SCALE_RATE"} \
   ${SOAK_DURATION:+-e SOAK_DURATION="$SOAK_DURATION"} \
   ${LOAD_MAX_VUS:+-e LOAD_MAX_VUS="$LOAD_MAX_VUS"} \
   "$TARGET_FILE" \

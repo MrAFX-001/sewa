@@ -248,6 +248,60 @@ All tests can be executed via `./run.sh <scenario>` or via direct `k6 run`.
 
 ---
 
+### Scale 10K Test (10,000 Direct Virtual Users)
+- **Purpose**: Massive capacity stress test scaling to 10,000 concurrent parallel threads.
+- **Progression**:
+  `1,000 VUs -> 2,500 VUs -> 5,000 VUs -> 7,500 VUs -> 10,000 VUs -> Cool-down`
+- **Memory Protection**: Utilizes `discardResponseBodies: true` to prevent allocating gigabytes of response payloads in client RAM.
+- **Safety Circuit Breaker**: Automatically aborts if failure rate > 10% or p95 latency > 5000ms.
+- **Command**:
+  ```bash
+  BASE_URL=http://10.50.0.80 ./run.sh scale10k
+  ```
+- **Direct k6**:
+  ```bash
+  BASE_URL=http://10.50.0.80 k6 run scenarios/scale-10k.js
+  ```
+
+---
+
+### Arrival Rate 10K Test (10,000 Real-World Concurrent Visitors)
+- **Purpose**: Open-model arrival rate scenario (`ramping-arrival-rate`) simulating 10,000 simultaneous active website visitors.
+- **Concept**: Real human visitors do not click simultaneously every millisecond; with an average 5-second think time, 10,000 active visitors generate **2,000 completed user journeys / second**.
+- **Efficiency**: Instead of locking 10,000 idle threads in memory, this dynamically utilizes an optimized pool of 500–3,000 active VUs. It delivers the exact traffic volume of 10,000 users while consuming under 3 GB of RAM on the generator laptop.
+- **Progression**:
+  `250/s -> 500/s -> 1,000/s -> 2,000/s (Hold) -> Ramp-down`
+- **Command**:
+  ```bash
+  BASE_URL=http://10.50.0.80 ./run.sh arrival10k
+  ```
+- **Direct k6**:
+  ```bash
+  BASE_URL=http://10.50.0.80 k6 run scenarios/arrival-10k.js
+  ```
+
+---
+
+### Tuning Ubuntu for 10,000 Concurrency
+
+Before generating 10,000 concurrent user traffic from Linux, ensure OS socket and file limits are tuned:
+
+```bash
+# 1. Raise open file descriptors (mandatory for 10k connections)
+ulimit -n 65535
+
+# 2. Expand ephemeral port range to prevent socket exhaustion
+sudo sysctl -w net.ipv4.ip_local_port_range="1024 65535"
+
+# 3. Enable fast TCP connection reuse
+sudo sysctl -w net.ipv4.tcp_tw_reuse=1
+
+# 4. Increase socket backlog queue
+sudo sysctl -w net.core.somaxconn=65535
+```
+
+---
+
 ## 7. Configuration Parameters
 
 The following environment variables can be set to customize test parameters:

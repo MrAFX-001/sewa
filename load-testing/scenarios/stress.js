@@ -23,6 +23,8 @@ const s4 = Math.max(75, Math.round(maxVus * 0.75));   // Stage 4 (e.g., 750)
 const s5 = maxVus;                                   // Peak Stage (e.g., 1000 or MAX_VUS)
 
 export const options = {
+  insecureSkipTLSVerify: true,
+  summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
   stages: [
     { duration: '1m', target: s1 },
     { duration: '2m', target: s1 },

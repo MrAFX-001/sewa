@@ -16,6 +16,8 @@ const peakVus = config.spike.peakVus;
 const baseVus = 10;
 
 export const options = {
+  insecureSkipTLSVerify: true,
+  summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
   stages: [
     { duration: '1m', target: baseVus }, // Pre-spike baseline
     { duration: '30s', target: peakVus }, // Abrupt traffic spike
