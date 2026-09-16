@@ -3727,7 +3727,7 @@ const faqData = [
   },
   {
     q: "Who is the Regional Coordinator for the Northern Region?",
-    a: "Delhi Technological University (DTU) is the Regional Coordinator for the Northern Region. The region includes J&K, Ladakh, Himachal Pradesh, Uttarakhand, Chandigarh, Delhi, Punjab, Haryana and Uttar Pradesh.",
+    a: "Delhi Technological University (DTU) is the Regional Coordinator for the Northern Region. The region includes J&K, Ladakh, Himachal Pradesh, Uttarakhand, Chandigarh, Delhi, Punjab and Haryana.",
   },
   {
     q: "Do I need a fully developed product to participate?",
