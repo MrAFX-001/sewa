@@ -1,5 +1,4 @@
 :root {
-
   /* Viewport range over which sizes scale, in px. */
   --vw-min: 380;
   --vw-max: 1280;
@@ -44,7 +43,6 @@
   --content-weight: 400;
   --content-tracking: 0;
 
-
   --section-gap: 90;
   --title-gap: 50;
 
@@ -52,21 +50,40 @@
 
   --vw-progress: calc((100vw - (var(--vw-min) * 1px)) / (var(--vw-max) - var(--vw-min)));
 
-  --fs-main-heading: clamp(calc(var(--main-heading-min) * var(--u)),
-      calc(var(--main-heading-min) * var(--u) + (var(--main-heading-max) - var(--main-heading-min)) * var(--vw-progress)),
-      calc(var(--main-heading-max) * var(--u)));
+  --fs-main-heading: clamp(
+    calc(var(--main-heading-min) * var(--u)),
+    calc(
+      var(--main-heading-min) * var(--u) + (var(--main-heading-max) - var(--main-heading-min)) *
+        var(--vw-progress)
+    ),
+    calc(var(--main-heading-max) * var(--u))
+  );
 
-  --fs-subheading-1: clamp(calc(var(--subheading-1-min) * var(--u)),
-      calc(var(--subheading-1-min) * var(--u) + (var(--subheading-1-max) - var(--subheading-1-min)) * var(--vw-progress)),
-      calc(var(--subheading-1-max) * var(--u)));
+  --fs-subheading-1: clamp(
+    calc(var(--subheading-1-min) * var(--u)),
+    calc(
+      var(--subheading-1-min) * var(--u) + (var(--subheading-1-max) - var(--subheading-1-min)) *
+        var(--vw-progress)
+    ),
+    calc(var(--subheading-1-max) * var(--u))
+  );
 
-  --fs-subheading-2: clamp(calc(var(--subheading-2-min) * var(--u)),
-      calc(var(--subheading-2-min) * var(--u) + (var(--subheading-2-max) - var(--subheading-2-min)) * var(--vw-progress)),
-      calc(var(--subheading-2-max) * var(--u)));
+  --fs-subheading-2: clamp(
+    calc(var(--subheading-2-min) * var(--u)),
+    calc(
+      var(--subheading-2-min) * var(--u) + (var(--subheading-2-max) - var(--subheading-2-min)) *
+        var(--vw-progress)
+    ),
+    calc(var(--subheading-2-max) * var(--u))
+  );
 
-  --fs-content: clamp(calc(var(--content-min) * var(--u)),
-      calc(var(--content-min) * var(--u) + (var(--content-max) - var(--content-min)) * var(--vw-progress)),
-      calc(var(--content-max) * var(--u)));
+  --fs-content: clamp(
+    calc(var(--content-min) * var(--u)),
+    calc(
+      var(--content-min) * var(--u) + (var(--content-max) - var(--content-min)) * var(--vw-progress)
+    ),
+    calc(var(--content-max) * var(--u))
+  );
 }
 
 .t-main-heading {
@@ -144,7 +161,7 @@
   margin-bottom: calc(var(--title-gap-wide) * var(--u));
 }
 
-.t-section-stack>*+* {
+.t-section-stack > * + * {
   margin-top: calc(var(--section-gap) * var(--u));
 }
 

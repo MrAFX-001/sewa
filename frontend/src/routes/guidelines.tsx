@@ -10,10 +10,11 @@ import regionalPdf from "../assets/REGIONAL LEVEL PPT.pdf";
 export const Route = createFileRoute("/guidelines")({
   head: () => ({
     meta: [
-      { title: "Guidelines | SEWA 2026" },
+      { title: "Guidelines | SEVA 2026" },
       {
         name: "description",
-        content: "Eligibility, registration, submission, and regional coordination guidelines for SEWA 2026.",
+        content:
+          "Eligibility, registration, submission, and regional coordination guidelines for SEVA 2026.",
       },
     ],
   }),
@@ -43,7 +44,9 @@ const eligibilityRows = [
     category: "School & Vocational",
     participants: (
       <>
-        Students from <strong className="font-bold text-[#14234B]">Class X onwards up to ITI level</strong>, participating individually or in teams, with appropriate institutional support.
+        Students from{" "}
+        <strong className="font-bold text-[#14234B]">Class X onwards up to ITI level</strong>,
+        participating individually or in teams, with appropriate institutional support.
       </>
     ),
     badgeBg: "bg-[#5294E2]",
@@ -55,7 +58,11 @@ const eligibilityRows = [
     category: "Diploma & Higher Education",
     participants: (
       <>
-        Students/teams from <strong className="font-bold text-[#14234B]">Diploma, Undergraduate, Postgraduate and Ph.D. programmes</strong>, including technical and non-technical institutions.
+        Students/teams from{" "}
+        <strong className="font-bold text-[#14234B]">
+          Diploma, Undergraduate, Postgraduate and Ph.D. programmes
+        </strong>
+        , including technical and non-technical institutions.
       </>
     ),
     badgeBg: "bg-[#52AB77]",
@@ -64,10 +71,12 @@ const eligibilityRows = [
   },
   {
     number: "III",
-    category: "Industry & Government",
+    category: "Industry & Government (Open Category)",
     participants: (
       <>
-        Urban/Rural industries, MSMEs, startups, R&amp;D organisations and Government laboratories, participating individually or through collaborative teams.
+        <strong className="font-bold text-[#14234B]">Open Category:</strong> Urban/Rural industries,
+        MSMEs, startups, R&amp;D organisations and Government laboratories, participating
+        individually or through collaborative teams.
       </>
     ),
     badgeBg: "bg-[#F39C42]",
@@ -91,7 +100,10 @@ const eligibilityCards = [
     category: "Applicability",
     text: (
       <>
-        In general, the same three participant categories will be applicable to both <strong className="font-bold text-[#14234B]">National-Level</strong> and <strong className="font-bold text-[#14234B]">Local-Level Challenges</strong>, however, may vary depending upon the problem statement.
+        In general, the same three participant categories will be applicable to both{" "}
+        <strong className="font-bold text-[#14234B]">National-Level</strong> and{" "}
+        <strong className="font-bold text-[#14234B]">Local-Level Challenges</strong>, however, may
+        vary depending upon the problem statement.
       </>
     ),
     cardBg: "bg-[#EFF9F4]",
@@ -102,7 +114,7 @@ const eligibilityCards = [
   {
     key: "northern-region",
     category: "Northern Region COORDINATION",
-    text: "Participants from Jammu & Kashmir, Ladakh, Himachal Pradesh, Uttarakhand, Chandigarh, NCT of Delhi, Punjab, Haryana and Uttar Pradesh are eligible to participate under the Northern Region coordinated by DTU.",
+    text: "Participants from Jammu & Kashmir, Ladakh, Himachal Pradesh, Uttarakhand, Chandigarh, NCT of Delhi, Punjab and Haryana are eligible to participate under the Northern Region coordinated by DTU.",
     cardBg: "bg-[#FFF4F4]",
     badgeBg: "bg-[#F2DCDC]",
     titleColor: "text-[#F53838]",
@@ -166,9 +178,7 @@ function GuidelinesPage() {
                 <div className="t-content flex items-center justify-center font-bold! text-[#334155]">
                   #
                 </div>
-                <div className="t-content pl-[24px] font-bold! text-[#1F2D48]">
-                  Category
-                </div>
+                <div className="t-content pl-[24px] font-bold! text-[#1F2D48]">Category</div>
                 <div className="t-content pl-[32px] pr-5 font-bold! text-[#1F2D48]">
                   Eligible Participants
                 </div>
@@ -188,9 +198,7 @@ function GuidelinesPage() {
                     </div>
                   </div>
                   <div className="pl-[24px] pr-4 h-full flex items-center border-r border-black/[0.04]">
-                    <h3 className="t-content font-bold! text-[#112347]">
-                      {row.category}
-                    </h3>
+                    <h3 className="t-content font-bold! text-[#112347]">{row.category}</h3>
                   </div>
                   <div className="pl-[32px] pr-5 flex items-center">
                     <p
@@ -216,12 +224,8 @@ function GuidelinesPage() {
                 </div>
                 <div className="w-[1px] self-stretch bg-[#E2E8F0] shrink-0" aria-hidden="true" />
                 <div className="flex flex-col gap-1 min-w-0 flex-1">
-                  <h3 className={`t-content font-bold! ${card.titleColor}`}>
-                    {card.category}
-                  </h3>
-                  <div className="t-content text-[#475569]">
-                    {card.text}
-                  </div>
+                  <h3 className={`t-content font-bold! ${card.titleColor}`}>{card.category}</h3>
+                  <div className="t-content text-[#475569]">{card.text}</div>
                 </div>
               </article>
             ))}
@@ -233,7 +237,9 @@ function GuidelinesPage() {
             How to participate
           </h2>
           <p className="t-content w-full text-justify text-black mb-8">
-            Eligible participants can take part in the SEWA First RYIC 2026 through the structured registration journey, designed to guide them from identifying a challenge to presenting their innovation.
+            Eligible participants can take part in the SEVA First RYIC 2026 through the structured
+            registration journey, designed to guide them from identifying a challenge to presenting
+            their innovation.
             <br />
             The registration process and key steps are outlined below:
           </p>
@@ -246,7 +252,10 @@ function GuidelinesPage() {
             Submission format
           </h2>
           <p className="t-content w-full text-justify text-black mb-8">
-            Participants are required to submit their innovation proposal in the prescribed 15-slide presentation format. The presentation should be concise, structured and focused on demonstrating the journey from problem identification to innovation, prototype development and potential impact. The prescribed slide format is appended for reference
+            Participants are required to submit their innovation proposal in the prescribed 15-slide
+            presentation format. The presentation should be concise, structured and focused on
+            demonstrating the journey from problem identification to innovation, prototype
+            development and potential impact. The prescribed slide format is appended for reference
           </p>
 
           <div className="w-full max-w-[1180px] mx-auto flex flex-col gap-4">

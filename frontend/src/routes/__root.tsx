@@ -47,6 +47,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
+        {error && (
+          <p className="mt-3 text-xs text-rose-600 bg-rose-50 border border-rose-200 p-2.5 rounded-lg text-left font-mono break-all max-h-36 overflow-auto">
+            {error.message || String(error)}
+          </p>
+        )}
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -74,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SEWA 2026" },
+      { title: "SEVA 2026" },
       { name: "description", content: "DTU Youth Innovation Challenge" },
       { name: "author", content: "Delhi Technological University" },
       { property: "og:type", content: "website" },

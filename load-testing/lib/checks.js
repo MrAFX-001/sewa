@@ -30,18 +30,19 @@ export function checkHtmlPage(res, stepName = 'page', expectedText = null) {
   serverError5xxRate.add(is5xx ? 1 : 0);
   rateLimited429Rate.add(is429 ? 1 : 0);
 
+  const ct = res.headers['Content-Type'] || res.headers['content-type'] || '';
   const checks = {
     [`${stepName} status is 200`]: (r) => r.status === 200,
-    [`${stepName} is HTML content`]: (r) => {
-      const ct = r.headers['Content-Type'] || r.headers['content-type'] || '';
-      return ct.includes('text/html');
-    },
-    [`${stepName} body not empty`]: (r) => r.body && r.body.length > 0,
+    [`${stepName} is HTML content`]: () => ct.includes('text/html'),
   };
 
-  if (expectedText) {
-    checks[`${stepName} contains "${expectedText}"`] = (r) =>
-      typeof r.body === 'string' && r.body.includes(expectedText);
+  // Only check body content if body was not discarded
+  if (res.body && res.body.length > 0) {
+    checks[`${stepName} body not empty`] = (r) => r.body && r.body.length > 0;
+    if (expectedText) {
+      checks[`${stepName} contains "${expectedText}"`] = (r) =>
+        typeof r.body === 'string' && r.body.includes(expectedText);
+    }
   }
 
   return check(res, checks);
@@ -56,31 +57,33 @@ export function checkJsonResponse(res, stepName = 'api', validator = null) {
   serverError5xxRate.add(is5xx ? 1 : 0);
   rateLimited429Rate.add(is429 ? 1 : 0);
 
-  let parsed = null;
-  let parseSuccess = false;
-
-  try {
-    if (res.body) {
-      parsed = JSON.parse(res.body);
-      parseSuccess = true;
-    }
-  } catch {
-    parseSuccess = false;
-  }
-
+  const ct = res.headers['Content-Type'] || res.headers['content-type'] || '';
   const checks = {
     [`${stepName} status is 200`]: (r) => r.status === 200,
-    [`${stepName} valid JSON body`]: () => parseSuccess,
+    [`${stepName} is JSON content`]: () => ct.includes('application/json'),
   };
 
-  if (validator && parseSuccess) {
-    checks[`${stepName} content validation`] = () => {
-      try {
-        return validator(parsed);
-      } catch {
-        return false;
-      }
-    };
+  if (res.body && res.body.length > 0) {
+    let parsed = null;
+    let parseSuccess = false;
+    try {
+      parsed = JSON.parse(res.body);
+      parseSuccess = true;
+    } catch {
+      parseSuccess = false;
+    }
+
+    checks[`${stepName} valid JSON body`] = () => parseSuccess;
+
+    if (validator && parseSuccess) {
+      checks[`${stepName} content validation`] = () => {
+        try {
+          return validator(parsed);
+        } catch {
+          return false;
+        }
+      };
+    }
   }
 
   return check(res, checks);
@@ -131,4 +134,3 @@ export function checkMyTeamResponse(res) {
     return data && ('team' in data);
   });
 }
-

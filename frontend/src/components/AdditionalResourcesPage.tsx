@@ -28,12 +28,14 @@ const TRL_ROWS: TrlRow[] = [
   {
     level: "TRL 4",
     title: "Technology Validated in Laboratory",
-    description: "Components or systems are integrated and validated in a controlled laboratory environment.",
+    description:
+      "Components or systems are integrated and validated in a controlled laboratory environment.",
   },
   {
     level: "TRL 5",
     title: "Technology Validated in Relevant Environment",
-    description: "The technology is tested and validated under conditions representative of the intended application.",
+    description:
+      "The technology is tested and validated under conditions representative of the intended application.",
   },
   {
     level: "TRL 6",
@@ -43,7 +45,8 @@ const TRL_ROWS: TrlRow[] = [
   {
     level: "TRL 7",
     title: "System Prototype Demonstrated in Operational Environment",
-    description: "A near-complete or fully functional prototype is demonstrated under actual or operational conditions.",
+    description:
+      "A near-complete or fully functional prototype is demonstrated under actual or operational conditions.",
   },
   {
     level: "TRL 8",
@@ -54,7 +57,8 @@ const TRL_ROWS: TrlRow[] = [
   {
     level: "TRL 9",
     title: "Actual System Proven in Operational Environment",
-    description: "The technology has been successfully deployed and proven through actual operation and real-world use.",
+    description:
+      "The technology has been successfully deployed and proven through actual operation and real-world use.",
   },
 ];
 
@@ -67,7 +71,6 @@ const BADGE_STYLES = [
   { bg: "bg-[#ffe6e8]", text: "text-[#e0435a]" },
   { bg: "bg-[#f0eefb]", text: "text-[#6f5fc9]" },
 ];
-
 
 const externalLinks = [
   {
@@ -87,8 +90,7 @@ const externalLinks = [
   },
 ];
 
-const sectionHeadingClass =
-  "t-main-heading uppercase";
+const sectionHeadingClass = "t-main-heading uppercase";
 
 export function AdditionalResourcesPage() {
   useEffect(() => {
@@ -125,7 +127,11 @@ export function AdditionalResourcesPage() {
                         <h3 className="t-content font-bold! text-gray-900">{link.title}</h3>
                         <p className="t-content mt-1 text-gray-500">{link.description}</p>
                       </div>
-                      <ExternalLink size={16} className="ml-auto mt-0.5 shrink-0 text-gray-300" strokeWidth={1.8} />
+                      <ExternalLink
+                        size={16}
+                        className="ml-auto mt-0.5 shrink-0 text-gray-300"
+                        strokeWidth={1.8}
+                      />
                     </a>
                   ))}
                 </div>
@@ -133,14 +139,18 @@ export function AdditionalResourcesPage() {
             </section>
 
             {/* ── Innovation Playbook ── */}
-            <section id="innovation-playbook" aria-labelledby="playbook-heading" className="scroll-mt-28">
+            <section
+              id="innovation-playbook"
+              aria-labelledby="playbook-heading"
+              className="scroll-mt-28"
+            >
               <h2 id="playbook-heading" className={sectionHeadingClass}>
                 Innovation Playbook
               </h2>
               <p className="t-content mt-6 max-w-2xl text-gray-700">
                 A step-by-step field guide for teams moving from problem observation through
-                ideation, prototyping and validation — structured around the same 100-day journey
-                as the Challenge itself.
+                ideation, prototyping and validation — structured around the innovation journey of
+                the Challenge itself.
               </p>
 
               {/*
@@ -173,7 +183,10 @@ export function AdditionalResourcesPage() {
 
             {/* ── Technology Readiness Level (TRL) ── */}
             <section id="trl" aria-labelledby="trl-heading" className="scroll-mt-28">
-              <h2 id="trl-heading" className={`${sectionHeadingClass} !mb-3 sm:!mb-8 [hyphens:none]`}>
+              <h2
+                id="trl-heading"
+                className={`${sectionHeadingClass} !mb-3 sm:!mb-8 [hyphens:none]`}
+              >
                 Technology Readiness Level (TRL)
               </h2>
 
@@ -213,9 +226,15 @@ export function AdditionalResourcesPage() {
                   <table className="w-full min-w-[880px] text-left">
                     <thead className="bg-[#1c2b40] text-white">
                       <tr>
-                        <th className="t-content w-36 px-5 py-4 font-bold! uppercase tracking-wide">TRL</th>
-                        <th className="t-content w-[30%] px-5 py-4 font-bold! uppercase tracking-wide">Level</th>
-                        <th className="t-content px-5 py-4 font-bold! uppercase tracking-wide">Description</th>
+                        <th className="t-content w-36 px-5 py-4 font-bold! uppercase tracking-wide">
+                          TRL
+                        </th>
+                        <th className="t-content w-[30%] px-5 py-4 font-bold! uppercase tracking-wide">
+                          Level
+                        </th>
+                        <th className="t-content px-5 py-4 font-bold! uppercase tracking-wide">
+                          Description
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -233,7 +252,10 @@ export function AdditionalResourcesPage() {
                                 {row.level}
                               </span>
                             </td>
-                            <th scope="row" className="t-content px-5 py-4 align-top font-bold! text-gray-900">
+                            <th
+                              scope="row"
+                              className="t-content px-5 py-4 align-top font-bold! text-gray-900"
+                            >
                               {row.title}
                             </th>
                             <td className="t-content px-5 py-4 align-top text-gray-600">

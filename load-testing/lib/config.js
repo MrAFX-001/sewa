@@ -10,6 +10,9 @@ export const config = {
   // Target Host
   baseUrl: getBaseUrl(),
 
+  // SSL/TLS Settings: Allow testing internal/private IP deployments with self-signed certs
+  insecureSkipTLSVerify: true,
+
   // Authentication Settings
   // Backend session cookie name is 'sewa_session'
   cookieName: __ENV.COOKIE_NAME || 'sewa_session',
@@ -68,4 +71,3 @@ export const defaultThresholds = {
   // 95% of requests should respond in under 1000ms, 99% in under 2000ms
   http_req_duration: ['p(95)<1000', 'p(99)<2000'],
 };
-

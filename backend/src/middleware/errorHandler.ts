@@ -1,7 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { MulterError } from "multer";
 import { logger } from "../config/logger.js";
-import { isProd } from "../config/env.js";
 
 export class AppError extends Error {
   constructor(
@@ -12,15 +11,23 @@ export class AppError extends Error {
   }
 }
 
+/** body-parser (express.json) client errors: { type, status, body, ... } */
+const BODY_PARSER_ERRORS: Record<string, { status: number; message: string }> = {
+  "entity.parse.failed": { status: 400, message: "Invalid JSON body." },
+  "entity.too.large": { status: 413, message: "Request body is too large." },
+  "entity.verify.failed": { status: 400, message: "Invalid request body." },
+  "request.aborted": { status: 400, message: "Request was aborted." },
+  "request.size.invalid": { status: 400, message: "Invalid request size." },
+  "stream.encoding.set": { status: 500, message: "Something went wrong. Please try again." },
+  "encoding.unsupported": { status: 415, message: "Unsupported content encoding." },
+  "charset.unsupported": { status: 415, message: "Unsupported charset." },
+};
+
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({ error: err.message });
   }
 
-  // Multer throws its own error class rather than AppError for things like
-  // an oversized file - translated here so the client gets a clear 400
-  // instead of a generic 500, without every upload route having to remember
-  // to catch this itself.
   if (err instanceof MulterError) {
     const message =
       err.code === "LIMIT_FILE_SIZE"
@@ -31,11 +38,18 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
     return res.status(400).json({ error: message });
   }
 
-  // Unexpected error: log full detail internally, return a generic message
-  // externally. Never leak stack traces or DB errors to the client.
+  // Client-side body errors: answer 4xx and never log err.body (raw request
+  // body, may contain passwords/PII).
+  if (err && typeof err === "object" && typeof (err as { type?: unknown }).type === "string") {
+    const mapped = BODY_PARSER_ERRORS[(err as { type: string }).type];
+    if (mapped) {
+      logger.warn({ errorType: (err as { type: string }).type, path: req.path }, "request_body_rejected");
+      return res.status(mapped.status).json({ error: mapped.message });
+    }
+  }
+
+  // Unexpected error: log sanitized detail internally (see safeErrSerializer),
+  // return a generic message. No debug detail in any environment.
   logger.error({ err, path: req.path, method: req.method }, "unhandled_error");
-  res.status(500).json({
-    error: "Something went wrong. Please try again.",
-    ...(isProd ? {} : { debug: err instanceof Error ? err.message : String(err) }),
-  });
+  res.status(500).json({ error: "Something went wrong. Please try again." });
 }

@@ -7,7 +7,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
-      user?: { id: string; email: string; emailVerified: boolean; status: string };
+      user?: { id: string; email: string; emailVerified: boolean; status: string; role?: string };
     }
   }
 }
@@ -25,10 +25,21 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     // not just after the token expires.
     const user = await prisma.user.findUnique({
       where: { id: payload.sub },
-      select: { id: true, email: true, emailVerified: true, status: true },
+      select: {
+        id: true,
+        email: true,
+        emailVerified: true,
+        status: true,
+        tokenVersion: true,
+        role: true,
+      },
     });
 
     if (!user || user.status === "suspended") {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    if (payload.ver !== user.tokenVersion) {
       return res.status(401).json({ error: "Not authenticated" });
     }
 
@@ -43,5 +54,40 @@ export function requireVerifiedEmail(req: Request, res: Response, next: NextFunc
   if (!req.user?.emailVerified) {
     return res.status(403).json({ error: "Email verification required" });
   }
+  next();
+}
+/**
+ * Best-effort authentication for endpoints that are public by default but
+ * expose an authenticated/admin-only view when explicitly requested. Invalid
+ * or expired cookies are treated as anonymous rather than blocking the public
+ * response.
+ */
+export async function optionalAuth(req: Request, _res: Response, next: NextFunction) {
+  const token = req.cookies?.[env.COOKIE_NAME];
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const payload = verifySession(token);
+    const user = await prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: {
+        id: true,
+        email: true,
+        emailVerified: true,
+        status: true,
+        tokenVersion: true,
+        role: true,
+      },
+    });
+
+    if (user && user.status !== "suspended" && payload.ver === user.tokenVersion) {
+      req.user = user;
+    }
+  } catch {
+    // Anonymous/public request.
+  }
+
   next();
 }

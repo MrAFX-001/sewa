@@ -11,7 +11,7 @@ import {
   signupUser,
   verifySignupOtp,
 } from "../services/auth.service.js";
-import { issueOtp } from "../services/otp.service.js";
+import { requestEmailVerificationOtp } from "../services/otp.service.js";
 import type {
   ForgotPasswordInput,
   OtpSendInput,
@@ -29,8 +29,18 @@ const cookieOptions = {
   path: "/",
 };
 
-function setSessionCookie(res: Response, userId: string, email: string) {
-  const token = signSession({ sub: userId, email });
+function setSessionCookie(
+  res: Response,
+  userId: string,
+  email: string,
+  tokenVersion: number,
+) {
+  const token = signSession({
+    sub: userId,
+    email,
+    ver: tokenVersion,
+  });
+
   res.cookie(env.COOKIE_NAME, token, cookieOptions);
 }
 
@@ -49,26 +59,24 @@ export async function signup(req: Request, res: Response) {
 export async function resendOtp(req: Request, res: Response) {
   const { email } = req.body as OtpSendInput;
 
-  const user = await prisma.user.findUnique({ where: { email } });
-  // Don't reveal whether the account exists - always respond the same way.
-  if (user && !user.emailVerified) {
-    await issueOtp(user.id, user.email, "email_verify");
-    await writeAuditLog({ req, userId: user.id, action: "otp_send" });
+  const userId = await requestEmailVerificationOtp(email);
+  if (userId) {
+    await writeAuditLog({ req, userId, action: "otp_send" });
   }
 
   res.status(200).json({ message: "If this email is registered, a code has been sent." });
 }
 
 export async function verifyOtpHandler(req: Request, res: Response) {
-  const { email, code } = req.body as OtpVerifyInput;
+  const { email, code, password } = req.body as OtpVerifyInput;
 
   try {
-    const user = await verifySignupOtp(email, code);
+    const user = await verifySignupOtp(email, code, password);
     await writeAuditLog({ req, userId: user.id, action: "otp_verify_success" });
-    setSessionCookie(res, user.id, user.email);
+    setSessionCookie(res, user.id, user.email, user.tokenVersion);
     res.status(200).json({
       message: "Email verified successfully.",
-      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName },
+      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: (user as any).role || "MEMBER" },
     });
   } catch (err) {
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -83,9 +91,9 @@ export async function signin(req: Request, res: Response) {
   try {
     const user = await authenticateUser(input);
     await writeAuditLog({ req, userId: user.id, action: "signin_success" });
-    setSessionCookie(res, user.id, user.email);
+    setSessionCookie(res, user.id, user.email, user.tokenVersion);
     res.status(200).json({
-      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName },
+      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: (user as any).role || "MEMBER" },
     });
   } catch (err) {
     await writeAuditLog({ req, action: "signin_failure", metadata: { email: input.email } });
@@ -124,8 +132,23 @@ export async function resetPassword(req: Request, res: Response) {
 }
 
 export async function signout(req: Request, res: Response) {
+  if (req.user?.id) {
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        tokenVersion: { increment: 1 },
+      },
+    });
+  }
+
   res.clearCookie(env.COOKIE_NAME, { path: "/" });
-  await writeAuditLog({ req, userId: req.user?.id, action: "signout" });
+
+  await writeAuditLog({
+    req,
+    userId: req.user?.id,
+    action: "signout",
+  });
+
   res.status(200).json({ message: "Signed out." });
 }
 
@@ -133,7 +156,7 @@ export async function me(req: Request, res: Response) {
   if (!req.user) throw new AppError(401, "Not authenticated");
   const user = await prisma.user.findUnique({
     where: { id: req.user.id },
-    select: { id: true, firstName: true, lastName: true, email: true, phone: true, emailVerified: true },
+    select: { id: true, firstName: true, lastName: true, email: true, phone: true, emailVerified: true, role: true },
   });
   res.status(200).json({ user });
 }

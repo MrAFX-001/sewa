@@ -14,6 +14,8 @@ import { config } from '../lib/config.js';
 import { initSession, executeWeightedJourney, createSummaryOutput, randomThinkTime } from '../lib/helpers.js';
 
 export const options = {
+  insecureSkipTLSVerify: true,
+  summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
   vus: config.baseline.vus,
   duration: config.baseline.duration,
   thresholds: {
@@ -42,4 +44,3 @@ export default function (session) {
 export function handleSummary(data) {
   return createSummaryOutput(data, 'baseline');
 }
-

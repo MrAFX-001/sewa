@@ -1,5 +1,5 @@
 /**
- * Single entry point for every call to the SEWA backend.
+ * Single entry point for every call to the SEVA backend.
  *
  * Two things every request here depends on:
  *  - `credentials: "include"` - the session is an httpOnly cookie, so it is
@@ -45,7 +45,9 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
         // an explicit Content-Type: the browser sets one itself, including
         // the multipart boundary, and setting it manually breaks parsing on
         // the server. JSON bodies still get it as before.
-        ...(init.body && !(init.body instanceof FormData) ? { "Content-Type": "application/json" } : {}),
+        ...(init.body && !(init.body instanceof FormData)
+          ? { "Content-Type": "application/json" }
+          : {}),
         ...init.headers,
       },
     });
@@ -100,6 +102,8 @@ function buildTeamFormData(
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
+export type UserRole = "SUPER_ADMIN" | "ADMIN" | "RESOURCE" | "MEMBER";
+
 export interface User {
   id: string;
   firstName: string;
@@ -107,6 +111,7 @@ export interface User {
   email: string;
   phone?: string | null;
   emailVerified?: boolean;
+  role?: UserRole;
 }
 
 export type TeamStatus = "draft" | "submitted" | "under_review" | "shortlisted" | "rejected";
@@ -118,6 +123,7 @@ export interface TeamMember {
   email: string;
   phone?: string | null;
   role: "leader" | "member";
+  idCardOriginalName?: string | null;
 }
 
 export interface Team {
@@ -125,6 +131,30 @@ export interface Team {
   name: string;
   institute: string;
   institutionAddress: string;
+  participationType: "Individual" | "Team / Group" | "Organisation";
+  participantCategory: "School & Vocational" | "Diploma & Higher Education" | "Industry & Government" | null;
+  participationLevel: "National Level" | "Local Community Level" | null;
+  institutionType: string | null;
+  affiliationPinCode: string | null;
+  affiliationCity: string | null;
+  affiliationState: string | null;
+  institutionEmail: string | null;
+  institutionPhone: string | null;
+  classLevel: string | null;
+  degreeProgramme: string | null;
+  departmentBranch: string | null;
+  yearOfStudy: string | null;
+  coordinatorName: string | null;
+  coordinatorEmail: string | null;
+  coordinatorPhone: string | null;
+  designationRole: string | null;
+  departmentDivision: string | null;
+  officialOrgEmail: string | null;
+  orgContactPhone: string | null;
+  mentorName: string | null;
+  mentorDesignation: string | null;
+  mentorEmail: string | null;
+  mentorPhone: string | null;
   /** Human-readable theme label, server-derived from problemCategoryCode. */
   theme: string;
   /** Server-derived: the official PS title, or the team's own proposed text. */
@@ -197,8 +227,12 @@ export const authApi = {
   resendOtp: (email: string) => post<{ message: string }>("/api/auth/otp/send", { email }),
 
   /** On success the backend sets the session cookie - the user is signed in. */
-  verifyOtp: (email: string, code: string) =>
-    post<{ message: string; user: User }>("/api/auth/otp/verify", { email, code }),
+  verifyOtp: (email: string, code: string, password: string) =>
+    post<{ message: string; user: User }>("/api/auth/otp/verify", {
+      email,
+      code,
+      password,
+    }),
 
   signin: (email: string, password: string) =>
     post<{ user: User }>("/api/auth/signin", { email, password }),
@@ -228,6 +262,30 @@ export interface TeamProblemSelectionInput {
   name: string;
   institute: string;
   institutionAddress: string;
+  participationType: "Individual" | "Team / Group" | "Organisation";
+  participantCategory: "School & Vocational" | "Diploma & Higher Education" | "Industry & Government";
+  participationLevel: "National Level" | "Local Community Level";
+  institutionType?: string;
+  affiliationPinCode?: string;
+  affiliationCity?: string;
+  affiliationState?: string;
+  institutionEmail?: string;
+  institutionPhone?: string;
+  classLevel?: string;
+  degreeProgramme?: string;
+  departmentBranch?: string;
+  yearOfStudy?: string;
+  coordinatorName?: string;
+  coordinatorEmail?: string;
+  coordinatorPhone?: string;
+  designationRole?: string;
+  departmentDivision?: string;
+  officialOrgEmail?: string;
+  orgContactPhone?: string;
+  mentorName?: string;
+  mentorDesignation?: string;
+  mentorEmail?: string;
+  mentorPhone?: string;
   problemCategoryCode: string;
   problemOptionType: "ps" | "open";
   /** Required by the backend when problemOptionType is "open"; omit for "ps". */
@@ -258,7 +316,37 @@ export const teamApi = {
   addMember: (
     teamId: string,
     input: { firstName: string; lastName: string; email: string; phone?: string | undefined },
-  ) => post<{ member: TeamMember }>(`/api/register/${teamId}/members`, input),
+    idCard: File,
+  ) => {
+    const form = new FormData();
+    form.append("firstName", input.firstName);
+    form.append("lastName", input.lastName);
+    form.append("email", input.email);
+    if (input.phone !== undefined) form.append("phone", input.phone);
+    form.append("idCard", idCard);
+    return request<{ member: TeamMember }>(`/api/register/${teamId}/members`, {
+      method: "POST",
+      body: form,
+    });
+  },
+
+  updateMember: (
+    teamId: string,
+    memberId: string,
+    input: { firstName: string; lastName: string; email: string; phone?: string | undefined },
+    idCard?: File,
+  ) => {
+    const form = new FormData();
+    form.append("firstName", input.firstName);
+    form.append("lastName", input.lastName);
+    form.append("email", input.email);
+    if (input.phone !== undefined) form.append("phone", input.phone);
+    if (idCard) form.append("idCard", idCard);
+    return request<{ member: TeamMember }>(`/api/register/${teamId}/members/${memberId}`, {
+      method: "PATCH",
+      body: form,
+    });
+  },
 
   removeMember: (teamId: string, memberId: string) =>
     request<void>(`/api/register/${teamId}/members/${memberId}`, { method: "DELETE" }),
@@ -277,6 +365,7 @@ export const profileApi = {
       method: "PUT",
       body: JSON.stringify(input),
     }),
+  getMail: () => request<{ mails: AdminMailItem[] }>("/api/profile/mail"),
 };
 
 // ─── Contact Us / Grievance form ─────────────────────────────────────────────
@@ -303,8 +392,7 @@ export interface ContactMessageInput {
 }
 
 export const contactApi = {
-  submit: (input: ContactMessageInput) =>
-    post<{ message: string }>("/api/contact", input),
+  submit: (input: ContactMessageInput) => post<{ message: string }>("/api/contact", input),
 };
 
 // ─── Announcements ───────────────────────────────────────────────────────────
@@ -323,3 +411,410 @@ export const announcementsApi = {
   list: () => request<Announcement[]>("/api/announcements"),
 };
 
+export interface PublicStats {
+  entries: number;
+  shortlisted: number;
+  participants: number;
+  mentored: number;
+  prototypes: number;
+  tested: number;
+  validated: number;
+  breakdowns: Record<
+    "entries" | "shortlisted" | "mentored" | "prototypes" | "tested" | "validated",
+    Array<{ state: string; note?: string; schools: number; colleges: number; industries: number }>
+  >;
+}
+
+export const publicApi = {
+  getStats: () => request<PublicStats>("/api/public/stats"),
+};
+
+// ─── RBAC & Super Admin ─────────────────────────────────────────────────────
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  role: UserRole;
+  status: "Active" | "Suspended" | "Pending";
+  joinedDate: string;
+  teamsCount?: number;
+}
+
+export interface AuditLogItem {
+  id: string;
+  actor: string;
+  actorEmail?: string | null;
+  action: string;
+  target?: string | null;
+  timestamp: string;
+  metadata?: Record<string, unknown> | null;
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  totalTeams: number;
+  totalQueries: number;
+  pendingSubmissions: number;
+  shortlistedTeams: number;
+  statusBreakdown: { status: string; count: number }[];
+  themeDistribution: { theme: string; count: number }[];
+  analyticsRows: {
+    id: string;
+    college: string;
+    location: string;
+    usersRegistered: number;
+    state: string;
+    participants: number;
+    status: "Delivered" | "Pending" | "Rejected";
+  }[];
+  recentUsers: any[];
+  trafficData?: {
+    labels: string[];
+    fullLabels?: string[];
+    counts: number[];
+    userCounts?: number[];
+    teamCounts?: number[];
+    queryCounts?: number[];
+    cumulativeUserCounts?: number[];
+    cumulativeTeamCounts?: number[];
+    cumulativeQueryCounts?: number[];
+    peak: number;
+    peakLabel: string;
+  };
+}
+
+export interface AdminTeam {
+  id: string;
+  teamName: string;
+  institution: string;
+  institutionAddress: string;
+  theme: string;
+  problemStatement: string;
+  problemCategoryCode: string;
+  problemOptionType: "ps" | "open";
+  problemStatementId: string;
+  status: "draft" | "submitted" | "under_review" | "shortlisted" | "rejected";
+  score: number;
+  evaluatorNotes: string;
+  evaluatedAt: string | null;
+  evaluatedBy: string | null;
+  submittedAt: string;
+  leader: {
+    name: string;
+    email: string;
+    phone?: string | null;
+  };
+  members: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    idCardOriginalName?: string | null;
+    idCardPath?: string | null;
+    idCardMimeType?: string | null;
+  }[];
+  idCardPath: string;
+  idCardOriginalName?: string | null;
+}
+
+export interface AdminMailItem {
+  id: string;
+  sender: string;
+  email: string;
+  title: string;
+  snippet: string;
+  body: string;
+  time: string;
+  tag: string;
+  starred: boolean;
+  archived: boolean;
+  folder: string;
+  targetAudience: string;
+}
+
+export interface CommitteeMemberItem {
+  id: string;
+  name: string;
+  designation: string;
+  category: "organizing" | "mentor" | "dev_team";
+  affiliation?: string | null | undefined;
+  imageUrl?: string | null | undefined;
+  rowNumber?: number | undefined;
+  rowTitle?: string | null | undefined;
+  displayOrder: number;
+}
+
+export interface HeroSlideItem {
+  id: string;
+  title: string;
+  subtitle?: string | null;
+  imageUrl: string;
+  active: boolean;
+  displayOrder: number;
+  createdAt?: string;
+}
+
+export interface FaqItem {
+  id: string;
+  question: string;
+  answer: string;
+  category: string;
+  displayOrder: number;
+  active: boolean;
+  createdAt?: string;
+}
+
+export interface AnnouncementItem {
+  id: string;
+  refNumber?: string | null;
+  category: string;
+  title: string;
+  summary: string;
+  detail?: string | null;
+  publishedAt: string;
+}
+
+export interface GalleryItem {
+  id: string;
+  url: string;
+  title: string;
+  active: boolean;
+  displayOrder: number;
+  uploadedBy?: string | null;
+  createdAt: string;
+}
+
+export interface ThemeCategoryItem {
+  id: string;
+  code: string;
+  theme: "NATIONAL" | "REGIONAL";
+  label: string;
+  psTitle?: string | null;
+  psUrl?: string | null;
+  psId?: string | null;
+  openId?: string | null;
+  badgeBg?: string | null;
+  badgeText?: string | null;
+  displayOrder: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const adminApi = {
+  getStats: () => request<AdminStats>("/api/admin/stats"),
+  getUsers: () => request<{ users: AdminUser[] }>("/api/admin/users"),
+  inviteUser: (data: {
+    firstName: string;
+    lastName?: string;
+    email: string;
+    role: UserRole;
+    phone?: string;
+  }) =>
+    request<{ success: boolean; user: AdminUser }>("/api/admin/users/invite", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  assignRole: (userId: string, role: UserRole) =>
+    request<{ success: boolean; user: any }>(`/api/admin/users/${userId}/role`, {
+      method: "PATCH",
+      body: JSON.stringify({ role }),
+    }),
+  updateStatus: (userId: string, status: "active" | "suspended") =>
+    request<{ success: boolean; user: any }>(`/api/admin/users/${userId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+  getTeams: () => request<{ teams: AdminTeam[] }>("/api/admin/teams"),
+  evaluateTeam: (
+    teamId: string,
+    data: { status?: string; score?: number; evaluatorNotes?: string },
+  ) =>
+    request<{ success: boolean; team: any }>(`/api/admin/teams/${teamId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  getMail: (folder?: string) =>
+    request<{ mails: AdminMailItem[] }>(`/api/admin/mail${folder ? `?folder=${folder}` : ""}`),
+  sendMail: (data: {
+    targetAudience: string;
+    targetEmail?: string;
+    subject: string;
+    content: string;
+  }) =>
+    request<{ success: boolean; mail: any }>("/api/admin/mail", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateMail: (
+    mailId: string,
+    updates: { starred?: boolean; archived?: boolean; folder?: string },
+  ) =>
+    request<{ success: boolean; mail: any }>(`/api/admin/mail/${mailId}`, {
+      method: "PATCH",
+      body: JSON.stringify(updates),
+    }),
+  deleteMail: (mailId: string) =>
+    request<{ success: boolean }>(`/api/admin/mail/${mailId}`, {
+      method: "DELETE",
+    }),
+  getAuditLogs: () => request<{ logs: AuditLogItem[] }>("/api/admin/audit-logs"),
+};
+
+export const resourceApi = {
+  uploadImage: (file: File) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    return request<{ url: string; filename: string }>("/api/resources/upload-image", {
+      method: "POST",
+      body: formData,
+    });
+  },
+  getHomepageGallery: () => request<{ items: GalleryItem[] }>("/api/resources/homepage-gallery"),
+  getGalleryImages: () => request<{ items: GalleryItem[] }>("/api/resources/gallery"),
+  createGalleryImage: (data: { title: string; url: string; displayOrder?: number }) =>
+    request<{ item: GalleryItem }>("/api/resources/gallery", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateGalleryItem: (id: string, updates: Partial<GalleryItem>) =>
+    request<{ item: GalleryItem }>(`/api/resources/gallery/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(updates),
+    }),
+  deleteGalleryItem: (id: string) =>
+    request<{ success: boolean }>(`/api/resources/gallery/${id}`, {
+      method: "DELETE",
+    }),
+  getCommittee: () => request<{ members: CommitteeMemberItem[] }>("/api/resources/committee"),
+  getCommitteeMembers: () =>
+    request<{ members: CommitteeMemberItem[] }>("/api/resources/committee"),
+  createCommitteeMember: (data: Partial<CommitteeMemberItem>) =>
+    request<{ member: CommitteeMemberItem }>("/api/resources/committee", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateCommitteeMember: (id: string, data: Partial<CommitteeMemberItem>) =>
+    request<{ member: CommitteeMemberItem }>(`/api/resources/committee/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteCommitteeMember: (id: string) =>
+    request<{ success: boolean }>(`/api/resources/committee/${id}`, {
+      method: "DELETE",
+    }),
+  updateCommitteeLayout: (
+    updates: Array<{
+      id: string;
+      rowNumber: number;
+      displayOrder: number;
+      rowTitle?: string | null;
+    }>,
+  ) =>
+    request<{ success: boolean }>("/api/resources/committee/layout", {
+      method: "PUT",
+      body: JSON.stringify({ updates }),
+    }),
+  getHeroSlides: (all = false) =>
+    request<{ slides: HeroSlideItem[] }>(`/api/resources/hero-slides${all ? "?all=true" : ""}`),
+  createHeroSlide: (data: {
+    title: string;
+    subtitle?: string;
+    imageUrl: string;
+    displayOrder?: number;
+    active?: boolean;
+  }) =>
+    request<{ slide: HeroSlideItem }>("/api/resources/hero-slides", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateHeroSlide: (id: string, data: Partial<HeroSlideItem>) =>
+    request<{ slide: HeroSlideItem }>(`/api/resources/hero-slides/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteHeroSlide: (id: string) =>
+    request<{ success: boolean }>(`/api/resources/hero-slides/${id}`, {
+      method: "DELETE",
+    }),
+  getFaqs: (all = false) =>
+    request<{ faqs: FaqItem[] }>(`/api/resources/faqs${all ? "?all=true" : ""}`),
+  createFaq: (data: {
+    question: string;
+    answer: string;
+    category?: string;
+    displayOrder?: number;
+    active?: boolean;
+  }) =>
+    request<{ faq: FaqItem }>("/api/resources/faqs", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateFaq: (id: string, data: Partial<FaqItem>) =>
+    request<{ faq: FaqItem }>(`/api/resources/faqs/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteFaq: (id: string) =>
+    request<{ success: boolean }>(`/api/resources/faqs/${id}`, {
+      method: "DELETE",
+    }),
+  getAdminAnnouncements: () =>
+    request<{ announcements: AnnouncementItem[] }>("/api/resources/announcements?all=true"),
+  createAnnouncement: (data: {
+    title: string;
+    summary: string;
+    detail?: string;
+    category?: string;
+    refNumber?: string;
+    publishedAt?: string;
+  }) =>
+    request<{ announcement: AnnouncementItem }>("/api/resources/announcements", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateAnnouncement: (id: string, data: Partial<AnnouncementItem>) =>
+    request<{ announcement: AnnouncementItem }>(`/api/resources/announcements/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteAnnouncement: (id: string) =>
+    request<{ success: boolean }>(`/api/resources/announcements/${id}`, {
+      method: "DELETE",
+    }),
+  getThemes: (all = false) =>
+    request<{ items: ThemeCategoryItem[] }>(`/api/resources/themes${all ? "?all=true" : ""}`),
+  createTheme: (data: {
+    code: string;
+    theme: "NATIONAL" | "REGIONAL";
+    label: string;
+    psTitle?: string;
+    psUrl?: string;
+    psId?: string;
+    openId?: string;
+    badgeBg?: string;
+    badgeText?: string;
+    displayOrder?: number;
+    active?: boolean;
+  }) =>
+    request<{ item: ThemeCategoryItem }>("/api/resources/themes", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateTheme: (id: string, data: Partial<ThemeCategoryItem>) =>
+    request<{ item: ThemeCategoryItem }>(`/api/resources/themes/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  deleteTheme: (id: string) =>
+    request<{ success: boolean }>(`/api/resources/themes/${id}`, {
+      method: "DELETE",
+    }),
+  reorderThemes: (updates: Array<{ id: string; displayOrder: number }>) =>
+    request<{ success: boolean }>("/api/resources/themes/reorder", {
+      method: "PUT",
+      body: JSON.stringify({ updates }),
+    }),
+};

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Timeline of the 100 Day Journey — six-step roadmap.
+ * Timeline of the Innovation Journey — six-step roadmap.
  *
  * Like the Participation Benefits diagram, this is laid out on a fixed
  * coordinate space (1400x720) because the pins, stems, node dots, display
@@ -45,10 +45,10 @@ const BAR_H = 16;
  *
  * With six evenly spaced nodes the gap between them is 233px, so a text block
  * and a neighbouring pin need half-widths summing to less than that:
- *   PIN/2 + TEXT_W/2 = 75 + 110 = 185 < 233, leaving 48px of clearance.
+ *   PIN/2 + TEXT_W/2 = 75 + 118 = 193 < 233, leaving 40px of clearance.
  * Widening either constant past that pushes text under a pin.
  */
-const TEXT_W = 220;
+const TEXT_W = 236;
 
 /*
  * The bar is six equal colour segments and each step's node sits at the centre
@@ -58,6 +58,14 @@ const TEXT_W = 220;
  */
 const COLUMNS = 6;
 const nodeLeft = (i: number) => `${((i + 0.5) / COLUMNS) * 100}%`;
+
+/** Clamps text blocks within the stage boundaries so edge text is never clipped. */
+const getBlockLeft = (i: number) => {
+  const center = ((i + 0.5) / COLUMNS) * STAGE_WIDTH;
+  const half = TEXT_W / 2;
+  const padding = 24;
+  return Math.max(half + padding, Math.min(STAGE_WIDTH - half - padding, center));
+};
 
 /** Where the pin badge starts, by side. */
 const PIN_TOP_ABOVE = BAR_TOP - STEM_H - PIN;
@@ -104,8 +112,8 @@ const steps: Step[] = [
   {
     number: "01",
     title: "Ideate",
-    dates: "Days 1–15 • 19 Sep – 1 Oct 2026",
-    body: "Launch of 50 National Problem Statements, online orientation, team registrations, and idea submissions.",
+    dates: "19 Sep – 1 Oct 2026",
+    body: "Launch of problem statements, online orientation, team registrations, and idea submissions.",
     color: "#F25C22",
     side: "below",
     icon: (
@@ -119,7 +127,7 @@ const steps: Step[] = [
   {
     number: "02",
     title: "Screen",
-    dates: "Days 16–30 • 2 – 16 Oct 2026",
+    dates: "2 Oct – 11 Oct 2026",
     body: "Preliminary eligibility scrutiny, regional screening, and announcement of shortlisted teams.",
     color: "#EFA00B",
     side: "above",
@@ -132,9 +140,9 @@ const steps: Step[] = [
   },
   {
     number: "03",
-    title: "Build",
-    dates: "Days 31–60 • 17 Oct – 15 Nov 2026",
-    body: "Expert bootcamps, laboratory/maker-space access, design reviews, and working prototype fabrication.",
+    title: "Build & Evaluate",
+    dates: "12 Oct – 10 Nov 2026",
+    body: "Expert bootcamps, laboratory/maker-space access, design reviews, prototype development, and technical evaluation.",
     color: "#48BF43",
     side: "below",
     icon: (
@@ -145,9 +153,9 @@ const steps: Step[] = [
   },
   {
     number: "04",
-    title: "Validate",
-    dates: "Days 61–80 • 16 Nov – 5 Dec 2026",
-    body: "Technical benchmarking, safety/reliability testing, and performance validation.",
+    title: "Validate & Test",
+    dates: "11 Nov – 19 Nov 2026",
+    body: "Field demonstrations in real environments, safety/reliability testing, and performance validation.",
     color: "#00B4D8",
     side: "above",
     icon: (
@@ -159,9 +167,9 @@ const steps: Step[] = [
   },
   {
     number: "05",
-    title: "Test",
-    dates: "Days 81–95 • 6 – 20 Dec 2026",
-    body: "Field demonstrations in real environments, usability testing, and cost/sustainability reviews.",
+    title: "Final Select",
+    dates: "20 Nov – 26 Nov 2026",
+    body: "Final report submissions and Regional Jury evaluations to nominate finalists for Delhi.",
     color: "#0077B6",
     side: "below",
     icon: (
@@ -175,9 +183,9 @@ const steps: Step[] = [
   },
   {
     number: "06",
-    title: "Select",
-    dates: "Days 96–100 • 21 – 25 Dec 2026",
-    body: "Final report submissions and Regional Jury evaluations to nominate finalists for Delhi.",
+    title: "Result Declaration",
+    dates: "Date to be declared",
+    body: "National Innovation Exhibition, Grand Finale, and official declaration and distribution of awards & prizes.",
     color: "#7B2CBF",
     side: "above",
     icon: (
@@ -281,7 +289,7 @@ export function TimelineRoadmap() {
                       >
                         {step.number}
                       </span>
-                      <h3 className="font-extrabold text-base sm:text-lg uppercase text-[#0f172a] tracking-tight">
+                      <h3 className="font-black text-xl sm:text-2xl uppercase text-[#0f172a] tracking-tight">
                         {step.title}
                       </h3>
                     </div>
@@ -305,7 +313,7 @@ export function TimelineRoadmap() {
         className="hidden lg:block w-full overflow-hidden"
         style={{ aspectRatio: `${STAGE_WIDTH} / ${STAGE_HEIGHT}` }}
         role="img"
-        aria-label="Timeline of the 100 day journey: Ideate, Screen, Build, Validate, Test, Select"
+        aria-label="Timeline of the innovation journey: Ideate, Screen, Build & Evaluate, Validate & Test, Final Select, Result Declaration"
       >
         <div
           className="relative select-none"
@@ -338,7 +346,10 @@ export function TimelineRoadmap() {
                 className="rounded-full flex items-center justify-center shadow-md"
                 style={{ width: NODE, height: NODE, backgroundColor: step.color }}
               >
-                <div className="rounded-full bg-white node-dot-shadow" style={{ width: NODE_INNER, height: NODE_INNER }} />
+                <div
+                  className="rounded-full bg-white node-dot-shadow"
+                  style={{ width: NODE_INNER, height: NODE_INNER }}
+                />
               </div>
             </div>
           ))}
@@ -374,16 +385,15 @@ export function TimelineRoadmap() {
               className="absolute z-40 -translate-x-1/2 text-center [hyphens:none]"
               style={
                 step.side === "below"
-                  ? { left: nodeLeft(i), bottom: TEXT_BOTTOM_ABOVE, width: TEXT_W }
-                  : { left: nodeLeft(i), top: TEXT_TOP_BELOW, width: TEXT_W }
+                  ? { left: getBlockLeft(i), bottom: TEXT_BOTTOM_ABOVE, width: TEXT_W }
+                  : { left: getBlockLeft(i), top: TEXT_TOP_BELOW, width: TEXT_W }
               }
             >
               <p
-                className="flex items-center justify-center gap-2 text-center font-black tracking-tight text-[#0f172a] uppercase [hyphens:none]"
-                style={{ fontSize: 27, lineHeight: 1.2 }}
+                className="text-center font-black tracking-tight text-[#0f172a] uppercase [hyphens:none]"
+                style={{ fontSize: 32, lineHeight: 1.15 }}
               >
-                <span style={{ color: step.color }}>{step.number}</span>
-                {step.title}
+                <span style={{ color: step.color }}>{step.number}</span> {step.title}
               </p>
               <p
                 className="mt-1 text-center font-bold text-slate-800 [hyphens:none]"

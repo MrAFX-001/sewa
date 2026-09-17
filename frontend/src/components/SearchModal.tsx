@@ -1,5 +1,18 @@
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowRight, ExternalLink, FileText, HelpCircle, Layers, Mail, MapPin, Navigation, Search, Sparkles, UserPlus, X } from "lucide-react";
+import {
+  ArrowRight,
+  ExternalLink,
+  FileText,
+  HelpCircle,
+  Layers,
+  Mail,
+  MapPin,
+  Navigation,
+  Search,
+  Sparkles,
+  UserPlus,
+  X,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export interface SearchItem {
@@ -16,31 +29,55 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     id: "home",
     title: "Home",
-    description: "SEWA 2026 portal landing page, overview, and challenge vision.",
+    description: "SEVA 2026 portal landing page, overview, and challenge vision.",
     category: "Pages",
     href: "/",
     keywords: ["home", "main", "start", "landing", "overview", "sewa 2026"],
   },
   {
     id: "about",
-    title: "About SEWA FIRST RYIC 2026",
-    description: "Rashtriya Youth Innovation Challenge vision, DTU partnership, and 100-day journey.",
+    title: "About SEVA FIRST RYIC 2026",
+    description:
+      "Rashtriya Youth Innovation Challenge vision, DTU partnership, and innovation journey.",
     category: "Pages",
     href: "/about",
-    keywords: ["about", "mission", "vision", "ryic", "dtu", "delhi technological university", "philosophy", "aim", "objectives"],
+    keywords: [
+      "about",
+      "mission",
+      "vision",
+      "ryic",
+      "dtu",
+      "delhi technological university",
+      "philosophy",
+      "aim",
+      "objectives",
+    ],
   },
   {
     id: "benefits",
     title: "Guidelines & Participation Benefits",
-    description: "Eligibility rules, category criteria (School/College/Startups), and prize benefits.",
+    description:
+      "Eligibility rules, category criteria (School/College/Startups), and prize benefits.",
     category: "Pages",
     href: "/#benefits",
-    keywords: ["guidelines", "rules", "eligibility", "benefits", "prizes", "grants", "funding", "awards", "school", "college"],
+    keywords: [
+      "guidelines",
+      "rules",
+      "eligibility",
+      "benefits",
+      "prizes",
+      "grants",
+      "funding",
+      "awards",
+      "school",
+      "college",
+    ],
   },
   {
     id: "themes",
     title: "Problem Statements & Themes",
-    description: "Flagship national challenges and grassroots community innovation problem statements.",
+    description:
+      "Flagship national challenges and grassroots community innovation problem statements.",
     category: "Themes",
     href: "/problem-statements",
     keywords: ["themes", "problem statements", "udan", "challenges", "topics", "priorities"],
@@ -48,10 +85,21 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     id: "national-themes",
     title: "Theme 1 - National Level Innovation",
-    description: "Defence, Space & National Security, AI, Robotics, Manufacturing, Energy, Mobility.",
+    description:
+      "Defence, Space & National Security, AI, Robotics, Manufacturing, Energy, Mobility.",
     category: "Themes",
     href: "/problem-statements#national",
-    keywords: ["defence", "space", "security", "ai", "robotics", "energy", "infrastructure", "mobility", "manufacturing"],
+    keywords: [
+      "defence",
+      "space",
+      "security",
+      "ai",
+      "robotics",
+      "energy",
+      "infrastructure",
+      "mobility",
+      "manufacturing",
+    ],
   },
   {
     id: "community-themes",
@@ -59,20 +107,36 @@ export const SEARCH_ITEMS: SearchItem[] = [
     description: "Agriculture, Healthcare, Rural Dev, Urban Issues, Women Safety, Tourism.",
     category: "Themes",
     href: "/problem-statements#community",
-    keywords: ["agriculture", "rural", "healthcare", "urban", "water", "safety", "women", "tourism", "grassroots", "sports", "khelo india", "employment", "livelihood", "miscellaneous"],
+    keywords: [
+      "agriculture",
+      "rural",
+      "healthcare",
+      "urban",
+      "water",
+      "safety",
+      "women",
+      "tourism",
+      "grassroots",
+      "sports",
+      "khelo india",
+      "employment",
+      "livelihood",
+      "miscellaneous",
+    ],
   },
   {
     id: "timeline",
-    title: "100-Day Innovation Timeline",
+    title: "Innovation Timeline",
     description: "Key dates from September 19 launch through Regional Hubs and DTU Grand Finale.",
     category: "Pages",
     href: "/#timeline",
-    keywords: ["timeline", "dates", "schedule", "stages", "deadlines", "100 days", "grand finale", "september"],
+    keywords: ["timeline", "dates", "schedule", "stages", "deadlines", "grand finale", "september"],
   },
   {
     id: "events",
     title: "Events & Competition Roadmap",
-    description: "National launch festival at DTU, milestone roadmap, and regional showcase stages.",
+    description:
+      "National launch festival at DTU, milestone roadmap, and regional showcase stages.",
     category: "Pages",
     href: "/events",
     keywords: ["events", "roadmap", "hackathon", "launch", "festival", "ceremony", "schedule"],
@@ -80,7 +144,8 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     id: "resources",
     title: "Additional Resources & Documents",
-    description: "Download challenge handbooks, official templates, reference PDFs, and external links.",
+    description:
+      "Download challenge handbooks, official templates, reference PDFs, and external links.",
     category: "Resources",
     href: "/resources",
     keywords: ["resources", "downloads", "documents", "templates", "links", "handbook", "pdf"],
@@ -91,7 +156,18 @@ export const SEARCH_ITEMS: SearchItem[] = [
     description: "Questions on team formation, cross-college teams, hostel stays, and evaluation.",
     category: "Pages",
     href: "/faq",
-    keywords: ["faq", "questions", "answers", "help", "queries", "rules", "accommodation", "support", "hostel", "travel"],
+    keywords: [
+      "faq",
+      "questions",
+      "answers",
+      "help",
+      "queries",
+      "rules",
+      "accommodation",
+      "support",
+      "hostel",
+      "travel",
+    ],
   },
   {
     id: "contact",
@@ -99,7 +175,16 @@ export const SEARCH_ITEMS: SearchItem[] = [
     description: "Reach DTU coordinator desk, submit evaluation appeals or technical inquiries.",
     category: "Pages",
     href: "/contact",
-    keywords: ["contact", "grievance", "support", "helpdesk", "email", "phone", "queries", "appeal"],
+    keywords: [
+      "contact",
+      "grievance",
+      "support",
+      "helpdesk",
+      "email",
+      "phone",
+      "queries",
+      "appeal",
+    ],
   },
   {
     id: "register",
@@ -123,7 +208,16 @@ export const SEARCH_ITEMS: SearchItem[] = [
     description: "Open Google Maps directions to Delhi Technological University, Rohini, Delhi.",
     category: "Actions",
     href: "https://www.google.com/maps/dir//Delhi+Technological+University,+Bawana+Rd,+Shahbad+Daulatpur,+Village+Badli,+Rohini,+Delhi,+110042",
-    keywords: ["directions", "map", "location", "dtu", "campus", "how to reach", "metro", "samaypur badli"],
+    keywords: [
+      "directions",
+      "map",
+      "location",
+      "dtu",
+      "campus",
+      "how to reach",
+      "metro",
+      "samaypur badli",
+    ],
     external: true,
   },
 ];
@@ -214,7 +308,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Search SEWA 2026 Portal"
+      aria-label="Search SEVA 2026 Portal"
       className="fixed inset-0 z-[100] flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/60 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
@@ -274,8 +368,12 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
         <div className="overflow-y-auto p-2 sm:p-2.5 divide-y divide-gray-50">
           {filtered.length === 0 ? (
             <div className="py-12 text-center text-gray-500">
-              <p className="text-sm font-semibold text-gray-700">No results found for &ldquo;{query}&rdquo;</p>
-              <p className="text-xs text-gray-400 mt-1">Try searching for themes, guidelines, timeline, or FAQs.</p>
+              <p className="text-sm font-semibold text-gray-700">
+                No results found for &ldquo;{query}&rdquo;
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Try searching for themes, guidelines, timeline, or FAQs.
+              </p>
             </div>
           ) : (
             filtered.map((item, idx) => {
@@ -286,20 +384,27 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                   onClick={() => handleSelect(item)}
                   onMouseEnter={() => setSelectedIndex(idx)}
                   className={`flex items-start gap-3 p-3 rounded-xl transition-all cursor-pointer group ${
-                    isSelected ? "bg-red-50/60 border border-red-100 shadow-2xs" : "hover:bg-gray-50 border border-transparent"
+                    isSelected
+                      ? "bg-red-50/60 border border-red-100 shadow-2xs"
+                      : "hover:bg-gray-50 border border-transparent"
                   }`}
                 >
                   <div
                     className={`size-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                      isSelected ? "bg-[#ff4d4f] text-white" : "bg-gray-100 text-gray-500 group-hover:text-[#ff4d4f] group-hover:bg-red-50"
+                      isSelected
+                        ? "bg-[#ff4d4f] text-white"
+                        : "bg-gray-100 text-gray-500 group-hover:text-[#ff4d4f] group-hover:bg-red-50"
                     }`}
                   >
                     {item.category === "Pages" && <FileText size={16} strokeWidth={1.8} />}
                     {item.category === "Themes" && <Layers size={16} strokeWidth={1.8} />}
                     {item.category === "Resources" && <Sparkles size={16} strokeWidth={1.8} />}
-                    {item.category === "Actions" && (
-                      item.id === "directions" ? <Navigation size={16} strokeWidth={1.8} /> : <ArrowRight size={16} strokeWidth={1.8} />
-                    )}
+                    {item.category === "Actions" &&
+                      (item.id === "directions" ? (
+                        <Navigation size={16} strokeWidth={1.8} />
+                      ) : (
+                        <ArrowRight size={16} strokeWidth={1.8} />
+                      ))}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -326,10 +431,24 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
         {/* Modal Footer helper */}
         <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-400 font-medium">
           <div className="flex items-center gap-3">
-            <span>Use <kbd className="font-mono bg-white px-1 py-0.5 rounded border border-gray-200 text-gray-500">↑</kbd> <kbd className="font-mono bg-white px-1 py-0.5 rounded border border-gray-200 text-gray-500">↓</kbd> to navigate</span>
-            <span><kbd className="font-mono bg-white px-1 py-0.5 rounded border border-gray-200 text-gray-500">↵</kbd> to select</span>
+            <span>
+              Use{" "}
+              <kbd className="font-mono bg-white px-1 py-0.5 rounded border border-gray-200 text-gray-500">
+                ↑
+              </kbd>{" "}
+              <kbd className="font-mono bg-white px-1 py-0.5 rounded border border-gray-200 text-gray-500">
+                ↓
+              </kbd>{" "}
+              to navigate
+            </span>
+            <span>
+              <kbd className="font-mono bg-white px-1 py-0.5 rounded border border-gray-200 text-gray-500">
+                ↵
+              </kbd>{" "}
+              to select
+            </span>
           </div>
-          <span>SEWA 2026 Portal</span>
+          <span>SEVA 2026 Portal</span>
         </div>
       </div>
     </div>

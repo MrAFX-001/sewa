@@ -251,9 +251,7 @@ export function ParticipationSteps() {
               {step.number}
             </div>
             <div className="flex flex-col gap-1 min-w-0 flex-1">
-              <h3 className="t-content font-bold! text-[#112347] leading-snug">
-                {step.title}
-              </h3>
+              <h3 className="t-content font-bold! text-[#112347] leading-snug">{step.title}</h3>
               <p className="t-content text-[#475569] text-sm sm:text-base leading-relaxed">
                 {step.body}
               </p>
@@ -279,46 +277,46 @@ export function ParticipationSteps() {
             transform: `scale(${scale})`,
           }}
         >
-        {/* Continuous bar: six equal colour segments */}
-        <div
-          className="absolute left-0 w-full flex z-0 rounded-full overflow-hidden shadow-sm"
-          style={{ top: BAR_TOP, height: BAR_H }}
-        >
-          {steps.map((step) => (
+          {/* Continuous bar: six equal colour segments */}
+          <div
+            className="absolute left-0 w-full flex z-0 rounded-full overflow-hidden shadow-sm"
+            style={{ top: BAR_TOP, height: BAR_H }}
+          >
+            {steps.map((step) => (
+              <div
+                key={step.number}
+                className="h-full"
+                style={{ width: `${100 / COLUMNS}%`, backgroundColor: step.color }}
+              />
+            ))}
+          </div>
+
+          {/* Number pills, centred on the bar */}
+          {steps.map((step, i) => (
             <div
-              key={step.number}
-              className="h-full"
-              style={{ width: `${100 / COLUMNS}%`, backgroundColor: step.color }}
-            />
+              key={`node-${step.number}`}
+              className="absolute -translate-x-1/2 z-30 rounded-full text-white flex items-center justify-center font-extrabold shadow-md"
+              style={{
+                left: nodeLeft(i),
+                top: BAR_TOP + BAR_H / 2 - NODE / 2,
+                width: NODE,
+                height: NODE,
+                backgroundColor: step.color,
+                border: "5px solid #ffffff",
+                fontSize: 20,
+                lineHeight: 1,
+              }}
+            >
+              {step.number}
+            </div>
+          ))}
+
+          {/* Connector, icon and text, alternating sides */}
+          {steps.map((step, i) => (
+            <StepColumn key={`col-${step.number}`} step={step} index={i} />
           ))}
         </div>
-
-        {/* Number pills, centred on the bar */}
-        {steps.map((step, i) => (
-          <div
-            key={`node-${step.number}`}
-            className="absolute -translate-x-1/2 z-30 rounded-full text-white flex items-center justify-center font-extrabold shadow-md"
-            style={{
-              left: nodeLeft(i),
-              top: BAR_TOP + BAR_H / 2 - NODE / 2,
-              width: NODE,
-              height: NODE,
-              backgroundColor: step.color,
-              border: "5px solid #ffffff",
-              fontSize: 20,
-              lineHeight: 1,
-            }}
-          >
-            {step.number}
-          </div>
-        ))}
-
-        {/* Connector, icon and text, alternating sides */}
-        {steps.map((step, i) => (
-          <StepColumn key={`col-${step.number}`} step={step} index={i} />
-        ))}
       </div>
-    </div>
     </div>
   );
 }

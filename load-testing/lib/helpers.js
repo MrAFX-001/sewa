@@ -91,7 +91,6 @@ export function buildHeaders(session, isJson = false) {
   if (session && session.token) {
     headers['Cookie'] = `${session.cookieName || 'sewa_session'}=${session.token}`;
   }
-
   return headers;
 }
 
@@ -314,43 +313,77 @@ export function executeWeightedJourney(session) {
 
 export function createSummaryOutput(data, scenarioName) {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const jsonFilename = `load-testing/results/${scenarioName}_${timestamp}.json`;
-  const txtFilename = `load-testing/results/${scenarioName}_${timestamp}.txt`;
 
-  const totalReqs = data.metrics.http_reqs ? data.metrics.http_reqs.values.count : 0;
-  const reqRate = data.metrics.http_reqs ? data.metrics.http_reqs.values.rate.toFixed(2) : '0';
-  const durationAvg = data.metrics.http_req_duration ? data.metrics.http_req_duration.values.avg.toFixed(2) : '0';
-  const durationP50 = data.metrics.http_req_duration ? data.metrics.http_req_duration.values['p(50)'].toFixed(2) : '0';
-  const durationP90 = data.metrics.http_req_duration ? data.metrics.http_req_duration.values['p(90)'].toFixed(2) : '0';
-  const durationP95 = data.metrics.http_req_duration ? data.metrics.http_req_duration.values['p(95)'].toFixed(2) : '0';
-  const durationP99 = data.metrics.http_req_duration ? data.metrics.http_req_duration.values['p(99)'].toFixed(2) : '0';
-  const failureRate = data.metrics.http_req_failed ? (data.metrics.http_req_failed.values.rate * 100).toFixed(2) : '0';
+  // Detect output directory dynamically based on execution context
+  let resultsDir = 'load-testing/results';
+  if (__ENV.RESULTS_DIR) {
+    resultsDir = __ENV.RESULTS_DIR.replace(/\/+$/, '');
+  } else if (__ENV.PWD && __ENV.PWD.endsWith('load-testing')) {
+    resultsDir = 'results';
+  }
+
+  const jsonFilename = `${resultsDir}/${scenarioName}_${timestamp}.json`;
+  const txtFilename = `${resultsDir}/${scenarioName}_${timestamp}.txt`;
+
+  const metrics = (data && data.metrics) || {};
+
+  const getVal = (name, key, fallback = 0) => {
+    if (metrics[name] && metrics[name].values && metrics[name].values[key] !== undefined && metrics[name].values[key] !== null) {
+      return metrics[name].values[key];
+    }
+    return fallback;
+  };
+
+  const totalReqs = getVal('http_reqs', 'count', 0);
+  const reqRate = Number(getVal('http_reqs', 'rate', 0)).toFixed(2);
+  const durationAvg = Number(getVal('http_req_duration', 'avg', 0)).toFixed(2);
+  const durationMed = Number(getVal('http_req_duration', 'med', getVal('http_req_duration', 'p(50)', 0))).toFixed(2);
+  const durationP90 = Number(getVal('http_req_duration', 'p(90)', 0)).toFixed(2);
+  const durationP95 = Number(getVal('http_req_duration', 'p(95)', 0)).toFixed(2);
+  const durationP99 = Number(getVal('http_req_duration', 'p(99)', 0)).toFixed(2);
+  const failureRate = (Number(getVal('http_req_failed', 'rate', 0)) * 100).toFixed(2);
+  const error5xxRate = (Number(getVal('sewa_5xx_rate', 'rate', 0)) * 100).toFixed(2);
+
+  // Extract check totals
+  let checksPassed = 0;
+  let checksFailed = 0;
+  const countChecks = (group) => {
+    if (!group) return;
+    if (group.checks) {
+      for (const c of group.checks) {
+        checksPassed += c.passes || 0;
+        checksFailed += c.fails || 0;
+      }
+    }
+    if (group.groups) {
+      for (const g of group.groups) countChecks(g);
+    }
+  };
+  countChecks(data.root_group);
+  const totalChecks = checksPassed + checksFailed;
+  const checkPassPct = totalChecks > 0 ? ((checksPassed / totalChecks) * 100).toFixed(2) : '100.00';
 
   const textReport = `
-================================================================================
   SEWA 2026 LOAD TEST SUMMARY: ${scenarioName.toUpperCase()}
-================================================================================
-  Date/Time          : ${new Date().toISOString()}
+  Execution Time     : ${new Date().toISOString()}
   Target Host        : ${config.baseUrl}
-  Total Requests     : ${totalReqs}
-  Throughput         : ${reqRate} reqs/sec
-  Average Latency    : ${durationAvg} ms
-  p50 Latency        : ${durationP50} ms
-  p90 Latency        : ${durationP90} ms
-  p95 Latency        : ${durationP95} ms
-  p99 Latency        : ${durationP99} ms
-  Failure Rate       : ${failureRate} %
-================================================================================
+  Total Requests     : ${totalReqs} (${reqRate} reqs/sec)
+  Request Duration   : avg=${durationAvg}ms | med=${durationMed}ms | p90=${durationP90}ms | p95=${durationP95}ms | p99=${durationP99}ms
+  HTTP Failures      : ${failureRate}%
+  5xx Server Errors  : ${error5xxRate}%
+  Checks Passed      : ${checksPassed}/${totalChecks} (${checkPassPct}%)
 `;
 
   const outputs = {
     stdout: textReport,
   };
 
-  // Only export files if results folder exists or configured
-  outputs[jsonFilename] = JSON.stringify(data, null, 2);
-  outputs[txtFilename] = textReport;
+  try {
+    outputs[jsonFilename] = JSON.stringify(data, null, 2);
+    outputs[txtFilename] = textReport;
+  } catch {
+    // If saving file fails, stdout report is still cleanly returned
+  }
 
   return outputs;
 }
-

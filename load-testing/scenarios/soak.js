@@ -17,6 +17,8 @@ const soakVus = config.soak.vus;
 const soakDuration = config.soak.duration;
 
 export const options = {
+  insecureSkipTLSVerify: true,
+  summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
   stages: [
     { duration: '2m', target: soakVus },       // Gentle ramp-up
     { duration: soakDuration, target: soakVus }, // Long steady state to detect memory/connection leaks
@@ -41,4 +43,3 @@ export default function (session) {
 export function handleSummary(data) {
   return createSummaryOutput(data, 'soak');
 }
-
