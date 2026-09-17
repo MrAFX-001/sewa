@@ -134,4 +134,3 @@ export function checkMyTeamResponse(res) {
     return data && ('team' in data);
   });
 }
-

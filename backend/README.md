@@ -57,11 +57,26 @@ npm run dev
   `https://sewa2026.dtu.ac.in`). CORS is locked to this one origin with
   credentials enabled.
 
+## Security and deployment notes
+
+- Rate limiting is backed by Redis in the deployed architecture. Authentication
+  limiters fail closed when Redis is unavailable; do not replace them with
+  per-process in-memory state when running multiple backend replicas.
+- Privileged accounts are not auto-created by application startup and no
+  default administrator password exists in source. Provision an administrator
+  explicitly with the supported promotion/invite flow.
+- Team ID cards are private files. They are not served from the public
+  `/uploads` root. Access is restricted to the team leader and privileged
+  administrative roles through the authenticated API.
+- Public resource endpoints return only active/published content. The
+  `?all=true` view requires `SUPER_ADMIN` or `RESOURCE`.
+- Resource images are restricted to JPEG/PNG/WebP/GIF and validated against
+  their file signatures. SVG is intentionally not accepted.
+- Team ID-card uploads are restricted to PDF/JPEG/PNG, with size, multipart,
+  filename, extension, MIME, and content-signature validation.
+
 ## What's deliberately NOT here yet
 
-- **Rate limiter store** - uses in-memory `express-rate-limit`. If you
-  deploy more than one instance behind a load balancer, swap in
-  `rate-limit-redis` (limits won't be shared across processes otherwise).
 - **Admin/review endpoints** - nothing here handles jury review,
   shortlisting, or exporting registrations. `team.status` already has the
   states (`under_review`, `shortlisted`, `rejected`) for this to build on.
@@ -76,10 +91,9 @@ npm run dev
   "20kb" })`, no multipart middleware). A selected file is never uploaded;
   the UI now says so instead of silently dropping it. Add `multer` (or
   equivalent) plus S3/disk storage if attachments need to actually work.
-- **Team-size limits** (`TEAM_MIN_MEMBERS` / `TEAM_MAX_MEMBERS` in
-  `src/schemas/team.schema.ts`) are placeholders (2–6) - set them to SEWA
-  2026's actual rules.
-- **Tests** - none included.
+- **Tests** - the source snapshot does not include a generated dependency
+  lockfile or `node_modules`. Run the verification commands below after
+  installing dependencies.
 
 ## Verifying before you deploy
 

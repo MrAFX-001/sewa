@@ -191,7 +191,7 @@ export const SEARCH_ITEMS: SearchItem[] = [
     title: "Register Your Team",
     description: "Create or join a team, submit innovation ideas, and track participation.",
     category: "Actions",
-    href: "/event-register",
+    href: "/team-register",
     keywords: ["register", "signup", "join", "team", "leader", "apply", "submission"],
   },
   {

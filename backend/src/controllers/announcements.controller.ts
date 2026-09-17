@@ -4,6 +4,7 @@ import { sortAnnouncementsNewestFirst } from "../utils/announcements.js";
 
 export async function listAnnouncements(_req: Request, res: Response) {
   const announcements = await prisma.announcement.findMany({
+    where: { publishedAt: { lte: new Date() } },
     select: {
       id: true,
       refNumber: true,
@@ -20,4 +21,3 @@ export async function listAnnouncements(_req: Request, res: Response) {
 
   res.json(announcements);
 }
-

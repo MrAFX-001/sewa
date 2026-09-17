@@ -123,6 +123,7 @@ export interface TeamMember {
   email: string;
   phone?: string | null;
   role: "leader" | "member";
+  idCardOriginalName?: string | null;
 }
 
 export interface Team {
@@ -130,6 +131,30 @@ export interface Team {
   name: string;
   institute: string;
   institutionAddress: string;
+  participationType: "Individual" | "Team / Group" | "Organisation";
+  participantCategory: "School & Vocational" | "Diploma & Higher Education" | "Industry & Government" | null;
+  participationLevel: "National Level" | "Local Community Level" | null;
+  institutionType: string | null;
+  affiliationPinCode: string | null;
+  affiliationCity: string | null;
+  affiliationState: string | null;
+  institutionEmail: string | null;
+  institutionPhone: string | null;
+  classLevel: string | null;
+  degreeProgramme: string | null;
+  departmentBranch: string | null;
+  yearOfStudy: string | null;
+  coordinatorName: string | null;
+  coordinatorEmail: string | null;
+  coordinatorPhone: string | null;
+  designationRole: string | null;
+  departmentDivision: string | null;
+  officialOrgEmail: string | null;
+  orgContactPhone: string | null;
+  mentorName: string | null;
+  mentorDesignation: string | null;
+  mentorEmail: string | null;
+  mentorPhone: string | null;
   /** Human-readable theme label, server-derived from problemCategoryCode. */
   theme: string;
   /** Server-derived: the official PS title, or the team's own proposed text. */
@@ -202,8 +227,12 @@ export const authApi = {
   resendOtp: (email: string) => post<{ message: string }>("/api/auth/otp/send", { email }),
 
   /** On success the backend sets the session cookie - the user is signed in. */
-  verifyOtp: (email: string, code: string) =>
-    post<{ message: string; user: User }>("/api/auth/otp/verify", { email, code }),
+  verifyOtp: (email: string, code: string, password: string) =>
+    post<{ message: string; user: User }>("/api/auth/otp/verify", {
+      email,
+      code,
+      password,
+    }),
 
   signin: (email: string, password: string) =>
     post<{ user: User }>("/api/auth/signin", { email, password }),
@@ -233,6 +262,30 @@ export interface TeamProblemSelectionInput {
   name: string;
   institute: string;
   institutionAddress: string;
+  participationType: "Individual" | "Team / Group" | "Organisation";
+  participantCategory: "School & Vocational" | "Diploma & Higher Education" | "Industry & Government";
+  participationLevel: "National Level" | "Local Community Level";
+  institutionType?: string;
+  affiliationPinCode?: string;
+  affiliationCity?: string;
+  affiliationState?: string;
+  institutionEmail?: string;
+  institutionPhone?: string;
+  classLevel?: string;
+  degreeProgramme?: string;
+  departmentBranch?: string;
+  yearOfStudy?: string;
+  coordinatorName?: string;
+  coordinatorEmail?: string;
+  coordinatorPhone?: string;
+  designationRole?: string;
+  departmentDivision?: string;
+  officialOrgEmail?: string;
+  orgContactPhone?: string;
+  mentorName?: string;
+  mentorDesignation?: string;
+  mentorEmail?: string;
+  mentorPhone?: string;
   problemCategoryCode: string;
   problemOptionType: "ps" | "open";
   /** Required by the backend when problemOptionType is "open"; omit for "ps". */
@@ -263,7 +316,37 @@ export const teamApi = {
   addMember: (
     teamId: string,
     input: { firstName: string; lastName: string; email: string; phone?: string | undefined },
-  ) => post<{ member: TeamMember }>(`/api/register/${teamId}/members`, input),
+    idCard: File,
+  ) => {
+    const form = new FormData();
+    form.append("firstName", input.firstName);
+    form.append("lastName", input.lastName);
+    form.append("email", input.email);
+    if (input.phone !== undefined) form.append("phone", input.phone);
+    form.append("idCard", idCard);
+    return request<{ member: TeamMember }>(`/api/register/${teamId}/members`, {
+      method: "POST",
+      body: form,
+    });
+  },
+
+  updateMember: (
+    teamId: string,
+    memberId: string,
+    input: { firstName: string; lastName: string; email: string; phone?: string | undefined },
+    idCard?: File,
+  ) => {
+    const form = new FormData();
+    form.append("firstName", input.firstName);
+    form.append("lastName", input.lastName);
+    form.append("email", input.email);
+    if (input.phone !== undefined) form.append("phone", input.phone);
+    if (idCard) form.append("idCard", idCard);
+    return request<{ member: TeamMember }>(`/api/register/${teamId}/members/${memberId}`, {
+      method: "PATCH",
+      body: form,
+    });
+  },
 
   removeMember: (teamId: string, memberId: string) =>
     request<void>(`/api/register/${teamId}/members/${memberId}`, { method: "DELETE" }),
@@ -326,6 +409,24 @@ export interface Announcement {
 
 export const announcementsApi = {
   list: () => request<Announcement[]>("/api/announcements"),
+};
+
+export interface PublicStats {
+  entries: number;
+  shortlisted: number;
+  participants: number;
+  mentored: number;
+  prototypes: number;
+  tested: number;
+  validated: number;
+  breakdowns: Record<
+    "entries" | "shortlisted" | "mentored" | "prototypes" | "tested" | "validated",
+    Array<{ state: string; note?: string; schools: number; colleges: number; industries: number }>
+  >;
+}
+
+export const publicApi = {
+  getStats: () => request<PublicStats>("/api/public/stats"),
 };
 
 // ─── RBAC & Super Admin ─────────────────────────────────────────────────────
@@ -410,6 +511,9 @@ export interface AdminTeam {
     name: string;
     email: string;
     role: string;
+    idCardOriginalName?: string | null;
+    idCardPath?: string | null;
+    idCardMimeType?: string | null;
   }[];
   idCardPath: string;
   idCardOriginalName?: string | null;
@@ -613,7 +717,7 @@ export const resourceApi = {
       method: "PUT",
       body: JSON.stringify({ updates }),
     }),
-  getHeroSlides: (all = true) =>
+  getHeroSlides: (all = false) =>
     request<{ slides: HeroSlideItem[] }>(`/api/resources/hero-slides${all ? "?all=true" : ""}`),
   createHeroSlide: (data: {
     title: string;
@@ -635,7 +739,7 @@ export const resourceApi = {
     request<{ success: boolean }>(`/api/resources/hero-slides/${id}`, {
       method: "DELETE",
     }),
-  getFaqs: (all = true) =>
+  getFaqs: (all = false) =>
     request<{ faqs: FaqItem[] }>(`/api/resources/faqs${all ? "?all=true" : ""}`),
   createFaq: (data: {
     question: string;
@@ -658,7 +762,7 @@ export const resourceApi = {
       method: "DELETE",
     }),
   getAdminAnnouncements: () =>
-    request<{ announcements: AnnouncementItem[] }>("/api/resources/announcements"),
+    request<{ announcements: AnnouncementItem[] }>("/api/resources/announcements?all=true"),
   createAnnouncement: (data: {
     title: string;
     summary: string;

@@ -1,21 +1,42 @@
 import { prisma } from "../config/prisma.js";
-import { hashPassword, verifyPassword } from "../utils/hash.js";
+import { hashPassword, verifyPassword, verifyOtpAgainstDummy } from "../utils/hash.js";
 import { AppError } from "../middleware/errorHandler.js";
-import { issueOtp, consumeOtp } from "./otp.service.js";
+import { issueOtp, consumeOtp, requestPasswordResetOtp } from "./otp.service.js";
 import type { ResetPasswordInput, SignupInput, SigninInput } from "../schemas/auth.schema.js";
 
-export async function signupUser(input: SignupInput) {
-  const existing = await prisma.user.findUnique({ where: { email: input.email } });
 
-  if (existing) {
-    // Don't reveal *why* signup failed in a way that confirms account
-    // existence beyond what's necessary - but for signup (unlike signin)
-    // it's standard and acceptable to say the email is taken, since the
-    // alternative (silent fake-success) breaks legitimate re-signup UX.
-    throw new AppError(409, "An account with this email already exists.");
-  }
+export async function signupUser(input: SignupInput) {
+  const existing = await prisma.user.findUnique({
+    where: { email: input.email },
+  });
 
   const passwordHash = await hashPassword(input.password);
+
+  if (existing) {
+    // Only an unverified pending account can be replaced.
+    if (!existing.emailVerified && existing.status === "pending") {
+      const user = await prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          firstName: input.firstName,
+          lastName: input.lastName,
+          phone: input.phone,
+          passwordHash,
+          tokenVersion: { increment: 1 },
+        },
+      });
+
+      try {
+        await issueOtp(user.id, user.email, "email_verify");
+      } catch (err) {
+        if (!(err instanceof AppError && err.statusCode === 429)) throw err;
+      }
+
+      return user;
+    }
+
+    throw new AppError(409, "An account with this email already exists.");
+  }
 
   const user = await prisma.user.create({
     data: {
@@ -34,10 +55,22 @@ export async function signupUser(input: SignupInput) {
   return user;
 }
 
-export async function verifySignupOtp(email: string, code: string) {
-  const user = await prisma.user.findUnique({ where: { email } });
+export async function verifySignupOtp(
+  email: string,
+  code: string,
+  password?: string,
+) {
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
   if (!user) {
-    throw new AppError(400, "Invalid request.");
+    await verifyOtpAgainstDummy(code);
+    throw new AppError(400, "Incorrect or expired code.");
+  }
+
+  if (user.status === "suspended") {
+    throw new AppError(403, "This account cannot be verified.");
   }
 
   const isValid = await consumeOtp(user.id, "email_verify", code);
@@ -46,9 +79,24 @@ export async function verifySignupOtp(email: string, code: string) {
     throw new AppError(400, "Incorrect or expired code.");
   }
 
+  const data: {
+    emailVerified: boolean;
+    status: "active";
+    passwordHash?: string;
+    tokenVersion: { increment: number };
+  } = {
+    emailVerified: true,
+    status: "active",
+    tokenVersion: { increment: 1 },
+  };
+
+  if (password) {
+    data.passwordHash = await hashPassword(password);
+  }
+
   return prisma.user.update({
     where: { id: user.id },
-    data: { emailVerified: true, status: "active" },
+    data,
   });
 }
 
@@ -89,23 +137,7 @@ export async function authenticateUser(input: SigninInput) {
  * it to the audit log. Callers must not branch their HTTP response on it.
  */
 export async function requestPasswordReset(email: string): Promise<string | undefined> {
-  const user = await prisma.user.findUnique({ where: { email } });
-
-  // An unverified or suspended account can't reset a password: for the
-  // former, email ownership was never proven; for the latter, a reset
-  // would be a way to quietly regain access.
-  if (!user || !user.emailVerified || user.status === "suspended") return undefined;
-
-  try {
-    await issueOtp(user.id, user.email, "password_reset");
-  } catch (err) {
-    // Swallow the cooldown 429 only - otherwise a repeated request would
-    // reveal that this email is registered while an unknown one wouldn't.
-    if (err instanceof AppError && err.statusCode === 429) return user.id;
-    throw err;
-  }
-
-  return user.id;
+  return requestPasswordResetOtp(email);
 }
 
 export async function resetPassword(input: ResetPasswordInput) {
@@ -121,6 +153,9 @@ export async function resetPassword(input: ResetPasswordInput) {
 
   return prisma.user.update({
     where: { id: user.id },
-    data: { passwordHash },
+    data: {
+      passwordHash,
+      tokenVersion: { increment: 1 },
+    },
   });
 }

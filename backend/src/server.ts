@@ -6,12 +6,7 @@ import { prisma } from "./config/prisma.js";
 import { redis } from "./config/redis.js";
 import { startOtpCleanupJob } from "./services/cleanup.service.js";
 
-import { bootstrapDatabaseIfEmpty } from "./lib/bootstrap.js";
-
 mkdirSync(env.UPLOAD_DIR, { recursive: true });
-
-// Check and seed initial admin user / records if starting with an empty database
-void bootstrapDatabaseIfEmpty();
 
 const server = app.listen(env.PORT, env.HOST, () => {
   logger.info(`SEVA 2026 backend listening on ${env.HOST}:${env.PORT} [${env.NODE_ENV}]`);

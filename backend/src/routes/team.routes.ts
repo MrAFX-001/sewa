@@ -1,13 +1,14 @@
 import { Router } from "express";
 import * as teamController from "../controllers/team.controller.js";
 import { validateBody } from "../middleware/validate.middleware.js";
-import { uploadIdCard } from "../middleware/upload.middleware.js";
+import { uploadIdCard, uploadMemberIdCard } from "../middleware/upload.middleware.js";
 import { requireAuth, requireVerifiedEmail } from "../middleware/auth.middleware.js";
 import { createTeamSchema, updateTeamSchema, addMemberSchema } from "../schemas/team.schema.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-
+import { cleanupRejectedUpload } from "../middleware/uploadCleanup.middleware.js";
+import { validateIdCardContent } from "../middleware/uploadContentValidation.middleware.js";
 export const teamRouter = Router();
-
+import { teamMemberAddLimiter } from "../middleware/rateLimiter.js";
 // Every route here requires a signed-in, email-verified user - team
 // registration is only reachable after signup + OTP verification + signin.
 teamRouter.use(requireAuth, requireVerifiedEmail);
@@ -19,6 +20,8 @@ teamRouter.use(requireAuth, requireVerifiedEmail);
 teamRouter.post(
   "/",
   uploadIdCard,
+  validateIdCardContent,
+  cleanupRejectedUpload,
   validateBody(createTeamSchema),
   asyncHandler(teamController.createTeam),
 );
@@ -27,13 +30,31 @@ teamRouter.get("/me", asyncHandler(teamController.getMyTeam));
 teamRouter.patch(
   "/:teamId",
   uploadIdCard,
+  validateIdCardContent,
+  cleanupRejectedUpload,
   validateBody(updateTeamSchema),
   asyncHandler(teamController.updateTeam),
 );
 teamRouter.post(
   "/:teamId/members",
+  teamMemberAddLimiter,
+  uploadMemberIdCard,
+  validateIdCardContent,
+  cleanupRejectedUpload,
   validateBody(addMemberSchema),
   asyncHandler(teamController.addMember),
+);
+teamRouter.patch(
+  "/:teamId/members/:memberId",
+  uploadMemberIdCard,
+  validateIdCardContent,
+  cleanupRejectedUpload,
+  validateBody(addMemberSchema),
+  asyncHandler(teamController.updateMember),
+);
+teamRouter.get(
+  "/:teamId/members/:memberId/id-card",
+  asyncHandler(teamController.getMemberIdCard),
 );
 teamRouter.delete("/:teamId/members/:memberId", asyncHandler(teamController.removeMember));
 teamRouter.post("/:teamId/submit", asyncHandler(teamController.submitTeam));

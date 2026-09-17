@@ -46,10 +46,13 @@ import {
   authApi,
   contactApi,
   announcementsApi,
+  publicApi,
   resourceApi,
+  teamApi,
   CONTACT_CATEGORIES,
   type ContactCategory,
   type Announcement,
+  type PublicStats,
 } from "../lib/api";
 import { sortAnnouncementsNewestFirst } from "../lib/announcements";
 import { useAuth } from "../lib/auth";
@@ -622,7 +625,7 @@ export function Header({
                     </Link>
                   ) : (
                     <Link
-                      to="/event-register"
+                      to="/team-register"
                       onClick={() => setMobileMenuOpen(false)}
                       className="inline-flex w-full items-center justify-center rounded-full border-2 border-[#ff4d4f] bg-white px-5 py-2.5 text-sm font-semibold text-[#ff4d4f] shadow-sm transition-colors hover:bg-red-50"
                     >
@@ -1163,10 +1166,16 @@ export function CountdownTimer() {
     };
   };
 
-  const [time, setTime] = useState(calculateTime);
+  const [time, setTime] = useState({
+    days: "00",
+    hours: "00",
+    minutes: "00",
+    seconds: "00",
+  });
 
   useEffect(() => {
     setTime(calculateTime());
+
     const interval = setInterval(() => {
       setTime(calculateTime());
     }, 1000);
@@ -1636,18 +1645,47 @@ export function VideoShowcaseSection() {
   );
 }
 
-const STAT_TILES: { key: StatKey; value: string; icon: typeof User }[] = [
-  { key: "entries", value: "0", icon: User },
-  { key: "shortlisted", value: "0", icon: MapPin },
-  { key: "mentored", value: "0", icon: Server },
-  { key: "prototypes", value: "0", icon: User },
-  { key: "tested", value: "0", icon: MapPin },
-  { key: "validated", value: "0", icon: Server },
-];
+const STAT_TILE_ICONS: Record<StatKey, typeof User> = {
+  entries: User,
+  shortlisted: MapPin,
+  mentored: Server,
+  prototypes: User,
+  tested: MapPin,
+  validated: Server,
+};
 
 export function StatisticsSection() {
   const [openStat, setOpenStat] = useState<StatKey | null>(null);
+  const [statsBreakdowns, setStatsBreakdowns] = useState<PublicStats["breakdowns"] | null>(null);
+  const [liveStats, setLiveStats] = useState<Record<StatKey, number>>({
+    entries: 0,
+    shortlisted: 0,
+    mentored: 0,
+    prototypes: 0,
+    tested: 0,
+    validated: 0,
+  });
   const closeStat = useCallback(() => setOpenStat(null), []);
+
+  useEffect(() => {
+    let active = true;
+    publicApi.getStats().then((stats) => {
+      if (!active) return;
+      setLiveStats({
+        entries: stats.entries,
+        shortlisted: stats.shortlisted,
+        mentored: stats.mentored,
+        prototypes: stats.prototypes,
+        tested: stats.tested,
+        validated: stats.validated,
+      });
+      setStatsBreakdowns(stats.breakdowns);
+    }).catch(() => {
+      // Keep the public section usable if the statistics endpoint is temporarily unavailable.
+    });
+    return () => { active = false; };
+  }, []);
+
   return (
     <section id="statistics" className="t-section-band bg-white scroll-mt-20">
       <div className="site-shell max-w-6xl">
@@ -1657,7 +1695,9 @@ export function StatisticsSection() {
         {/* 6 Key Metrics Grid: 2 rows x 3 columns. Each tile opens its
             state-wise summary popup (see StatSummaryModal). */}
         <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-y-4 sm:gap-x-0">
-          {STAT_TILES.map(({ key, value, icon: TileIcon }, i) => {
+          {(Object.keys(STAT_TILE_ICONS) as StatKey[]).map((key, i) => {
+            const value = liveStats[key].toLocaleString("en-IN");
+            const TileIcon = STAT_TILE_ICONS[key];
             const col = i % 3;
             const colClasses =
               col === 0 ? "sm:pr-6 sm:border-r" : col === 1 ? "sm:px-6 sm:border-r" : "sm:pl-6";
@@ -1694,7 +1734,9 @@ export function StatisticsSection() {
           })}
         </div>
 
-        {openStat && <StatSummaryModal stat={openStat} onClose={closeStat} />}
+        {openStat && statsBreakdowns && (
+          <StatSummaryModal stat={openStat} rows={statsBreakdowns[openStat]} onClose={closeStat} />
+        )}
 
         {/* Charts Container with light background */}
         <div className="mt-14 sm:mt-18 rounded-2xl p-4 sm:p-6 lg:p-8">
@@ -2429,7 +2471,7 @@ export function HomePage() {
                   </Link>
                 ) : (
                   <Link
-                    to="/event-register"
+                    to="/team-register"
                     className="inline-flex items-center gap-2 rounded-md bg-[#e53e3e] hover:bg-[#c53030] px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 shadow-lg"
                   >
                     Register Your Team
@@ -3184,10 +3226,11 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
     try {
       // A successful verify sets the session cookie server-side, so the
       // user is signed in from here - no separate signin call needed.
-      await authApi.verifyOtp(email, code);
+      await authApi.verifyOtp(email, code, password);
       await refresh();
+      const { team } = await teamApi.getMine();
       setMessage("Email verified! Welcome to SEVA 2026.");
-      navigate({ to: "/team-register" });
+      navigate({ to: team ? "/dashboard" : "/team-register" });
     } catch (err) {
       setEmailDigits(["", "", "", "", "", ""]);
       digitRefs.current[0]?.focus();
@@ -3225,7 +3268,8 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
       if (mode === "login") {
         await authApi.signin(email, password);
         await refresh();
-        navigate({ to: "/team-register" });
+        const { team } = await teamApi.getMine();
+        navigate({ to: team ? "/dashboard" : "/team-register" });
       } else {
         await authApi.signup({
           firstName,

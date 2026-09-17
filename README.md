@@ -37,11 +37,11 @@ sudo -u postgres psql
 
 ```sql
 CREATE DATABASE sewa2026;
-CREATE USER admin WITH PASSWORD 'admin';
-ALTER USER admin CREATEDB;
-GRANT ALL PRIVILEGES ON DATABASE sewa2026 TO admin;
+CREATE USER sewa_app WITH PASSWORD '<generate-a-strong-password>';
+ALTER USER sewa_app CREATEDB;
+GRANT ALL PRIVILEGES ON DATABASE sewa2026 TO sewa_app;
 \c sewa2026
-GRANT ALL ON SCHEMA public TO admin;
+GRANT ALL ON SCHEMA public TO sewa_app;
 \q
 ```
 
@@ -67,7 +67,7 @@ NODE_ENV=development
 PORT=4000
 CLIENT_ORIGIN=http://localhost:8080
 
-DATABASE_URL=postgresql://admin:admin@localhost:5432/sewa2026?schema=public
+DATABASE_URL=postgresql://sewa_app:<strong-password>@localhost:5432/sewa2026?schema=public
 
 JWT_SECRET=<32+ random characters - generate with `openssl rand -base64 48`>
 JWT_EXPIRES_IN=7d

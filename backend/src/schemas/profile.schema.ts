@@ -4,15 +4,48 @@ import { phoneSchema } from "./phone.js";
 const aadhaarRegex = /^\d{12}$/;
 const pinRegex = /^\d{6}$/;
 const dobRegex = /^\d{4}-\d{2}-\d{2}$/;
-const ELIGIBLE_STATES = [
-  "J&K",
-  "Ladakh",
-  "HP",
-  "Punjab",
+const INDIA_STATE_OPTIONS = [
+  "Andaman and Nicobar Islands",
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chandigarh",
+  "Chhattisgarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi (NCT)",
+  "Goa",
+  "Gujarat",
   "Haryana",
+  "Himachal Pradesh",
+  "Jammu and Kashmir",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Ladakh",
+  "Lakshadweep",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Puducherry",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+  // Legacy values already stored by the older profile flow.
+  "J&K",
+  "HP",
   "Delhi",
   "UP",
-  "Chandigarh",
 ] as const;
 
 // Category / nationality / gender / state are kept as free text rather than
@@ -44,8 +77,8 @@ export const upsertProfileSchema = z
     addressLine2: z.string().trim().max(200).optional(),
     pinCode: z.string().trim().regex(pinRegex, "PIN code must be exactly 6 digits"),
     city: z.string().trim().min(2).max(100),
-    state: z.enum(ELIGIBLE_STATES, {
-      errorMap: () => ({ message: "State must be an eligible North Indian state or UT" }),
+    state: z.enum(INDIA_STATE_OPTIONS, {
+      errorMap: () => ({ message: "Please select a valid Indian state or UT" }),
     }),
     country: z.string().trim().min(2).max(100),
 

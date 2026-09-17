@@ -15,7 +15,8 @@ import { AppError } from "./errorHandler.js";
  */
 const ALLOWED_MIME_TYPES = new Set(["application/pdf", "image/jpeg", "image/png"]);
 const ALLOWED_EXTENSIONS = new Set([".pdf", ".jpg", ".jpeg", ".png"]);
-const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_FILE_SIZE_BYTES = 500 * 1024; // Event dossier: 500 KB per participant
+const MEMBER_ID_CARD_MAX_FILE_SIZE_BYTES = 500 * 1024; // Event dossier: 500 KB per participant
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
@@ -36,6 +37,11 @@ function fileFilter(
   file: Express.Multer.File,
   cb: multer.FileFilterCallback,
 ) {
+  if (file.originalname.length > 255) {
+    cb(new AppError(400, "Filename is too long."));
+    return;
+  }
+
   const ext = path.extname(file.originalname).toLowerCase();
 
   if (!ALLOWED_MIME_TYPES.has(file.mimetype) || !ALLOWED_EXTENSIONS.has(ext)) {
@@ -51,11 +57,21 @@ function fileFilter(
  * multer populates req.body with the request's other (text) fields before
  * validateBody ever runs, and req.file with the upload itself.
  */
-export const uploadIdCard = multer({
-  storage,
-  limits: {
-    fileSize: MAX_FILE_SIZE_BYTES,
-    files: 1,
-  },
-  fileFilter,
-}).single("idCard");
+const makeIdCardUpload = (fileSize: number) =>
+  multer({
+    storage,
+    limits: {
+      fileSize,
+      files: 1,
+      fields: 20,
+      fieldSize: 16 * 1024,
+      parts: 25,
+    },
+    fileFilter,
+  }).single("idCard");
+
+export const uploadIdCard = makeIdCardUpload(MAX_FILE_SIZE_BYTES);
+
+// The Event Registration UI requires an identity / affiliation document for
+// every participant and caps each participant document at 500 KB.
+export const uploadMemberIdCard = makeIdCardUpload(MEMBER_ID_CARD_MAX_FILE_SIZE_BYTES);

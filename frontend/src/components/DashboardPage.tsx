@@ -163,13 +163,15 @@ export function DashboardPage() {
   const navigate = useNavigate();
 
   // Active role state - defaults to user role or SUPER_ADMIN
-  const [currentRole, setCurrentRole] = useState<UserRole>(user?.role || "SUPER_ADMIN");
+  const [currentRole, setCurrentRole] = useState<UserRole>("MEMBER");
 
   // Sync role when user profile loads from backend
   useEffect(() => {
-    if (user?.role) {
-      setCurrentRole(user.role);
-    }
+    if (!user?.role) return;
+    setCurrentRole(user.role);
+    if (user.role === "MEMBER") setActiveTab("my-registration");
+    else if (user.role === "RESOURCE") setActiveTab("resources");
+    else setActiveTab("dashboard");
   }, [user?.role]);
 
   // Sidebar navigation tab - role aware
@@ -675,14 +677,16 @@ export function DashboardPage() {
   };
 
   const loadAll = async () => {
+    const role = user?.role;
+
+    if (!role) return;
+
     setIsRefreshing(true);
-    await Promise.allSettled([
-      loadStats(),
-      loadUsers(),
-      loadTeams(),
-      loadMails(),
-      loadAuditLogs(),
-      loadGallery(),
+
+    const isAdmin = role === "SUPER_ADMIN" || role === "ADMIN";
+    const isResource = role === "SUPER_ADMIN" || role === "RESOURCE";
+
+    const requests: Promise<unknown>[] = [
       loadCommittee(),
       loadHeroSlides(),
       loadFaqs(),
@@ -690,13 +694,30 @@ export function DashboardPage() {
       loadThemes(),
       loadMyTeam(),
       loadMemberMails(),
-    ]);
+    ];
+
+    if (isAdmin) {
+      requests.push(
+        loadStats(),
+        loadUsers(),
+        loadTeams(),
+        loadMails(),
+        loadAuditLogs(),
+      );
+    }
+
+    if (isResource) {
+      requests.push(loadGallery());
+    }
+
+    await Promise.allSettled(requests);
     setIsRefreshing(false);
   };
 
   useEffect(() => {
+    if (!user?.role) return;
     loadAll();
-  }, []);
+  }, [user?.role]);
 
   // 100% Dynamic Member Data derived directly from the PostgreSQL database
   const memberData = useMemo(() => {
@@ -2738,6 +2759,19 @@ export function DashboardPage() {
                   : "Member"}
           </div>
 
+          <button
+            type="button"
+            onClick={async () => {
+              await signOut();
+              navigate({ to: "/" });
+            }}
+            className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3.5 py-1.5 text-xs font-bold text-[#ff3355] transition-colors hover:bg-red-100"
+            title="Sign out"
+          >
+            <LogOut size={13} />
+            Logout
+          </button>
+
           {/* User Info (Greeting & Email) */}
           <div className="flex items-center gap-2.5 pl-3 border-l border-gray-200">
             <div className="size-8 rounded-full bg-red-50 text-[#ff3355] border border-red-200/80 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
@@ -2948,8 +2982,6 @@ export function DashboardPage() {
                     Committee Members
                   </button>
                 </nav>
-              </>
-            )}
 
             {/* ── 2. RESOURCE TEAM NAVIGATION (Strictly Limited to Media & Content) ── */}
             {currentRole === "RESOURCE" && (
@@ -3078,36 +3110,13 @@ export function DashboardPage() {
                 >
                   Official Mail
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("announcement")}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
-                    activeTab === "announcement"
-                      ? "bg-[#ff3355] text-white shadow-sm"
-                      : "text-gray-700 hover:bg-gray-100 font-semibold"
-                  }`}
-                >
-                  Announcements
-                </button>
               </nav>
+            )}
+              </>
             )}
           </div>
 
-          {/* Logout button at bottom */}
-          <div className="pt-6 border-t border-gray-100 px-3">
-            <button
-              type="button"
-              onClick={() => {
-                signOut();
-                navigate({ to: "/" });
-              }}
-              className="text-[#ff3355] hover:text-[#c5213d] text-sm font-bold flex items-center gap-2 cursor-pointer transition-colors"
-            >
-              <LogOut size={16} />
-              <span>Logout</span>
-            </button>
-          </div>
+
         </aside>
 
         {/* ─── Main Content Canvas ─── */}
@@ -4460,7 +4469,7 @@ export function DashboardPage() {
           {/* ═════════════════════════════════════════════════════════════════════
               VIEW: RESOURCES & CONTENT HUB (Resource Role & Super Admin)
              ═════════════════════════════════════════════════════════════════════ */}
-          {activeTab === "resources" && (
+          {(currentRole === "SUPER_ADMIN" || currentRole === "RESOURCE") && activeTab === "resources" && (
             <div className="space-y-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -4513,13 +4522,12 @@ export function DashboardPage() {
           )}
 
           {/* Direct Sidebar Page Tabs */}
-          {activeTab === "hero" && renderHeroPanel()}
-          {(activeTab === "announcement" || activeTab === "newsletter") &&
-            renderAnnouncementsPanel()}
-          {activeTab === "faq" && renderFaqsPanel()}
-          {activeTab === "committee" && renderCommitteePanel()}
-          {activeTab === "contact" && renderContactQueriesPanel()}
-          {activeTab === "themes" && renderThemesPanel()}
+          {(currentRole === "SUPER_ADMIN" || currentRole === "RESOURCE") && activeTab === "hero" && renderHeroPanel()}
+          {(currentRole === "SUPER_ADMIN" || currentRole === "RESOURCE") && (activeTab === "announcement" || activeTab === "newsletter") && renderAnnouncementsPanel()}
+          {(currentRole === "SUPER_ADMIN" || currentRole === "RESOURCE") && activeTab === "faq" && renderFaqsPanel()}
+          {(currentRole === "SUPER_ADMIN" || currentRole === "RESOURCE") && activeTab === "committee" && renderCommitteePanel()}
+          {(currentRole === "SUPER_ADMIN" || currentRole === "RESOURCE") && activeTab === "contact" && renderContactQueriesPanel()}
+          {(currentRole === "SUPER_ADMIN" || currentRole === "RESOURCE") && activeTab === "themes" && renderThemesPanel()}
 
           {/* ═════════════════════════════════════════════════════════════════════
               MEMBER VIEWS: MY REGISTRATION, TIMELINE, RESULTS, MEMBER MAIL
@@ -4543,7 +4551,7 @@ export function DashboardPage() {
                   </div>
                   <div>
                     <Link
-                      to="/register"
+                      to="/team-register"
                       className="inline-flex items-center gap-2 bg-[#ff3355] hover:bg-[#d62544] text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-xs transition-colors"
                     >
                       <Plus size={14} />
@@ -4568,7 +4576,7 @@ export function DashboardPage() {
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         <Link
-                          to="/register"
+                          to="/team-register"
                           className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-white/20 transition-colors"
                         >
                           <Edit3 size={14} />

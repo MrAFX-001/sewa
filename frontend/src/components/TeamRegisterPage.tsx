@@ -2,18 +2,27 @@ import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   ChevronLeft,
+  ChevronDown,
   CheckCircle2,
+  Award,
+  Bookmark,
+  Building2,
   Download,
+  GraduationCap,
   IdCard,
   Layers,
   ListChecks,
   Loader2,
+  Mail,
   MapPin,
+  Phone,
   Save,
+  School,
   User,
+  UserCheck,
   Users,
 } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ApiError,
   profileApi,
@@ -42,16 +51,85 @@ const CATEGORY_OPTIONS = ["General / Open", "OBC", "SC", "ST", "EWS", "Other"];
 const GENDER_OPTIONS = ["Male", "Female", "Other", "Prefer not to say"];
 const NATIONALITY_OPTIONS = ["Indian Citizen (Bharat)", "Other / Foreign National"];
 const COUNTRY_OPTIONS = ["India (Bharat)", "Other"];
-const NORTH_STATE_OPTIONS = [
-  "J&K",
-  "Ladakh",
-  "HP",
-  "Punjab",
-  "Haryana",
-  "Delhi",
-  "UP",
+const INDIA_STATE_OPTIONS = [
+  "Andaman and Nicobar Islands",
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
   "Chandigarh",
-];
+  "Chhattisgarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi (NCT)",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jammu and Kashmir",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Ladakh",
+  "Lakshadweep",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Puducherry",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+] as const;
+
+const LEGACY_STATE_ALIASES: Record<string, string> = {
+  "J&K": "Jammu and Kashmir",
+  "HP": "Himachal Pradesh",
+  Delhi: "Delhi (NCT)",
+  UP: "Uttar Pradesh",
+};
+
+const normalizeIndiaState = (state: string | null | undefined) =>
+  state ? (LEGACY_STATE_ALIASES[state] ?? state) : "";
+
+const PARTICIPANT_CATEGORIES = [
+  "School & Vocational",
+  "Diploma & Higher Education",
+  "Industry & Government",
+] as const;
+
+const PARTICIPATION_LEVELS = ["National Level", "Local Community Level"] as const;
+const SCHOOL_INSTITUTION_TYPES = ["School", "ITI", "Vocational Institution", "Other"] as const;
+const HIGHER_ED_INSTITUTION_TYPES = [
+  "College",
+  "University",
+  "Diploma Institute",
+  "Research Institution",
+  "Other",
+] as const;
+const INDUSTRY_INSTITUTION_TYPES = [
+  "Industry",
+  "MSME",
+  "Startup",
+  "R&D Organization",
+  "Government Laboratory",
+  "Other",
+] as const;
+const SCHOOL_CLASS_OPTIONS = [
+  "Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12",
+  "ITI 1st Year", "ITI 2nd Year", "Vocational / Diploma", "Other",
+] as const;
+const HIGHER_ED_YEARS = [
+  "1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year / Final Year", "Research Scholar / Ph.D",
+] as const;
 
 // Real category catalogue (National + Regional, PS/OPEN) now lives in
 // lib/problemCategories.ts, shared with the backend's validation - this used
@@ -59,12 +137,12 @@ const NORTH_STATE_OPTIONS = [
 // relationship to the site's actual Problem Statements page or the backend
 // schema at all.
 
-const TEAM_SIZE_OPTIONS = [2, 3, 4, 5, 6]; // mirrors backend TEAM_MIN/MAX_MEMBERS
+const TEAM_SIZE_OPTIONS = [2, 3, 4, 5, 6]; // Team / Organisation sizes; Individual is fixed at 1
 
 const WIZARD_STEPS = [
   { n: 1, title: "Personal Details", desc: "Applicant Identity" },
   { n: 2, title: "Category & Participation", desc: "Select your category and participation type" },
-  { n: 3, title: "About Team", desc: "Member Details" },
+  { n: 3, title: "Entry Details", desc: "Entry identity and participants" },
   { n: 4, title: "Review & Confirmation", desc: "Review Details" },
   { n: 5, title: "Download Confirmation", desc: "Print PDF" },
 ] as const;
@@ -118,9 +196,20 @@ interface MemberDraft {
   lastName: string;
   email: string;
   phone: string;
+  idCardFile: File | null;
+  idCardName: string;
+  idCardError: string;
 }
 
-const emptyMember = (): MemberDraft => ({ firstName: "", lastName: "", email: "", phone: "" });
+const emptyMember = (): MemberDraft => ({
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  idCardFile: null,
+  idCardName: "",
+  idCardError: "",
+});
 
 // These mirror the server's schemas (backend/src/schemas/phone.ts plus
 // profile.schema.ts / team.schema.ts). The wizard's gates used to check only
@@ -138,6 +227,8 @@ const phoneOk = (v: string) => PHONE_RE.test(v.replace(/\s+/g, ""));
 
 const TEAM_NAME_MIN = 3; // createTeamSchema.name.min(3)
 const INSTITUTE_MIN = 2; // createTeamSchema.institute.min(2)
+const MEMBER_ID_CARD_MAX_SIZE_BYTES = 500 * 1024; // Event dossier requirement
+const MEMBER_ID_CARD_MIME_TYPES = new Set(["application/pdf", "image/jpeg", "image/png"]);
 
 const personalComplete = (p: PersonalDraft) =>
   !!(
@@ -160,7 +251,53 @@ const personalComplete = (p: PersonalDraft) =>
 const memberComplete = (m: MemberDraft) =>
   !!(m.firstName.trim() && m.lastName.trim()) &&
   EMAIL_RE.test(m.email.trim()) &&
-  (!m.phone.trim() || phoneOk(m.phone));
+  (!m.phone.trim() || phoneOk(m.phone)) &&
+  !!(m.idCardFile || m.idCardName);
+
+  const affiliationComplete = (
+    category: "School & Vocational" | "Diploma & Higher Education" | "Industry & Government",
+    fields: {
+      institutionType: string;
+      affiliationPinCode: string;
+      affiliationCity: string;
+      affiliationState: string;
+      institutionEmail: string;
+      institutionPhone: string;
+      classLevel: string;
+      degreeProgramme: string;
+      departmentBranch: string;
+      yearOfStudy: string;
+      coordinatorName: string;
+      coordinatorEmail: string;
+      coordinatorPhone: string;
+      designationRole: string;
+      departmentDivision: string;
+      officialOrgEmail: string;
+      orgContactPhone: string;
+    },
+  ) => {
+    if (!fields.institutionType || !fields.affiliationCity.trim() || !fields.affiliationState) return false;
+    if (fields.institutionEmail && !EMAIL_RE.test(fields.institutionEmail.trim())) return false;
+    if (fields.institutionPhone && !phoneOk(fields.institutionPhone)) return false;
+
+    if (category === "School & Vocational") {
+      return !!fields.classLevel && PIN_RE.test(fields.affiliationPinCode.trim());
+    }
+
+    if (category === "Diploma & Higher Education") {
+      if (!fields.degreeProgramme.trim() || !fields.departmentBranch.trim() || !fields.yearOfStudy) return false;
+      if (fields.coordinatorEmail && !EMAIL_RE.test(fields.coordinatorEmail.trim())) return false;
+      if (fields.coordinatorPhone && !phoneOk(fields.coordinatorPhone)) return false;
+      return true;
+    }
+
+    return !!(
+      fields.designationRole.trim() &&
+      EMAIL_RE.test(fields.officialOrgEmail.trim())
+    ) &&
+      (!fields.departmentDivision.trim() || fields.departmentDivision.trim().length >= 1) &&
+      (!fields.orgContactPhone.trim() || phoneOk(fields.orgContactPhone));
+  };
 
 /** First duplicate email among members (leader included), or null. */
 function findDuplicateEmail(members: MemberDraft[]): string | null {
@@ -177,10 +314,107 @@ function findDuplicateEmail(members: MemberDraft[]): string | null {
 // ─── Small presentational helpers ───────────────────────────────────────────
 
 const inputClass =
-  "w-full h-11 px-3.5 rounded-lg border border-gray-200 bg-white text-sm text-gray-800 placeholder-gray-400 " +
-  "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all " +
-  "disabled:bg-gray-50 disabled:text-gray-500";
+  "w-full h-11 px-3.5 rounded-lg border border-slate-200 bg-[#f8faff] text-sm text-gray-800 placeholder-gray-400 " +
+  "focus:outline-none focus:ring-2 focus:ring-[#ff4d4f]/20 focus:border-[#ff4d4f] focus:bg-white transition-all " +
+  "disabled:bg-gray-100 disabled:text-gray-500";
 const selectClass = `${inputClass} appearance-none cursor-pointer`;
+
+interface DossierSelectProps {
+  value: string;
+  onChange: (val: string) => void;
+  options: readonly string[] | string[];
+  placeholder?: string;
+  disabled?: boolean;
+  className?: string;
+}
+
+function DossierSelect({
+  value,
+  onChange,
+  options,
+  placeholder = "Select an option",
+  disabled = false,
+  className = "",
+}: DossierSelectProps) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handlePointer = (event: MouseEvent | TouchEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", handlePointer);
+    document.addEventListener("touchstart", handlePointer);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointer);
+      document.removeEventListener("touchstart", handlePointer);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <div ref={containerRef} className={`relative w-full ${className}`}>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && setOpen((v) => !v)}
+        className={`w-full h-11 px-3.5 rounded-lg border text-left text-sm flex items-center justify-between transition-all cursor-pointer select-none disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed ${
+          open
+            ? "border-[#ff4d4f] ring-2 ring-[#ff4d4f]/20 bg-white"
+            : "border-slate-200 bg-[#f8faff] text-gray-800 hover:border-slate-300 hover:bg-white"
+        }`}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span className={`truncate ${value ? "text-gray-800 font-medium" : "text-gray-400"}`}>
+          {value || placeholder}
+        </span>
+        <ChevronDown
+          size={16}
+          className={`ml-2 shrink-0 transition-transform duration-200 ${
+            open ? "rotate-180 text-[#ff4d4f]" : "text-gray-400"
+          }`}
+        />
+      </button>
+      {open && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-60 overflow-y-auto rounded-xl border border-red-100/90 bg-white p-1.5 shadow-xl shadow-red-950/10 ring-1 ring-black/5">
+          <div className="space-y-0.5" role="listbox">
+            {options.map((opt) => {
+              const selected = opt === value;
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  onClick={() => {
+                    onChange(opt);
+                    setOpen(false);
+                  }}
+                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-xs transition-colors cursor-pointer sm:text-sm ${
+                    selected
+                      ? "bg-red-50 font-bold text-[#ff4d4f]"
+                      : "font-medium text-gray-700 hover:bg-slate-50 hover:text-gray-950"
+                  }`}
+                >
+                  <span className="truncate">{opt}</span>
+                  {selected && <CheckCircle2 size={15} className="ml-2 shrink-0 text-[#ff4d4f]" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Field({
   label,
@@ -195,8 +429,8 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-semibold text-gray-600">
-        {label} {required && <span className="text-primary">*</span>}
+      <label className="mb-1.5 block text-xs font-semibold text-gray-700">
+        {label} {required && <span className="text-[#ff4d4f]">*</span>}
         {!required && <span className="text-gray-400 font-normal"> (Optional)</span>}
       </label>
       {children}
@@ -207,7 +441,7 @@ function Field({
 
 function Badge({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">
+    <span className="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold text-[#ff4d4f]">
       {children}
     </span>
   );
@@ -225,14 +459,14 @@ function SectionHeader({
   badge?: ReactNode;
 }) {
   return (
-    <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-2.5">
+    <div className="mb-5 flex items-center justify-between border-b border-gray-100 pb-3">
       <div className="flex items-center gap-2">
-        <Icon size={15} className="text-primary" />
-        <h3 className="text-xs font-bold uppercase tracking-wide text-gray-700">
+        <Icon size={16} className="text-[#ff4d4f]" />
+        <h3 className="text-xs font-bold uppercase tracking-wider text-gray-800">
           {n}. {title}
         </h3>
       </div>
-      {badge ?? <span className="text-[10px] font-bold text-primary">*Required</span>}
+      {badge ?? <span className="text-xs font-semibold text-[#ff4d4f]">* Required</span>}
     </div>
   );
 }
@@ -269,7 +503,7 @@ function StepFooter({
           type="button"
           onClick={onSaveDraft}
           disabled={savingDraft}
-          className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-primary transition-colors cursor-pointer disabled:opacity-50"
+          className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-[#ff4d4f] transition-colors cursor-pointer disabled:opacity-50"
         >
           {savingDraft ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
           Save draft &amp; continue later
@@ -293,42 +527,35 @@ function StepFooter({
 
 function DossierSidebar({ step }: { step: WizardStep }) {
   return (
-    <aside className="no-print w-full shrink-0 border-b border-gray-100 px-5 py-6 sm:w-[230px] sm:border-b-0 sm:border-r">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">SEVA 2026</p>
-      <h2 className="mb-6 text-sm font-extrabold text-gray-900">Registration Dossier</h2>
+    <aside className="no-print w-full shrink-0 rounded-2xl border border-red-200/90 bg-white p-6 shadow-xs lg:w-72">
+      <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">REGISTRATION DOSSIER</p>
+      <h2 className="mb-6 mt-1 text-xl font-black tracking-tight text-gray-900">SEVA 2026</h2>
 
-      <ol className="space-y-5">
+      <ol className="space-y-6">
         {WIZARD_STEPS.map((s) => {
-          const state = step === s.n ? "active" : step > s.n ? "done" : "upcoming";
+          const isActive = step === s.n;
+          const isDone = step > s.n;
           return (
-            <li key={s.n} className="flex items-start gap-3">
+            <li key={s.n} className="group flex select-none items-start gap-3.5">
               <span
-                className={`flex size-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
-                  state === "active"
-                    ? "bg-primary text-white"
-                    : state === "done"
-                      ? "bg-primary/15 text-primary"
-                      : "bg-gray-100 text-gray-400"
+                className={`flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all ${
+                  isActive
+                    ? "bg-[#ff4d4f] text-white shadow-sm"
+                    : isDone
+                      ? "border border-emerald-200 bg-emerald-50 text-emerald-600"
+                      : "bg-slate-100 text-slate-400"
                 }`}
               >
-                {state === "done" ? <CheckCircle2 size={14} /> : s.n}
+                {isDone ? <CheckCircle2 size={15} /> : s.n}
               </span>
               <div className="pt-0.5">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-gray-300">
-                  Step {s.n}
+                <p className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? "text-[#ff4d4f]" : "text-gray-400"}`}>
+                  STEP {s.n}
                 </p>
-                <p
-                  className={`text-[13px] font-bold leading-tight ${
-                    state === "active"
-                      ? "text-primary"
-                      : state === "done"
-                        ? "text-gray-700"
-                        : "text-gray-400"
-                  }`}
-                >
+                <p className={`text-[13px] font-bold leading-tight ${isActive ? "text-[#ff4d4f]" : isDone ? "text-gray-800" : "text-gray-500"}`}>
                   {s.title}
                 </p>
-                <p className="text-[11px] leading-tight text-gray-400">{s.desc}</p>
+                <p className="mt-0.5 text-[11px] leading-tight text-gray-400">{s.desc}</p>
               </div>
             </li>
           );
@@ -342,9 +569,33 @@ function DossierSidebar({ step }: { step: WizardStep }) {
 function ConfirmationSummary({
   personal,
   email,
+  participationType,
   teamName,
   institute,
   institutionAddress,
+  participantCategory,
+  participationLevel,
+  institutionType,
+  affiliationCity,
+  affiliationState,
+  affiliationPinCode,
+  institutionEmail,
+  institutionPhone,
+  degreeProgramme,
+  departmentBranch,
+  yearOfStudy,
+  classLevel,
+  designationRole,
+  departmentDivision,
+  officialOrgEmail,
+  coordinatorName,
+  coordinatorEmail,
+  coordinatorPhone,
+  mentorName,
+  mentorDesignation,
+  mentorEmail,
+  mentorPhone,
+  orgContactPhone,
   theme,
   problem,
   idCardName,
@@ -355,9 +606,33 @@ function ConfirmationSummary({
 }: {
   personal: PersonalDraft;
   email: string;
+  participationType: "Individual" | "Team / Group" | "Organisation";
   teamName: string;
   institute: string;
   institutionAddress: string;
+  participantCategory: string;
+  participationLevel: string;
+  institutionType: string;
+  affiliationCity: string;
+  affiliationState: string;
+  affiliationPinCode: string;
+  institutionEmail: string;
+  institutionPhone: string;
+  degreeProgramme: string;
+  departmentBranch: string;
+  yearOfStudy: string;
+  classLevel: string;
+  designationRole: string;
+  departmentDivision: string;
+  officialOrgEmail: string;
+  coordinatorName: string;
+  coordinatorEmail: string;
+  coordinatorPhone: string;
+  mentorName: string;
+  mentorDesignation: string;
+  mentorEmail: string;
+  mentorPhone: string;
+  orgContactPhone: string;
   theme: string;
   problem: string;
   idCardName: string;
@@ -395,11 +670,45 @@ function ConfirmationSummary({
     ],
     ["Mobile Number", personal.phone || "-"],
     ["University Email", email],
+    ["Participation Type", participationType],
+    ["Participant Category", participantCategory || "-"],
+    ["Participation Level", participationLevel || "-"],
+    ["Institution Type", institutionType || "-"],
+    ["Institution City / District", affiliationCity || "-"],
+    ["Institution State / UT", affiliationState || "-"],
+    ["Institution PIN", affiliationPinCode || "-"],
+    ["Institution Email", institutionEmail || "-"],
+    ["Institution Phone", institutionPhone || "-"],
+    ...(participantCategory === "School & Vocational"
+      ? (["Class / Level", classLevel || "-"] as [string, string][]) 
+      : participantCategory === "Diploma & Higher Education"
+        ? ([
+            ["Degree / Programme", degreeProgramme || "-"],
+            ["Department / Branch", departmentBranch || "-"],
+            ["Year of Study", yearOfStudy || "-"],
+            ["Faculty Coordinator", coordinatorName || "-"],
+            ["Coordinator Email", coordinatorEmail || "-"],
+            ["Coordinator Phone", coordinatorPhone || "-"],
+          ] as [string, string][])
+        : ([
+            ["Applicant Designation / Role", designationRole || "-"],
+            ["Department / Division", departmentDivision || "-"],
+            ["Official Organization Email", officialOrgEmail || "-"],
+            ["Organization Contact Phone", orgContactPhone || "-"],
+          ] as [string, string][])),
+    ...(mentorName
+      ? ([
+          ["Mentor / Guide", mentorName],
+          ["Mentor Designation", mentorDesignation || "-"],
+          ["Mentor Email", mentorEmail || "-"],
+          ["Mentor Phone", mentorPhone || "-"],
+        ] as [string, string][])
+      : []),
     ["Institute / Organisation Address", institutionAddress || "-"],
     ["Theme / Track", theme || "-"],
     ["Problem Statement", problem || "-"],
-    ["Organisation ID Card", idCardName || "-"],
-    ["Team Size", `${teamSize} members`],
+    ["Identity / Affiliation ID Card", idCardName || "-"],
+    ["Participant Count", `${teamSize} ${teamSize === 1 ? "participant" : "participants"}`],
   ];
 
   return (
@@ -408,7 +717,7 @@ function ConfirmationSummary({
         <p className="text-xs font-bold uppercase tracking-widest text-primary">
           SEVA 2026 · Registration Confirmation
         </p>
-        <h2 className="mt-1 text-xl font-extrabold text-gray-900">{teamName || "Untitled Team"}</h2>
+        <h2 className="mt-1 text-xl font-extrabold text-gray-900">{teamName || "Untitled Entry"}</h2>
         <p className="mt-1 text-xs text-gray-400">{institute}</p>
         {teamId && (
           <p className="mt-2 text-xs text-gray-500">
@@ -431,7 +740,7 @@ function ConfirmationSummary({
 
       <div className="rounded-xl border border-gray-100 overflow-hidden">
         <div className="bg-gray-50 px-4 py-2.5">
-          <p className="text-xs font-bold uppercase tracking-wide text-gray-500">Team Members</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-gray-500">{participationType === "Individual" ? "Individual Participant" : participationType === "Organisation" ? "Organisation Participants" : "Team Members"}</p>
         </div>
         {members.map((m, i) => (
           <div key={i} className="flex items-center gap-3 border-t border-gray-100 px-4 py-2.5">
@@ -443,7 +752,10 @@ function ConfirmationSummary({
                 {`${m.firstName} ${m.lastName}`.trim()}
               </p>
               <p className="text-[10px] text-gray-400">
-                {m.email} · {i === 0 ? "Team Leader" : `Member ${i + 1}`}
+                {m.email} · {i === 0 ? "Team Leader / Applicant" : `Member ${i + 1}`}
+              </p>
+              <p className={`text-[10px] font-semibold ${m.idCardName || m.idCardFile ? "text-emerald-600" : "text-primary"}`}>
+                {m.idCardName || m.idCardFile ? `ID Card: ${m.idCardName || m.idCardFile?.name || "Uploaded"}` : "ID Card: Missing"}
               </p>
             </div>
           </div>
@@ -461,19 +773,41 @@ export function TeamRegisterPage() {
   const [step, setStep] = useState<WizardStep>(1);
   const [personal, setPersonal] = useState<PersonalDraft>(emptyPersonal());
   const [problemCategoryCode, setProblemCategoryCode] = useState("");
+  const [participationType, setParticipationType] = useState<"Individual" | "Team / Group" | "Organisation">("Team / Group");
   // "" until a category is picked, then defaults to the only option a
   // REGIONAL category has ("open") or is left for the user to choose on a
   // NATIONAL one - see handleCategoryChange.
   const [problemOptionType, setProblemOptionType] = useState<"" | "ps" | "open">("");
   const [proposedProblemStatement, setProposedProblemStatement] = useState("");
   const [teamSize, setTeamSize] = useState(2);
+  const [participantCategory, setParticipantCategory] = useState<"School & Vocational" | "Diploma & Higher Education" | "Industry & Government">("Diploma & Higher Education");
+  const [participationLevel, setParticipationLevel] = useState<"National Level" | "Local Community Level">("National Level");
+  const [institutionType, setInstitutionType] = useState("College");
+  const [affiliationPinCode, setAffiliationPinCode] = useState("");
+  const [affiliationCity, setAffiliationCity] = useState("");
+  const [affiliationState, setAffiliationState] = useState("");
+  const [institutionEmail, setInstitutionEmail] = useState("");
+  const [institutionPhone, setInstitutionPhone] = useState("");
+  const [classLevel, setClassLevel] = useState("");
+  const [degreeProgramme, setDegreeProgramme] = useState("");
+  const [departmentBranch, setDepartmentBranch] = useState("");
+  const [yearOfStudy, setYearOfStudy] = useState("");
+  const [coordinatorName, setCoordinatorName] = useState("");
+  const [coordinatorEmail, setCoordinatorEmail] = useState("");
+  const [coordinatorPhone, setCoordinatorPhone] = useState("");
+  const [designationRole, setDesignationRole] = useState("");
+  const [departmentDivision, setDepartmentDivision] = useState("");
+  const [officialOrgEmail, setOfficialOrgEmail] = useState("");
+  const [orgContactPhone, setOrgContactPhone] = useState("");
+  const [mentorName, setMentorName] = useState("");
+  const [mentorDesignation, setMentorDesignation] = useState("");
+  const [mentorEmail, setMentorEmail] = useState("");
+  const [mentorPhone, setMentorPhone] = useState("");
   const [teamName, setTeamName] = useState("");
   const [institute, setInstitute] = useState("");
   const [institutionAddress, setInstitutionAddress] = useState("");
-  // File objects can't be restored from a resumed draft (the browser never
-  // hands the server's stored file back to JS) - existingIdCardName shows
-  // what's already on file, and idCardFile is only set when the user
-  // chooses to replace it (or must be set, on first-time creation).
+  // Legacy team-level ID-card columns are retained for database compatibility,
+  // but this state now mirrors the leader's per-participant document.
   const [idCardFile, setIdCardFile] = useState<File | null>(null);
   const [existingIdCardName, setExistingIdCardName] = useState<string | null>(null);
   const [idCardError, setIdCardError] = useState("");
@@ -512,6 +846,9 @@ export function TeamRegisterPage() {
               lastName: user.lastName,
               email: user.email,
               phone: user.phone ?? "",
+              idCardFile: prev[idx]?.idCardFile ?? null,
+              idCardName: prev[idx]?.idCardName ?? "",
+              idCardError: prev[idx]?.idCardError ?? "",
             }
           : m,
       ),
@@ -541,7 +878,7 @@ export function TeamRegisterPage() {
             addressLine2: profile.addressLine2 ?? "",
             pinCode: profile.pinCode,
             city: profile.city,
-            state: profile.state,
+            state: normalizeIndiaState(profile.state),
             country: profile.country,
             alternatePhone: profile.alternatePhone ?? "",
             backupEmail: profile.backupEmail ?? "",
@@ -553,30 +890,81 @@ export function TeamRegisterPage() {
         setTeamStatus(team.status);
         if (team.status !== "draft") {
           setExistingTeam(team);
+          setParticipationType(team.participationType ?? "Team / Group");
           setTeamName(team.name);
           setInstitute(team.institute);
           setInstitutionAddress(team.institutionAddress);
           setProblemCategoryCode(team.problemCategoryCode);
           setProblemOptionType(team.problemOptionType);
           setProposedProblemStatement(team.proposedProblemStatement ?? "");
+          setParticipantCategory(team.participantCategory ?? "Diploma & Higher Education");
+          setParticipationLevel(team.participationLevel ?? "National Level");
+          setInstitutionType(team.institutionType ?? "");
+          setAffiliationPinCode(team.affiliationPinCode ?? "");
+          setAffiliationCity(team.affiliationCity ?? "");
+          setAffiliationState(normalizeIndiaState(team.affiliationState));
+          setInstitutionEmail(team.institutionEmail ?? "");
+          setInstitutionPhone(team.institutionPhone ?? "");
+          setClassLevel(team.classLevel ?? "");
+          setDegreeProgramme(team.degreeProgramme ?? "");
+          setDepartmentBranch(team.departmentBranch ?? "");
+          setYearOfStudy(team.yearOfStudy ?? "");
+          setCoordinatorName(team.coordinatorName ?? "");
+          setCoordinatorEmail(team.coordinatorEmail ?? "");
+          setCoordinatorPhone(team.coordinatorPhone ?? "");
+          setDesignationRole(team.designationRole ?? "");
+          setDepartmentDivision(team.departmentDivision ?? "");
+          setOfficialOrgEmail(team.officialOrgEmail ?? "");
+          setOrgContactPhone(team.orgContactPhone ?? "");
+          setMentorName(team.mentorName ?? "");
+          setMentorDesignation(team.mentorDesignation ?? "");
+          setMentorEmail(team.mentorEmail ?? "");
+          setMentorPhone(team.mentorPhone ?? "");
           setExistingIdCardName(team.idCardOriginalName);
           const roster = (team.members ?? []).map((m: TeamMember): MemberDraft => ({
             firstName: m.firstName,
             lastName: m.lastName,
             email: m.email,
             phone: m.phone ?? "",
+            idCardFile: null,
+            idCardName: m.idCardOriginalName ?? (m.role === "leader" ? team.idCardOriginalName ?? "" : ""),
+            idCardError: "",
           }));
           if (roster.length) setMembers(roster);
           return;
         }
 
         setTeamId(team.id);
+        setParticipationType(team.participationType ?? "Team / Group");
         setTeamName(team.name);
         setInstitute(team.institute);
         setInstitutionAddress(team.institutionAddress);
         setProblemCategoryCode(team.problemCategoryCode);
         setProblemOptionType(team.problemOptionType);
         setProposedProblemStatement(team.proposedProblemStatement ?? "");
+        setParticipantCategory(team.participantCategory ?? "Diploma & Higher Education");
+        setParticipationLevel(team.participationLevel ?? "National Level");
+        setInstitutionType(team.institutionType ?? "");
+        setAffiliationPinCode(team.affiliationPinCode ?? "");
+        setAffiliationCity(team.affiliationCity ?? "");
+        setAffiliationState(normalizeIndiaState(team.affiliationState));
+        setInstitutionEmail(team.institutionEmail ?? "");
+        setInstitutionPhone(team.institutionPhone ?? "");
+        setClassLevel(team.classLevel ?? "");
+        setDegreeProgramme(team.degreeProgramme ?? "");
+        setDepartmentBranch(team.departmentBranch ?? "");
+        setYearOfStudy(team.yearOfStudy ?? "");
+        setCoordinatorName(team.coordinatorName ?? "");
+        setCoordinatorEmail(team.coordinatorEmail ?? "");
+        setCoordinatorPhone(team.coordinatorPhone ?? "");
+        setDesignationRole(team.designationRole ?? "");
+        setDepartmentDivision(team.departmentDivision ?? "");
+        setOfficialOrgEmail(team.officialOrgEmail ?? "");
+        setOrgContactPhone(team.orgContactPhone ?? "");
+        setMentorName(team.mentorName ?? "");
+        setMentorDesignation(team.mentorDesignation ?? "");
+        setMentorEmail(team.mentorEmail ?? "");
+        setMentorPhone(team.mentorPhone ?? "");
         setExistingIdCardName(team.idCardOriginalName);
 
         const existing = team.members ?? [];
@@ -587,10 +975,18 @@ export function TeamRegisterPage() {
           lastName: m.lastName,
           email: m.email,
           phone: m.phone ?? "",
+          idCardFile: null,
+          idCardName: m.idCardOriginalName ?? (m.role === "leader" ? team.idCardOriginalName ?? "" : ""),
+          idCardError: "",
         });
         const roster = [leader ? toDraft(leader) : emptyMember(), ...others.map(toDraft)];
-        setMembers(roster.length >= 2 ? roster : [...roster, emptyMember()]);
-        setTeamSize(Math.max(2, roster.length));
+        const normalizedRoster = team.participationType === "Individual"
+          ? roster.slice(0, 1)
+          : roster.length >= 2
+            ? roster
+            : [...roster, emptyMember()];
+        setMembers(normalizedRoster);
+        setTeamSize(team.participationType === "Individual" ? 1 : Math.max(2, normalizedRoster.length));
       })
       .catch(() => {
         /* 401/403 is handled by RequireAuth; anything else surfaces on submit */
@@ -604,8 +1000,74 @@ export function TeamRegisterPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (participationType === "Individual") {
+      setTeamSize(1);
+      setMembers((prev) => [{
+        firstName: personal.firstName,
+        lastName: personal.lastName,
+        email: user?.email ?? prev[0]?.email ?? "",
+        phone: personal.phone,
+        idCardFile: prev[0]?.idCardFile ?? null,
+        idCardName: prev[0]?.idCardName ?? "",
+        idCardError: prev[0]?.idCardError ?? "",
+      }]);
+      return;
+    }
+
+    const targetSize = Math.max(2, Math.min(teamSize, 6));
+    setTeamSize(targetSize);
+    setMembers((prev) => {
+      const next = [...prev];
+      while (next.length < targetSize) next.push(emptyMember());
+      return next.slice(0, targetSize);
+    });
+  }, [participationType]);
+
   const updateMember = (i: number, field: keyof MemberDraft, val: string) => {
     setMembers((prev) => prev.map((m, idx) => (idx === i ? { ...m, [field]: val } : m)));
+  };
+
+  const handleMemberIdCardChange = (index: number, file: File | null) => {
+    if (index === 0) {
+      setIdCardFile(null);
+      setIdCardError("");
+    }
+
+    setMembers((prev) =>
+      prev.map((member, idx) =>
+        idx === index ? { ...member, idCardFile: null, idCardName: "", idCardError: "" } : member,
+      ),
+    );
+
+    if (!file) return;
+
+    if (!MEMBER_ID_CARD_MIME_TYPES.has(file.type)) {
+      const message = "ID card must be a PDF, JPG, or PNG file.";
+      if (index === 0) setIdCardError(message);
+      setMembers((prev) =>
+        prev.map((member, idx) => (idx === index ? { ...member, idCardError: message } : member)),
+      );
+      return;
+    }
+
+    if (file.size > MEMBER_ID_CARD_MAX_SIZE_BYTES) {
+      const message = "ID card file is too large (max 500 KB).";
+      if (index === 0) setIdCardError(message);
+      setMembers((prev) =>
+        prev.map((member, idx) => (idx === index ? { ...member, idCardError: message } : member)),
+      );
+      return;
+    }
+
+    setMembers((prev) =>
+      prev.map((member, idx) =>
+        idx === index
+          ? { ...member, idCardFile: file, idCardName: file.name, idCardError: "" }
+          : member,
+      ),
+    );
+    if (index === 0) setIdCardFile(file);
   };
 
   const handleSizeChange = (n: number) => {
@@ -630,7 +1092,18 @@ export function TeamRegisterPage() {
       : problemOptionType === "open"
         ? proposedProblemStatement || "-"
         : "-";
-  const idCardDisplay = idCardFile?.name ?? existingIdCardName ?? "-";
+  const idCardDisplay = members[0]?.idCardFile?.name ?? members[0]?.idCardName ?? idCardFile?.name ?? existingIdCardName ?? "-";
+
+  const resetAffiliationForCategory = (category: typeof participantCategory) => {
+    setParticipantCategory(category);
+    if (category === "School & Vocational") {
+      setInstitutionType(SCHOOL_INSTITUTION_TYPES[0]);
+    } else if (category === "Diploma & Higher Education") {
+      setInstitutionType(HIGHER_ED_INSTITUTION_TYPES[0]);
+    } else {
+      setInstitutionType(INDUSTRY_INSTITUTION_TYPES[0]);
+    }
+  };
 
   /**
    * Regional categories have no official PS, so there's nothing to choose -
@@ -646,22 +1119,6 @@ export function TeamRegisterPage() {
     setProposedProblemStatement("");
   };
 
-  const handleIdCardChange = (file: File | null) => {
-    setIdCardError("");
-    if (!file) {
-      setIdCardFile(null);
-      return;
-    }
-    if (!ID_CARD_ALLOWED_MIME.has(file.type)) {
-      setIdCardError("ID card must be a PDF, JPG, or PNG file.");
-      return;
-    }
-    if (file.size > ID_CARD_MAX_SIZE_BYTES) {
-      setIdCardError("ID card file is too large (max 5 MB).");
-      return;
-    }
-    setIdCardFile(file);
-  };
 
   async function saveProfile(): Promise<boolean> {
     setError("");
@@ -762,8 +1219,29 @@ export function TeamRegisterPage() {
       setStep(2);
       return;
     }
-    if (!idCardFile && !existingIdCardName) {
-      setError("Upload your organisation/institution ID card (PDF, JPG, or PNG).");
+    if (!affiliationComplete(participantCategory, {
+      institutionType, affiliationPinCode, affiliationCity, affiliationState,
+      institutionEmail, institutionPhone, classLevel, degreeProgramme,
+      departmentBranch, yearOfStudy, coordinatorName, coordinatorEmail,
+      coordinatorPhone, designationRole, departmentDivision, officialOrgEmail, orgContactPhone,
+    })) {
+      setError("Complete the required affiliation details before submitting.");
+      setStep(2);
+      return;
+    }
+    if (
+      mentorName.trim() &&
+      (!mentorEmail.trim() || !EMAIL_RE.test(mentorEmail.trim()) || !phoneOk(mentorPhone))
+    ) {
+      setError("When a mentor is provided, enter a valid mentor email and phone number.");
+      setStep(3);
+      return;
+    }
+    const missingMemberDocument = members.find((member) => !member.idCardFile && !member.idCardName);
+    if (missingMemberDocument) {
+      const index = members.indexOf(missingMemberDocument);
+      const label = participationType === "Individual" ? "the applicant" : index === 0 ? "the team leader" : `Member ${index + 1}`;
+      setError(`Upload a Student / Institution ID Card for ${label}. PDF, JPG, or PNG, max 500 KB.`);
       setStep(3);
       return;
     }
@@ -772,9 +1250,33 @@ export function TeamRegisterPage() {
     setError("");
 
     const problemSelection = {
-      name: teamName,
+      name: teamName.trim() || `${personal.firstName || "Participant"}'s Innovation Entry`,
       institute,
       institutionAddress,
+      participationType,
+      participantCategory,
+      participationLevel,
+      institutionType: institutionType || undefined,
+      affiliationPinCode: affiliationPinCode || undefined,
+      affiliationCity: affiliationCity || undefined,
+      affiliationState: affiliationState || undefined,
+      institutionEmail: institutionEmail || undefined,
+      institutionPhone: institutionPhone || undefined,
+      classLevel: classLevel || undefined,
+      degreeProgramme: degreeProgramme || undefined,
+      departmentBranch: departmentBranch || undefined,
+      yearOfStudy: yearOfStudy || undefined,
+      coordinatorName: coordinatorName || undefined,
+      coordinatorEmail: coordinatorEmail || undefined,
+      coordinatorPhone: coordinatorPhone || undefined,
+      designationRole: designationRole || undefined,
+      departmentDivision: departmentDivision || undefined,
+      officialOrgEmail: officialOrgEmail || undefined,
+      orgContactPhone: orgContactPhone || undefined,
+      mentorName: mentorName || undefined,
+      mentorDesignation: mentorDesignation || undefined,
+      mentorEmail: mentorEmail || undefined,
+      mentorPhone: mentorPhone || undefined,
       problemCategoryCode,
       problemOptionType,
       ...(problemOptionType === "open" ? { proposedProblemStatement } : {}),
@@ -784,10 +1286,13 @@ export function TeamRegisterPage() {
       let id = teamId;
 
       if (!id) {
-        // idCardFile is guaranteed non-null here: the check above already
-        // returned early if both it and existingIdCardName were empty, and
-        // a brand-new team (no teamId yet) can't have an existingIdCardName.
-        const { team } = await teamApi.create(problemSelection, idCardFile!);
+        // The leader's participant document also supplies the legacy team-level
+        // card column needed by the existing create API.
+        const leaderIdCard = members[0]?.idCardFile ?? idCardFile;
+        if (!leaderIdCard) {
+          throw new ApiError(400, "Upload the Team Leader / Applicant ID Card first.");
+        }
+        const { team } = await teamApi.create(problemSelection, leaderIdCard);
         id = team.id;
         setTeamId(id);
       } else {
@@ -795,7 +1300,7 @@ export function TeamRegisterPage() {
         // edits made since it loaded. idCardFile is only passed when the
         // user chose to replace the card already on file; omitting it
         // leaves the existing upload untouched (see teamApi.update).
-        await teamApi.update(id, problemSelection, idCardFile ?? undefined);
+        await teamApi.update(id, problemSelection, members[0]?.idCardFile ?? idCardFile ?? undefined);
       }
 
       // Reconcile the local roster against whatever's already on the team
@@ -811,7 +1316,8 @@ export function TeamRegisterPage() {
       const currentByEmail = new Map(
         currentMembers.map((m: TeamMember) => [m.email.toLowerCase(), m]),
       );
-      const localEmails = new Set(members.slice(1).map((m) => m.email.toLowerCase()));
+      const localOtherMembers = participationType === "Individual" ? [] : members.slice(1);
+      const localEmails = new Set(localOtherMembers.map((m) => m.email.toLowerCase()));
 
       for (const cm of currentMembers) {
         if (!localEmails.has(cm.email.toLowerCase())) {
@@ -819,23 +1325,45 @@ export function TeamRegisterPage() {
         }
       }
 
-      for (const m of members.slice(1)) {
+      for (const m of localOtherMembers) {
         const existing = currentByEmail.get(m.email.toLowerCase());
+
+        if (!existing) {
+          if (!m.idCardFile) {
+            throw new ApiError(400, `Upload an ID Card for ${m.firstName} ${m.lastName}.`);
+          }
+          await teamApi.addMember(
+            id,
+            {
+              firstName: m.firstName,
+              lastName: m.lastName,
+              email: m.email,
+              phone: m.phone || undefined,
+            },
+            m.idCardFile,
+          );
+          continue;
+        }
+
         const changed =
-          !!existing &&
-          (existing.firstName !== m.firstName ||
-            existing.lastName !== m.lastName ||
-            (existing.phone ?? "") !== m.phone);
+          existing.firstName !== m.firstName ||
+          existing.lastName !== m.lastName ||
+          (existing.phone ?? "") !== m.phone ||
+          !!m.idCardFile;
 
-        if (existing && !changed) continue;
-        if (existing && changed) await teamApi.removeMember(id, existing.id);
+        if (!changed) continue;
 
-        await teamApi.addMember(id, {
-          firstName: m.firstName,
-          lastName: m.lastName,
-          email: m.email,
-          phone: m.phone || undefined,
-        });
+        await teamApi.updateMember(
+          id,
+          existing.id,
+          {
+            firstName: m.firstName,
+            lastName: m.lastName,
+            email: m.email,
+            phone: m.phone || undefined,
+          },
+          m.idCardFile ?? undefined,
+        );
       }
 
       const { team } = await teamApi.submit(id);
@@ -868,20 +1396,20 @@ export function TeamRegisterPage() {
   if (existingTeam) {
     const STATUS_COPY: Record<string, { title: string; body: string }> = {
       submitted: {
-        title: "Your team has been registered!",
+        title: "Your registration has been recorded!",
         body: "Sit tight - wait for further rounds. We'll notify every team member by email as the process moves forward.",
       },
       under_review: {
-        title: "Your team is under review",
+        title: "Your registration is under review",
         body: "Your registration is being reviewed by the SEVA 2026 jury. Wait for further rounds - we'll notify you by email.",
       },
       shortlisted: {
         title: "Congratulations - you're shortlisted!",
-        body: "Your team has been shortlisted for the next round of SEVA 2026. Watch your email for next steps.",
+        body: "Your registration has been shortlisted for the next round of SEVA 2026. Watch your email for next steps.",
       },
       rejected: {
         title: "Thank you for participating",
-        body: "Your team was not shortlisted this round. We appreciate the effort you put into your registration.",
+        body: "Your registration was not shortlisted this round. We appreciate the effort you put into your registration.",
       },
     };
     const copy = STATUS_COPY[existingTeam.status] ?? STATUS_COPY["submitted"]!;
@@ -929,9 +1457,33 @@ export function TeamRegisterPage() {
             <ConfirmationSummary
               personal={personal}
               email={user?.email ?? ""}
-              teamName={teamName}
+              participationType={participationType}
+              teamName={teamName || `${personal.firstName || "Participant"}'s Innovation Entry`}
               institute={institute}
               institutionAddress={institutionAddress}
+              participantCategory={participantCategory}
+              participationLevel={participationLevel}
+              institutionType={institutionType}
+              affiliationCity={affiliationCity}
+              affiliationState={affiliationState}
+              affiliationPinCode={affiliationPinCode}
+              institutionEmail={institutionEmail}
+              institutionPhone={institutionPhone}
+              degreeProgramme={degreeProgramme}
+              departmentBranch={departmentBranch}
+              yearOfStudy={yearOfStudy}
+              classLevel={classLevel}
+              designationRole={designationRole}
+              departmentDivision={departmentDivision}
+              officialOrgEmail={officialOrgEmail}
+              coordinatorName={coordinatorName}
+              coordinatorEmail={coordinatorEmail}
+              coordinatorPhone={coordinatorPhone}
+              orgContactPhone={orgContactPhone}
+              mentorName={mentorName}
+              mentorDesignation={mentorDesignation}
+              mentorEmail={mentorEmail}
+              mentorPhone={mentorPhone}
               theme={themeDisplay}
               problem={problemDisplay}
               idCardName={idCardDisplay}
@@ -948,29 +1500,29 @@ export function TeamRegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#fdf6f6]">
+    <div className="flex min-h-screen flex-col bg-[#fafafa]">
       <Header activeNav="team-register" />
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
-        <div className="no-print mb-6">
-          <p className="mb-1 text-xs font-bold uppercase tracking-widest text-primary">
-            SEVA 2026 · DTU Youth Innovation Challenge
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+        <div className="no-print mb-8">
+          <p className="text-xs font-bold uppercase tracking-widest text-[#ff4d4f]">
+            SEVA 2026 · RASHTRIYA YOUTH INNOVATION CHALLENGE
           </p>
-          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-            Team Registration
+          <h1 className="mt-1 text-3xl font-black tracking-tight text-gray-900 sm:text-4xl">
+            Registration Dossier
           </h1>
-          <p className="mt-2 text-sm text-gray-500">
-            Complete every step of the dossier to register your team for SEVA 2026.
+          <p className="mt-2 max-w-3xl text-sm text-gray-600">
+            Complete your personal identity, problem category, participation details, entry information, and final confirmation to register for SEVA 2026.
           </p>
         </div>
 
-        <div className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm sm:flex-row">
+        <div className="flex flex-col items-start gap-6 lg:flex-row">
           <DossierSidebar step={step} />
 
-          <div className="min-w-0 flex-1">
+          <div className="w-full min-w-0 flex-1 rounded-2xl border border-red-200/90 bg-white p-6 shadow-xs sm:p-8">
             {/* ── STEP 1: Personal Details ── */}
             {step === 1 && (
-              <div className="space-y-7 px-6 py-8 sm:px-8">
+              <div className="space-y-7">
                 <SectionHeader n={1} icon={User} title="Candidate Full Name & Profile" />
                 <div className="-mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <Field label="First Name" required>
@@ -1012,17 +1564,11 @@ export function TeamRegisterPage() {
                     </select>
                   </Field>
                   <Field label="Nationality / Citizenship" required>
-                    <select
-                      className={selectClass}
+                    <DossierSelect
                       value={personal.nationality}
-                      onChange={(e) => setPersonal((p) => ({ ...p, nationality: e.target.value }))}
-                    >
-                      {NATIONALITY_OPTIONS.map((n) => (
-                        <option key={n} value={n}>
-                          {n}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => setPersonal((p) => ({ ...p, nationality: val }))}
+                      options={NATIONALITY_OPTIONS}
+                    />
                   </Field>
                   <Field label="Date of Birth (As per High School Certificate)" required>
                     <input
@@ -1033,18 +1579,12 @@ export function TeamRegisterPage() {
                     />
                   </Field>
                   <Field label="Gender Identity" required>
-                    <select
-                      className={selectClass}
+                    <DossierSelect
                       value={personal.gender}
-                      onChange={(e) => setPersonal((p) => ({ ...p, gender: e.target.value }))}
-                    >
-                      <option value="">Select…</option>
-                      {GENDER_OPTIONS.map((g) => (
-                        <option key={g} value={g}>
-                          {g}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => setPersonal((p) => ({ ...p, gender: val }))}
+                      options={GENDER_OPTIONS}
+                      placeholder="Select an option"
+                    />
                   </Field>
                 </div>
 
@@ -1121,31 +1661,19 @@ export function TeamRegisterPage() {
                     />
                   </Field>
                   <Field label="State / UT" required>
-                    <select
-                      className={selectClass}
+                    <DossierSelect
                       value={personal.state}
-                      onChange={(e) => setPersonal((p) => ({ ...p, state: e.target.value }))}
-                    >
-                      <option value="">Select…</option>
-                      {NORTH_STATE_OPTIONS.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => setPersonal((p) => ({ ...p, state: val }))}
+                      options={INDIA_STATE_OPTIONS}
+                      placeholder="Select a state / UT"
+                    />
                   </Field>
                   <Field label="Country" required>
-                    <select
-                      className={selectClass}
+                    <DossierSelect
                       value={personal.country}
-                      onChange={(e) => setPersonal((p) => ({ ...p, country: e.target.value }))}
-                    >
-                      {COUNTRY_OPTIONS.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => setPersonal((p) => ({ ...p, country: val }))}
+                      options={COUNTRY_OPTIONS}
+                    />
                   </Field>
                 </div>
 
@@ -1217,90 +1745,379 @@ export function TeamRegisterPage() {
 
             {/* ── STEP 2: Category & Participation ── */}
             {step === 2 && (
-              <div className="space-y-7 px-6 py-8 sm:px-8">
-                <SectionHeader n={1} icon={Layers} title="Category" />
-                <div className="-mt-5">
-                  <Field label="Problem Category" required>
-                    <select
-                      className={selectClass}
-                      value={problemCategoryCode}
-                      onChange={(e) => handleCategoryChange(e.target.value)}
-                    >
-                      <option value="">Select a category…</option>
-                      <optgroup label="National Level Innovation">
-                        {PROBLEM_CATEGORIES.filter((c) => c.theme === "NATIONAL").map((c) => (
-                          <option key={c.code} value={c.code}>
-                            {c.label}
-                          </option>
-                        ))}
-                      </optgroup>
-                      <optgroup label="Local Community Level Innovation">
-                        {PROBLEM_CATEGORIES.filter((c) => c.theme === "REGIONAL").map((c) => (
-                          <option key={c.code} value={c.code}>
-                            {c.label}
-                          </option>
-                        ))}
-                      </optgroup>
-                    </select>
-                  </Field>
+              <div className="space-y-8">
+                <div>
+                  <SectionHeader n={1} icon={Users} title="Participation Type" />
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {([
+                      { type: "Individual", title: "Individual", desc: "Single innovator submitting a project", icon: User },
+                      { type: "Team / Group", title: "Team / Group", desc: "Collaborative team of 2 to 6 participants", icon: Users },
+                      { type: "Organisation", title: "Organisation", desc: "Industry, startup or institution-sponsored entry", icon: Building2 },
+                    ] as const).map((item) => {
+                      const Icon = item.icon;
+                      const selected = participationType === item.type;
+                      return (
+                        <button
+                          key={item.type}
+                          type="button"
+                          onClick={() => setParticipationType(item.type)}
+                          className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${selected ? "border-[#ff4d4f] bg-red-50/40 ring-1 ring-[#ff4d4f] shadow-xs" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <Icon size={18} className={selected ? "text-[#ff4d4f]" : "text-gray-400"} />
+                            {selected && <CheckCircle2 size={16} className="text-[#ff4d4f]" />}
+                          </div>
+                          <p className={`mt-2 text-sm font-bold ${selected ? "text-gray-900" : "text-gray-700"}`}>{item.title}</p>
+                          <p className="mt-0.5 text-xs text-gray-500 leading-snug">{item.desc}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                <SectionHeader n={2} icon={ListChecks} title="Problem Statement" />
-                <div className="-mt-5 space-y-4">
-                  {!problemCategoryCode ? (
-                    <p className="text-xs text-gray-400">Pick a category first.</p>
-                  ) : selectedCategory?.theme === "REGIONAL" ? (
-                    // Regional categories have no official PS at all - every
-                    // regional team proposes and solves its own problem, so
-                    // there is no PS/OPEN choice to make here, only the
-                    // proposal text itself.
-                    <p className="text-xs text-gray-500">
-                      This category has no official problem statement - describe the problem you're
-                      proposing to solve below.
-                    </p>
-                  ) : (
-                    <Field label="How do you want to participate?" required>
-                      <div className="flex flex-col gap-2 sm:flex-row">
+                <div>
+                  <SectionHeader n={2} icon={GraduationCap} title="Participant Category" />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {([
+                      { cat: "School & Vocational", title: "School & Vocational", desc: "Secondary, Higher Secondary, ITI & vocational participants", icon: School },
+                      { cat: "Diploma & Higher Education", title: "Diploma & Higher Education", desc: "Polytechnic, UG, PG & higher-education participants", icon: GraduationCap },
+                      { cat: "Industry & Government", title: "Industry & Government", desc: "Startups, MSMEs, industry and government innovators", icon: Building2 },
+                    ] as const).map((item) => {
+                      const Icon = item.icon;
+                      const selected = participantCategory === item.cat;
+                      return (
                         <button
+                          key={item.cat}
                           type="button"
-                          onClick={() => setProblemOptionType("ps")}
-                          className={`flex-1 rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-all cursor-pointer ${
-                            problemOptionType === "ps"
-                              ? "border-primary bg-primary/5 text-primary"
-                              : "border-gray-200 text-gray-600 hover:bg-gray-50"
-                          }`}
+                          onClick={() => resetAffiliationForCategory(item.cat)}
+                          className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${selected ? "border-[#ff4d4f] bg-red-50/40 ring-1 ring-[#ff4d4f] shadow-xs" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"}`}
                         >
-                          Take the official Problem Statement
-                          <span className="mt-0.5 block text-xs font-normal text-gray-400">
-                            {selectedCategory?.psTitle}
-                          </span>
+                          <div className="flex items-center justify-between">
+                            <Icon size={18} className={selected ? "text-[#ff4d4f]" : "text-gray-400"} />
+                            {selected && <CheckCircle2 size={16} className="text-[#ff4d4f]" />}
+                          </div>
+                          <p className={`mt-2 text-sm font-bold ${selected ? "text-gray-900" : "text-gray-700"}`}>{item.title}</p>
+                          <p className="mt-0.5 text-xs text-gray-500 leading-snug">{item.desc}</p>
                         </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <SectionHeader n={3} icon={Award} title="Participation Level" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {([
+                      { level: "National Level", title: "National Level", desc: "National-level innovation themes and official problem statements." },
+                      { level: "Local Community Level", title: "Local Community Level", desc: "Regional and community-focused innovation challenges." },
+                    ] as const).map((item) => {
+                      const selected = participationLevel === item.level;
+                      return (
                         <button
+                          key={item.level}
                           type="button"
-                          onClick={() => setProblemOptionType("open")}
-                          className={`flex-1 rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-all cursor-pointer ${
-                            problemOptionType === "open"
-                              ? "border-primary bg-primary/5 text-primary"
-                              : "border-gray-200 text-gray-600 hover:bg-gray-50"
-                          }`}
+                          onClick={() => {
+                            setParticipationLevel(item.level);
+                            setProblemCategoryCode("");
+                            setProblemOptionType("");
+                            setProposedProblemStatement("");
+                          }}
+                          className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${selected ? "border-[#ff4d4f] bg-red-50/40 ring-1 ring-[#ff4d4f] shadow-xs" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"}`}
                         >
-                          Propose my own problem
-                          <span className="mt-0.5 block text-xs font-normal text-gray-400">
-                            Identify and solve a problem of your own within this category.
-                          </span>
+                          <div className="flex items-center justify-between">
+                            <Award size={18} className={selected ? "text-[#ff4d4f]" : "text-gray-400"} />
+                            {selected && <CheckCircle2 size={16} className="text-[#ff4d4f]" />}
+                          </div>
+                          <p className={`mt-2 text-sm font-bold ${selected ? "text-gray-900" : "text-gray-700"}`}>{item.title}</p>
+                          <p className="mt-1 text-xs text-gray-500 leading-relaxed">{item.desc}</p>
                         </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <SectionHeader
+                    n={4}
+                    icon={Building2}
+                    title={
+                      participantCategory === "School & Vocational"
+                        ? "School & Vocational Institution Details"
+                        : participantCategory === "Industry & Government"
+                          ? "Organization Details"
+                          : "College / University / Institution Details"
+                    }
+                  />
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field
+                      label={
+                        participantCategory === "School & Vocational"
+                          ? "School / Institution Name"
+                          : participantCategory === "Industry & Government"
+                            ? "Organization Name"
+                            : "College / University / Institution Name"
+                      }
+                      required
+                    >
+                      <input
+                        className={inputClass}
+                        value={institute}
+                        onChange={(e) => setInstitute(e.target.value)}
+                        placeholder={
+                          participantCategory === "School & Vocational"
+                            ? "e.g. Kendriya Vidyalaya / Government Senior Secondary School"
+                            : participantCategory === "Industry & Government"
+                              ? "e.g. Bharat Dynamics / DRDO / Tech Innovation Pvt Ltd"
+                              : "e.g. Delhi Technological University"
+                        }
+                      />
+                    </Field>
+                    <Field label="Institution Type" required>
+                      <DossierSelect
+                        value={institutionType}
+                        onChange={setInstitutionType}
+                        options={
+                          participantCategory === "School & Vocational"
+                            ? SCHOOL_INSTITUTION_TYPES
+                            : participantCategory === "Industry & Government"
+                              ? INDUSTRY_INSTITUTION_TYPES
+                              : HIGHER_ED_INSTITUTION_TYPES
+                        }
+                      />
+                    </Field>
+                    <Field label="Institution / Organization Email">
+                      <div className="relative">
+                        <Mail size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="email"
+                          className={`${inputClass} pl-9`}
+                          value={institutionEmail}
+                          onChange={(e) => setInstitutionEmail(e.target.value)}
+                          placeholder="office@institution.ac.in"
+                        />
                       </div>
                     </Field>
-                  )}
-
-                  {problemOptionType === "open" && (
+                    <Field label="Institution Contact Phone">
+                      <div className="relative">
+                        <Phone size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="tel"
+                          className={`${inputClass} pl-9`}
+                          value={institutionPhone}
+                          onChange={(e) => setInstitutionPhone(e.target.value)}
+                          placeholder="+91 9876543210"
+                        />
+                      </div>
+                    </Field>
                     <Field
-                      label="Describe the problem you're proposing to solve"
+                      label={
+                        participantCategory === "School & Vocational"
+                          ? "School Address"
+                          : participantCategory === "Industry & Government"
+                            ? "Organization Address"
+                            : "Institution Address"
+                      }
                       required
-                      hint="At least 10 characters."
                     >
                       <textarea
-                        className={`${inputClass} min-h-[110px] resize-y`}
+                        className={`${inputClass} min-h-[80px] resize-y`}
+                        value={institutionAddress}
+                        onChange={(e) => setInstitutionAddress(e.target.value)}
+                        placeholder={
+                          participantCategory === "School & Vocational"
+                            ? "School premises, street / area / landmark"
+                            : participantCategory === "Industry & Government"
+                              ? "Registered address, office complex, area, PIN"
+                              : "Campus road, locality, district, state, PIN"
+                        }
+                      />
+                    </Field>
+                    {participantCategory === "School & Vocational" && (
+                      <Field label="School PIN / Postal Code" required hint="6-digit Indian PIN code">
+                        <input
+                          inputMode="numeric"
+                          maxLength={6}
+                          className={inputClass}
+                          value={affiliationPinCode}
+                          onChange={(e) => setAffiliationPinCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          placeholder="110042"
+                        />
+                      </Field>
+                    )}
+                    <Field label="City / District" required>
+                      <input
+                        className={inputClass}
+                        value={affiliationCity}
+                        onChange={(e) => setAffiliationCity(e.target.value)}
+                        placeholder="New Delhi"
+                      />
+                    </Field>
+                    <Field label="State / UT" required>
+                      <DossierSelect value={affiliationState} onChange={setAffiliationState} options={INDIA_STATE_OPTIONS} />
+                    </Field>
+                  </div>
+
+                  {participantCategory === "School & Vocational" && (
+                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <Field label="Class / Level" required>
+                        <DossierSelect value={classLevel} onChange={setClassLevel} options={SCHOOL_CLASS_OPTIONS} />
+                      </Field>
+                    </div>
+                  )}
+
+                  {participantCategory === "Diploma & Higher Education" && (
+                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <Field label="Degree / Programme" required>
+                        <input
+                          className={inputClass}
+                          value={degreeProgramme}
+                          onChange={(e) => setDegreeProgramme(e.target.value)}
+                          placeholder="B.Tech / Diploma / M.Tech / Ph.D"
+                        />
+                      </Field>
+                      <Field label="Department / Branch" required>
+                        <input
+                          className={inputClass}
+                          value={departmentBranch}
+                          onChange={(e) => setDepartmentBranch(e.target.value)}
+                          placeholder="Computer Science & Engineering"
+                        />
+                      </Field>
+                      <Field label="Year of Study" required>
+                        <DossierSelect value={yearOfStudy} onChange={setYearOfStudy} options={HIGHER_ED_YEARS} />
+                      </Field>
+                      <Field label="Coordinator Name">
+                        <input
+                          className={inputClass}
+                          value={coordinatorName}
+                          onChange={(e) => setCoordinatorName(e.target.value)}
+                          placeholder="Dr. Faculty Coordinator"
+                        />
+                      </Field>
+                      <Field label="Coordinator Email">
+                        <input
+                          type="email"
+                          className={inputClass}
+                          value={coordinatorEmail}
+                          onChange={(e) => setCoordinatorEmail(e.target.value)}
+                          placeholder="coordinator@institution.ac.in"
+                        />
+                      </Field>
+                      <Field label="Coordinator Contact Number">
+                        <input
+                          type="tel"
+                          className={inputClass}
+                          value={coordinatorPhone}
+                          onChange={(e) => setCoordinatorPhone(e.target.value)}
+                          placeholder="+91 9876543210"
+                        />
+                      </Field>
+                    </div>
+                  )}
+
+                  {participantCategory === "Industry & Government" && (
+                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <Field label="Applicant Role / Designation" required>
+                        <input
+                          className={inputClass}
+                          value={designationRole}
+                          onChange={(e) => setDesignationRole(e.target.value)}
+                          placeholder="Founder / Scientist / Engineer"
+                        />
+                      </Field>
+                      <Field label="Department / Division">
+                        <input
+                          className={inputClass}
+                          value={departmentDivision}
+                          onChange={(e) => setDepartmentDivision(e.target.value)}
+                          placeholder="R&D / Innovation / Engineering"
+                        />
+                      </Field>
+                      <Field label="Official Organization Email" required>
+                        <input
+                          type="email"
+                          className={inputClass}
+                          value={officialOrgEmail}
+                          onChange={(e) => setOfficialOrgEmail(e.target.value)}
+                          placeholder="innovation@organization.com"
+                        />
+                      </Field>
+                      <Field label="Organization Contact Number">
+                        <input
+                          type="tel"
+                          className={inputClass}
+                          value={orgContactPhone}
+                          onChange={(e) => setOrgContactPhone(e.target.value)}
+                          placeholder="+91 9876543210"
+                        />
+                      </Field>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <SectionHeader n={5} icon={Layers} title="Problem Category" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {PROBLEM_CATEGORIES.filter((c) => (participationLevel === "National Level" ? c.theme === "NATIONAL" : c.theme === "REGIONAL")).map((c) => {
+                      const selected = problemCategoryCode === c.code;
+                      return (
+                        <button
+                          key={c.code}
+                          type="button"
+                          onClick={() => handleCategoryChange(c.code)}
+                          className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${selected ? "border-[#ff4d4f] bg-red-50/40 ring-1 ring-[#ff4d4f] shadow-xs" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"}`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs font-bold uppercase tracking-wider text-[#ff4d4f]">{c.code}</span>
+                            {selected && <CheckCircle2 size={16} className="text-[#ff4d4f]" />}
+                          </div>
+                          <p className="mt-2 text-sm font-bold text-gray-900">{c.label}</p>
+                          {c.psTitle && <p className="mt-1 text-xs leading-relaxed text-gray-500">{c.psTitle}</p>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <SectionHeader n={6} icon={ListChecks} title="Problem Statement" />
+                  {!problemCategoryCode ? (
+                    <p className="text-xs text-gray-400">Choose a problem category first.</p>
+                  ) : selectedCategory?.theme === "REGIONAL" ? (
+                    <p className="text-xs text-gray-500">This regional category uses an open proposal. Describe the problem your team intends to solve.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setProblemOptionType("ps")}
+                        className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${problemOptionType === "ps" ? "border-[#ff4d4f] bg-red-50/40 ring-1 ring-[#ff4d4f] shadow-xs" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <Bookmark size={18} className={problemOptionType === "ps" ? "text-[#ff4d4f]" : "text-gray-400"} />
+                          {problemOptionType === "ps" && <CheckCircle2 size={16} className="text-[#ff4d4f]" />}
+                        </div>
+                        <p className="mt-2 text-sm font-bold text-gray-900">Official Problem Statement</p>
+                        <p className="mt-1 text-xs text-gray-500">{selectedCategory?.psTitle}</p>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProblemOptionType("open")}
+                        className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${problemOptionType === "open" ? "border-[#ff4d4f] bg-red-50/40 ring-1 ring-[#ff4d4f] shadow-xs" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <Layers size={18} className={problemOptionType === "open" ? "text-[#ff4d4f]" : "text-gray-400"} />
+                          {problemOptionType === "open" && <CheckCircle2 size={16} className="text-[#ff4d4f]" />}
+                        </div>
+                        <p className="mt-2 text-sm font-bold text-gray-900">Propose my own problem</p>
+                        <p className="mt-1 text-xs text-gray-500">Define a problem within the selected challenge category.</p>
+                      </button>
+                    </div>
+                  )}
+                  {problemOptionType === "open" && (
+                    <Field label="Describe the problem you're proposing to solve" required hint="At least 10 characters.">
+                      <textarea
+                        className={`${inputClass} mt-3 min-h-[110px] resize-y`}
                         value={proposedProblemStatement}
                         onChange={(e) => setProposedProblemStatement(e.target.value)}
                         placeholder="What's the problem, who does it affect, and what's your proposed direction?"
@@ -1309,39 +2126,32 @@ export function TeamRegisterPage() {
                   )}
                 </div>
 
-                <SectionHeader n={3} icon={Users} title="Team Composition" />
-                <div className="-mt-5">
-                  <Field label="Team Size" required hint="Including team leader (you).">
-                    <div className="flex gap-2">
-                      {TEAM_SIZE_OPTIONS.map((n) => (
-                        <button
-                          key={n}
-                          type="button"
-                          onClick={() => handleSizeChange(n)}
-                          className={`size-10 rounded-lg text-sm font-bold transition-all cursor-pointer ${
-                            teamSize === n
-                              ? "bg-primary text-white"
-                              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
-                          }`}
-                        >
-                          {n}
-                        </button>
-                      ))}
-                    </div>
-                  </Field>
-                </div>
-
-                {error && (
-                  <p role="alert" className="text-xs font-semibold text-primary">
-                    {error}
-                  </p>
-                )}
+                {error && <p role="alert" className="text-xs font-semibold text-[#ff4d4f]">{error}</p>}
 
                 <StepFooter
                   onBack={() => setStep(1)}
-                  nextLabel="Next: About Team"
+                  nextLabel="Next: Entry Details"
                   onNext={() => setStep(3)}
                   nextDisabled={
+                    !affiliationComplete(participantCategory, {
+                      institutionType,
+                      affiliationPinCode,
+                      affiliationCity,
+                      affiliationState,
+                      institutionEmail,
+                      institutionPhone,
+                      classLevel,
+                      degreeProgramme,
+                      departmentBranch,
+                      yearOfStudy,
+                      coordinatorName,
+                      coordinatorEmail,
+                      coordinatorPhone,
+                      designationRole,
+                      departmentDivision,
+                      officialOrgEmail,
+                      orgContactPhone,
+                    }) ||
                     !problemCategoryCode ||
                     !problemOptionType ||
                     (problemOptionType === "open" && proposedProblemStatement.trim().length < 10)
@@ -1350,77 +2160,56 @@ export function TeamRegisterPage() {
               </div>
             )}
 
-            {/* ── STEP 3: About Team ── */}
+            {/* ── STEP 3: Entry Details ── */}
             {step === 3 && (
-              <div className="space-y-7 px-6 py-8 sm:px-8">
-                <SectionHeader n={1} icon={IdCard} title="Team Identity" />
+              <div className="space-y-7">
+                <SectionHeader n={1} icon={IdCard} title={participationType === "Individual" ? "Innovation Entry" : participationType === "Organisation" ? "Organisation Entry" : "Team Identity"} />
                 <div className="-mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Field label="Team Name" required hint="At least 3 characters.">
+                  <Field label={participationType === "Individual" ? "Project / Innovation Title" : participationType === "Organisation" ? "Organisation / Entry Name" : "Team Name"} required={participationType !== "Individual"} hint={participationType === "Individual" ? "Optional; a default title will be generated if left blank." : "At least 3 characters."}>
                     <input
                       className={inputClass}
                       value={teamName}
                       onChange={(e) => setTeamName(e.target.value)}
-                      placeholder="e.g. Circuit Breakers"
+                      placeholder={participationType === "Individual" ? "e.g. Automated Precision Agrotech Rover" : participationType === "Organisation" ? "e.g. ABC Innovation Cell" : "e.g. Circuit Breakers"}
                     />
-                  </Field>
-                  <Field label="Institute / College" required>
-                    <input
-                      className={inputClass}
-                      value={institute}
-                      onChange={(e) => setInstitute(e.target.value)}
-                      placeholder="e.g. Delhi Technological University"
-                    />
-                  </Field>
-                  <Field
-                    label="Institute / Organisation Address"
-                    required
-                    hint="Postal address of the institution or organisation you're registering under."
-                  >
-                    <textarea
-                      className={`${inputClass} min-h-[80px] resize-y`}
-                      value={institutionAddress}
-                      onChange={(e) => setInstitutionAddress(e.target.value)}
-                      placeholder="Street, city, state, PIN code"
-                    />
-                  </Field>
-                  <Field
-                    label="Organisation ID Card"
-                    required={!existingIdCardName}
-                    hint="PDF, JPG, or PNG · max 5 MB. Institute, staff, or student ID confirming your affiliation."
-                  >
-                    <input
-                      type="file"
-                      accept={ID_CARD_ACCEPT}
-                      onChange={(e) => handleIdCardChange(e.target.files?.[0] ?? null)}
-                      className="block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-bold file:text-primary hover:file:bg-primary/20"
-                    />
-                    {idCardFile ? (
-                      <p className="mt-1.5 text-xs font-medium text-emerald-600">
-                        Selected: {idCardFile.name}
-                      </p>
-                    ) : existingIdCardName ? (
-                      <p className="mt-1.5 text-xs text-gray-400">
-                        Currently on file: {existingIdCardName}. Choose a new file to replace it.
-                      </p>
-                    ) : null}
-                    {idCardError && (
-                      <p role="alert" className="mt-1.5 text-xs font-semibold text-primary">
-                        {idCardError}
-                      </p>
-                    )}
                   </Field>
                 </div>
 
-                <SectionHeader n={2} icon={Users} title="Member Details" />
-                <div className="-mt-5 space-y-3">
+                <SectionHeader n={2} icon={Users} title={participationType === "Individual" ? "Participant Details" : "Member Details"} />
+                {participationType !== "Individual" && (
+                  <div className="-mt-5 mb-3 flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-semibold text-gray-600">Participant count</span>
+                    {TEAM_SIZE_OPTIONS.map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => handleSizeChange(n)}
+                        className={`size-8 rounded-lg border text-xs font-bold cursor-pointer ${teamSize === n ? "border-[#ff4d4f] bg-red-50 text-[#ff4d4f]" : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"}`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="-mt-2 space-y-3">
                   {members.map((m, i) => {
-                    const who = i === 0 ? "Team Leader" : `Member ${i + 1}`;
+                    const who = i === 0
+                      ? participationType === "Individual"
+                        ? "Individual Applicant"
+                        : "Team Leader"
+                      : `${participationType === "Organisation" ? "Participant" : "Team Member"} ${i + 1}`;
                     return (
                       <div key={i} className="space-y-3 rounded-xl border border-gray-100 p-4">
-                        <label className="block text-xs font-semibold text-gray-600">
-                          {i === 0 ? "Team Leader (You)" : `Member ${i + 1} *`}
-                        </label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="flex items-center justify-between">
+                          <label className="block text-xs font-semibold text-gray-600">
+                            {who}{i === 0 ? " (You)" : " *"}
+                          </label>
+                          {i === 0 && (
+                            <span className="text-[10px] font-bold uppercase text-gray-400">Auto-filled from Step 1</span>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                           <input
                             aria-label={`${who} first name`}
                             className={inputClass}
@@ -1437,28 +2226,96 @@ export function TeamRegisterPage() {
                             onChange={(e) => updateMember(i, "lastName", e.target.value)}
                             placeholder="Last name"
                           />
+                          <input
+                            type="email"
+                            aria-label={`${who} email`}
+                            className={inputClass}
+                            disabled={i === 0}
+                            value={m.email}
+                            onChange={(e) => updateMember(i, "email", e.target.value)}
+                            placeholder={i === 0 ? "your@email.com" : `member${i + 1}@email.com`}
+                          />
+                          <input
+                            type="tel"
+                            aria-label={`${who} phone`}
+                            className={inputClass}
+                            disabled={i === 0}
+                            value={m.phone}
+                            onChange={(e) => updateMember(i, "phone", e.target.value)}
+                            placeholder="Phone (optional)"
+                          />
                         </div>
-                        <input
-                          type="email"
-                          aria-label={`${who} email`}
-                          className={inputClass}
-                          disabled={i === 0}
-                          value={m.email}
-                          onChange={(e) => updateMember(i, "email", e.target.value)}
-                          placeholder={i === 0 ? "your@email.com" : `member${i + 1}@email.com`}
-                        />
-                        <input
-                          type="tel"
-                          aria-label={`${who} phone`}
-                          className={inputClass}
-                          disabled={i === 0}
-                          value={m.phone}
-                          onChange={(e) => updateMember(i, "phone", e.target.value)}
-                          placeholder="Phone (optional)"
-                        />
+
+                        <div className="rounded-lg border border-gray-100 bg-gray-50/70 p-3">
+                          <label className="block text-xs font-bold text-gray-700">
+                            {who}'s Student / Institution ID Card <span className="text-[#ff4d4f]">*</span>
+                          </label>
+                          <p className="mt-1 text-[11px] text-gray-500">
+                            PDF, JPG, or PNG · max 500 KB. College ID, Student ID or Bonafide certificate.
+                          </p>
+                          <input
+                            type="file"
+                            accept={ID_CARD_ACCEPT}
+                            onChange={(e) => handleMemberIdCardChange(i, e.target.files?.[0] ?? null)}
+                            className="mt-2 block w-full text-xs text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-red-50 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-[#ff4d4f] hover:file:bg-red-100 cursor-pointer"
+                          />
+                          {m.idCardFile ? (
+                            <p className="mt-1.5 text-xs font-semibold text-emerald-600">Selected: {m.idCardFile.name}</p>
+                          ) : m.idCardName ? (
+                            <p className="mt-1.5 text-xs text-gray-500">Currently on file: {m.idCardName}. Choose a new file to replace it.</p>
+                          ) : null}
+                          {m.idCardError ? (
+                            <p role="alert" className="mt-1.5 text-xs font-semibold text-[#ff4d4f]">{m.idCardError}</p>
+                          ) : null}
+                        </div>
                       </div>
                     );
                   })}
+                </div>
+
+                <div>
+                  <SectionHeader n={3} icon={UserCheck} title="Mentor / Guide" />
+                  <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-4">
+                    <p className="mb-3 text-xs leading-relaxed text-gray-500">
+                      Optional. Add a faculty guide, incubator manager, industry mentor, or other mentor supporting your team.
+                    </p>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <Field label="Mentor Full Name">
+                        <input
+                          className={inputClass}
+                          value={mentorName}
+                          onChange={(e) => setMentorName(e.target.value)}
+                          placeholder="Mentor Full Name"
+                        />
+                      </Field>
+                      <Field label="Designation / Department / Organization">
+                        <input
+                          className={inputClass}
+                          value={mentorDesignation}
+                          onChange={(e) => setMentorDesignation(e.target.value)}
+                          placeholder="Professor / Research Scientist / Incubator Manager"
+                        />
+                      </Field>
+                      <Field label="Mentor Email">
+                        <input
+                          type="email"
+                          className={inputClass}
+                          value={mentorEmail}
+                          onChange={(e) => setMentorEmail(e.target.value)}
+                          placeholder="mentor@institution.ac.in"
+                        />
+                      </Field>
+                      <Field label="Mentor Phone Number">
+                        <input
+                          type="tel"
+                          className={inputClass}
+                          value={mentorPhone}
+                          onChange={(e) => setMentorPhone(e.target.value)}
+                          placeholder="+91 9876543210"
+                        />
+                      </Field>
+                    </div>
+                  </div>
                 </div>
 
                 {error && (
@@ -1482,10 +2339,10 @@ export function TeamRegisterPage() {
                     setStep(4);
                   }}
                   nextDisabled={
-                    teamName.trim().length < TEAM_NAME_MIN ||
+                    (participationType !== "Individual" && teamName.trim().length < TEAM_NAME_MIN) ||
                     institute.trim().length < INSTITUTE_MIN ||
                     institutionAddress.trim().length < 5 ||
-                    (!idCardFile && !existingIdCardName) ||
+                    members.length !== (participationType === "Individual" ? 1 : teamSize) ||
                     members.some((m) => !memberComplete(m))
                   }
                 />
@@ -1494,14 +2351,38 @@ export function TeamRegisterPage() {
 
             {/* ── STEP 4: Review & Confirmation ── */}
             {step === 4 && (
-              <div className="space-y-6 px-6 py-8 sm:px-8">
+              <div className="space-y-6">
                 <h2 className="text-lg font-bold text-gray-900">Review &amp; Confirm</h2>
                 <ConfirmationSummary
                   personal={personal}
                   email={user?.email ?? ""}
-                  teamName={teamName}
+                  participationType={participationType}
+                  teamName={teamName || `${personal.firstName || "Participant"}'s Innovation Entry`}
                   institute={institute}
                   institutionAddress={institutionAddress}
+                  participantCategory={participantCategory}
+                  participationLevel={participationLevel}
+                  institutionType={institutionType}
+                  affiliationCity={affiliationCity}
+                  affiliationState={affiliationState}
+                  affiliationPinCode={affiliationPinCode}
+                  institutionEmail={institutionEmail}
+                  institutionPhone={institutionPhone}
+                  degreeProgramme={degreeProgramme}
+                  departmentBranch={departmentBranch}
+                  yearOfStudy={yearOfStudy}
+                  classLevel={classLevel}
+                  designationRole={designationRole}
+                  departmentDivision={departmentDivision}
+                  officialOrgEmail={officialOrgEmail}
+                  coordinatorName={coordinatorName}
+                  coordinatorEmail={coordinatorEmail}
+                  coordinatorPhone={coordinatorPhone}
+                  orgContactPhone={orgContactPhone}
+                  mentorName={mentorName}
+                  mentorDesignation={mentorDesignation}
+                  mentorEmail={mentorEmail}
+                  mentorPhone={mentorPhone}
                   theme={themeDisplay}
                   problem={problemDisplay}
                   idCardName={idCardDisplay}
@@ -1546,14 +2427,14 @@ export function TeamRegisterPage() {
 
             {/* ── STEP 5: Download Confirmation ── */}
             {step === 5 && (
-              <div className="space-y-6 px-6 py-8 sm:px-8">
+              <div className="space-y-6">
                 <div className="no-print text-center">
                   <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-50">
                     <CheckCircle2 className="size-7 text-emerald-500" />
                   </div>
-                  <h2 className="mt-3 text-xl font-extrabold text-gray-900">Team Registered!</h2>
+                  <h2 className="mt-3 text-xl font-extrabold text-gray-900">Registration Recorded!</h2>
                   <p className="mx-auto mt-1 max-w-sm text-sm text-gray-500">
-                    <span className="font-semibold text-gray-800">{teamName}</span> has been
+                    <span className="font-semibold text-gray-800">{teamName || `${personal.firstName || "Participant"}'s Innovation Entry`}</span> has been
                     successfully registered for SEVA 2026. Wait for further rounds - we'll notify
                     every team member by email.
                   </p>
@@ -1562,9 +2443,33 @@ export function TeamRegisterPage() {
                 <ConfirmationSummary
                   personal={personal}
                   email={user?.email ?? ""}
-                  teamName={teamName}
+                  participationType={participationType}
+                  teamName={teamName || `${personal.firstName || "Participant"}'s Innovation Entry`}
                   institute={institute}
                   institutionAddress={institutionAddress}
+                  participantCategory={participantCategory}
+                  participationLevel={participationLevel}
+                  institutionType={institutionType}
+                  affiliationCity={affiliationCity}
+                  affiliationState={affiliationState}
+                  affiliationPinCode={affiliationPinCode}
+                  institutionEmail={institutionEmail}
+                  institutionPhone={institutionPhone}
+                  degreeProgramme={degreeProgramme}
+                  departmentBranch={departmentBranch}
+                  yearOfStudy={yearOfStudy}
+                  classLevel={classLevel}
+                  designationRole={designationRole}
+                  departmentDivision={departmentDivision}
+                  officialOrgEmail={officialOrgEmail}
+                  coordinatorName={coordinatorName}
+                  coordinatorEmail={coordinatorEmail}
+                  coordinatorPhone={coordinatorPhone}
+                  orgContactPhone={orgContactPhone}
+                  mentorName={mentorName}
+                  mentorDesignation={mentorDesignation}
+                  mentorEmail={mentorEmail}
+                  mentorPhone={mentorPhone}
                   theme={themeDisplay}
                   problem={problemDisplay}
                   idCardName={idCardDisplay}
