@@ -365,10 +365,18 @@ async function main() {
       {
         refNumber: "DTU/SEVA/2026/CIR-08",
         category: "Announcements",
-        title: "The portal launch event to be graced by Hon'ble Chief Minister of Delhi Smt. Rekha Gupta on 19th Sept",
+        title: "SEVA First portal launch event to be graced by Hon'ble Chief Minister of Delhi Smt. Rekha Gupta on 19th Sept 2026",
         summary: "The official portal launch event of SEVA FIRST 2026 will be graced by the Hon'ble Chief Minister of Delhi, Smt. Rekha Gupta, on 19th September 2026.",
         detail: "The launch event marks the official unveiling of the problem statements, opening of registrations, and introduction of the innovation roadmap.",
         publishedAt: new Date("2026-09-17T12:00:00.000Z"),
+      },
+      {
+        refNumber: "DTU/SEVA/2026/CIR-09",
+        category: "Problem Statements",
+        title: "The problem statements for the national-level themes have been released",
+        summary: "The problem statements across all national-level themes have been officially released. Participants and teams can now review the statements and begin drafting proposals.",
+        detail: "Explore the thematic problem statements across the designated challenge tracks, download reference guidelines, and register your team.",
+        publishedAt: new Date("2026-09-17T14:00:00.000Z"),
       },
       {
         refNumber: "SEVA-CIR-01",

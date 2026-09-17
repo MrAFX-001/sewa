@@ -197,18 +197,33 @@ function XLogo({ className = "size-3.5" }: { className?: string }) {
   );
 }
 
-const DEFAULT_LATEST_ANNOUNCEMENT: Announcement = {
-  id: "ann-portal-launch-rekha-gupta",
-  refNumber: "DTU/SEVA/2026/CIR-08",
-  category: "Announcements",
-  title:
-    "The portal launch event to be graced by Hon'ble Chief Minister of Delhi Smt. Rekha Gupta on 19th Sept",
-  summary:
-    "The official portal launch event of SEVA FIRST 2026 will be graced by the Hon'ble Chief Minister of Delhi, Smt. Rekha Gupta, on 19th September 2026.",
-  detail:
-    "The launch event marks the official unveiling of the problem statements, opening of registrations, and introduction of the innovation roadmap.",
-  publishedAt: "2026-09-17T12:00:00.000Z",
-};
+const DEFAULT_LATEST_ANNOUNCEMENTS: Announcement[] = [
+  {
+    id: "ann-portal-launch-rekha-gupta",
+    refNumber: "DTU/SEVA/2026/CIR-08",
+    category: "Announcements",
+    title:
+      "SEVA First portal launch event to be graced by Hon'ble Chief Minister of Delhi Smt. Rekha Gupta on 19th Sept 2026",
+    summary:
+      "The official portal launch event of SEVA FIRST 2026 will be graced by the Hon'ble Chief Minister of Delhi, Smt. Rekha Gupta, on 19th September 2026.",
+    detail:
+      "The launch event marks the official unveiling of the problem statements, opening of registrations, and introduction of the innovation roadmap.",
+    publishedAt: "2026-09-17T12:00:00.000Z",
+  },
+  {
+    id: "ann-problem-statements-released",
+    refNumber: "DTU/SEVA/2026/CIR-09",
+    category: "Problem Statements",
+    title:
+      "The problem statements for the national-level themes have been released",
+    summary:
+      "The problem statements across all national-level themes have been officially released. Participants and teams can now review the statements and begin drafting proposals.",
+    detail:
+      "Explore the thematic problem statements across the designated challenge tracks, download reference guidelines, and register your team.",
+    publishedAt: "2026-09-17T14:00:00.000Z",
+  },
+];
+const DEFAULT_LATEST_ANNOUNCEMENT = DEFAULT_LATEST_ANNOUNCEMENTS[0];
 
 export function Header({
   activeNav = "home",
@@ -231,22 +246,24 @@ export function Header({
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [latestAnnouncement, setLatestAnnouncement] = useState<Announcement | null>(
-    DEFAULT_LATEST_ANNOUNCEMENT,
+  const [liveAnnouncements, setLiveAnnouncements] = useState<Announcement[]>(
+    DEFAULT_LATEST_ANNOUNCEMENTS,
   );
 
   useEffect(() => {
     announcementsApi
       .list()
       .then((items) => {
-        const sorted = sortAnnouncementsNewestFirst([
-          DEFAULT_LATEST_ANNOUNCEMENT,
-          ...(items || []),
-        ]);
-        setLatestAnnouncement(sorted[0] ?? DEFAULT_LATEST_ANNOUNCEMENT);
+        const merged = items && items.length > 0 ? [...items] : [];
+        for (const def of DEFAULT_LATEST_ANNOUNCEMENTS) {
+          if (!merged.some((i) => i.id === def.id || i.title === def.title)) {
+            merged.push(def);
+          }
+        }
+        setLiveAnnouncements(merged.length > 0 ? merged : DEFAULT_LATEST_ANNOUNCEMENTS);
       })
       .catch(() => {
-        // Keep DEFAULT_LATEST_ANNOUNCEMENT available even if the public announcements endpoint is unavailable.
+        // Keep DEFAULT_LATEST_ANNOUNCEMENTS available even if the public announcements endpoint is unavailable.
       });
   }, []);
 
@@ -832,9 +849,25 @@ export function Header({
         </a>
         <div className="live-updates-ticker-wrap min-w-0 flex-1 overflow-hidden">
           <div className="ticker flex h-full items-center whitespace-nowrap font-bold text-xs sm:text-base text-gray-800">
-            <span>{latestAnnouncement?.title ?? DEFAULT_LATEST_ANNOUNCEMENT.title}</span>
-            <span aria-hidden="true">
-              {latestAnnouncement?.title ?? DEFAULT_LATEST_ANNOUNCEMENT.title}
+            <span className="inline-flex items-center gap-8">
+              {liveAnnouncements.map((ann, idx) => (
+                <span key={`live-${ann.id || idx}`} className="inline-flex items-center gap-8">
+                  {idx > 0 && (
+                    <span className="size-2 rounded-full bg-[#ff4d4f] inline-block shrink-0" />
+                  )}
+                  <span>{ann.title}</span>
+                </span>
+              ))}
+            </span>
+            <span aria-hidden="true" className="inline-flex items-center gap-8">
+              {liveAnnouncements.map((ann, idx) => (
+                <span key={`live-dup-${ann.id || idx}`} className="inline-flex items-center gap-8">
+                  {idx > 0 && (
+                    <span className="size-2 rounded-full bg-[#ff4d4f] inline-block shrink-0" />
+                  )}
+                  <span>{ann.title}</span>
+                </span>
+              ))}
             </span>
           </div>
         </div>
@@ -2070,20 +2103,22 @@ export function HomePage() {
     }
   };
 
-  const [announcements, setAnnouncements] = useState<Announcement[]>([DEFAULT_LATEST_ANNOUNCEMENT]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>(DEFAULT_LATEST_ANNOUNCEMENTS);
 
   useEffect(() => {
     announcementsApi
       .list()
       .then((items) => {
         const merged = items && items.length > 0 ? [...items] : [];
-        if (!merged.some((i) => i.title.toLowerCase().includes("rekha gupta"))) {
-          merged.unshift(DEFAULT_LATEST_ANNOUNCEMENT);
+        for (const def of DEFAULT_LATEST_ANNOUNCEMENTS) {
+          if (!merged.some((i) => i.id === def.id || i.title === def.title)) {
+            merged.unshift(def);
+          }
         }
         setAnnouncements(sortAnnouncementsNewestFirst(merged));
       })
       .catch(() => {
-        setAnnouncements([DEFAULT_LATEST_ANNOUNCEMENT]);
+        setAnnouncements(DEFAULT_LATEST_ANNOUNCEMENTS);
       });
   }, []);
 
