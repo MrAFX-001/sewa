@@ -705,6 +705,22 @@ const FAQ_DATA = [
 
 const ANNOUNCEMENTS_DATA = [
   {
+    "id": "eef5a614-c8ed-4fc7-90ec-1aa0463a6e28",
+    "refNumber": "DTU/SEVA/2026/CIR-08",
+    "category": "Announcements",
+    "title": "SEVA First portal launch event to be graced by Hon'ble Chief Minister of Delhi Smt. Rekha Gupta on 19th Sept 2026",
+    "summary": "The official portal launch event of SEVA FIRST 2026 will be graced by the Hon'ble Chief Minister of Delhi, Smt. Rekha Gupta, on 19th September 2026.",
+    "detail": "The launch event marks the official unveiling of the problem statements, opening of registrations, and introduction of the innovation roadmap."
+  },
+  {
+    "id": "26dc7848-eec0-4563-8e9b-0bb9463a1029",
+    "refNumber": "DTU/SEVA/2026/CIR-09",
+    "category": "Problem Statements",
+    "title": "The problem statements for the national-level themes have been released",
+    "summary": "The problem statements across all national-level themes have been officially released. Participants and teams can now review the statements and begin drafting proposals.",
+    "detail": "Explore the thematic problem statements across the designated challenge tracks, download reference guidelines, and register your team."
+  },
+  {
     "id": "eef5a614-c8ed-4fc7-90ec-1aa0463a6e21",
     "refNumber": "SEVA-CIR-04",
     "category": "Mentorship",

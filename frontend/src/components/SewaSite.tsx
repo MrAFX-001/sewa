@@ -254,20 +254,26 @@ export function Header({
   );
 
   useEffect(() => {
+    let active = true;
     announcementsApi
       .list()
       .then((items) => {
-        const merged = items && items.length > 0 ? [...items] : [];
-        for (const def of DEFAULT_LATEST_ANNOUNCEMENTS) {
-          if (!merged.some((i) => i.id === def.id || i.title === def.title)) {
-            merged.push(def);
-          }
+        if (!active) return;
+        if (items && items.length > 0) {
+          setLiveAnnouncements(sortAnnouncementsNewestFirst(items));
+        } else {
+          setLiveAnnouncements(DEFAULT_LATEST_ANNOUNCEMENTS);
         }
-        setLiveAnnouncements(merged.length > 0 ? merged : DEFAULT_LATEST_ANNOUNCEMENTS);
       })
       .catch(() => {
-        // Keep DEFAULT_LATEST_ANNOUNCEMENTS available even if the public announcements endpoint is unavailable.
+        // Fall back to default announcements if backend is unreachable
+        if (active) {
+          setLiveAnnouncements(DEFAULT_LATEST_ANNOUNCEMENTS);
+        }
       });
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -2148,20 +2154,25 @@ export function HomePage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>(DEFAULT_LATEST_ANNOUNCEMENTS);
 
   useEffect(() => {
+    let active = true;
     announcementsApi
       .list()
       .then((items) => {
-        const merged = items && items.length > 0 ? [...items] : [];
-        for (const def of DEFAULT_LATEST_ANNOUNCEMENTS) {
-          if (!merged.some((i) => i.id === def.id || i.title === def.title)) {
-            merged.unshift(def);
-          }
+        if (!active) return;
+        if (items && items.length > 0) {
+          setAnnouncements(sortAnnouncementsNewestFirst(items));
+        } else {
+          setAnnouncements(DEFAULT_LATEST_ANNOUNCEMENTS);
         }
-        setAnnouncements(sortAnnouncementsNewestFirst(merged));
       })
       .catch(() => {
-        setAnnouncements(DEFAULT_LATEST_ANNOUNCEMENTS);
+        if (active) {
+          setAnnouncements(DEFAULT_LATEST_ANNOUNCEMENTS);
+        }
       });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const filtered = useMemo(
