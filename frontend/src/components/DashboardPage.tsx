@@ -164,7 +164,7 @@ export function DashboardPage() {
   const navigate = useNavigate();
 
   // Active role state - defaults to user role or SUPER_ADMIN
-  const [currentRole, setCurrentRole] = useState<UserRole>(user?.role || "SUPER_ADMIN");
+  const [currentRole, setCurrentRole] = useState<UserRole>("MEMBER");
 
   // Sync role when user profile loads from backend
   useEffect(() => {
@@ -646,14 +646,16 @@ export function DashboardPage() {
   };
 
   const loadAll = async () => {
+    const role = user?.role;
+
+    if (!role) return;
+
     setIsRefreshing(true);
-    await Promise.allSettled([
-      loadStats(),
-      loadUsers(),
-      loadTeams(),
-      loadMails(),
-      loadAuditLogs(),
-      loadGallery(),
+
+    const isAdmin = role === "SUPER_ADMIN" || role === "ADMIN";
+    const isResource = role === "SUPER_ADMIN" || role === "RESOURCE";
+
+    const requests: Promise<unknown>[] = [
       loadCommittee(),
       loadHeroSlides(),
       loadFaqs(),
@@ -661,13 +663,30 @@ export function DashboardPage() {
       loadThemes(),
       loadMyTeam(),
       loadMemberMails(),
-    ]);
+    ];
+
+    if (isAdmin) {
+      requests.push(
+        loadStats(),
+        loadUsers(),
+        loadTeams(),
+        loadMails(),
+        loadAuditLogs(),
+      );
+    }
+
+    if (isResource) {
+      requests.push(loadGallery());
+    }
+
+    await Promise.allSettled(requests);
     setIsRefreshing(false);
   };
 
   useEffect(() => {
+    if (!user?.role) return;
     loadAll();
-  }, []);
+  }, [user?.role]);
 
   // 100% Dynamic Member Data derived directly from the PostgreSQL database
   const memberData = useMemo(() => {

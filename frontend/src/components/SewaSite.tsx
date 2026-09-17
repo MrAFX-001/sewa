@@ -998,10 +998,16 @@ export function CountdownTimer() {
     };
   };
 
-  const [time, setTime] = useState(calculateTime);
+  const [time, setTime] = useState({
+    days: "00",
+    hours: "00",
+    minutes: "00",
+    seconds: "00",
+  });
 
   useEffect(() => {
     setTime(calculateTime());
+
     const interval = setInterval(() => {
       setTime(calculateTime());
     }, 1000);
