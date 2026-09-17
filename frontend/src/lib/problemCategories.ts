@@ -60,6 +60,3 @@ export function themeLabel(theme: ProblemTheme): string {
 export const ID_CARD_ACCEPT = ".pdf,.jpg,.jpeg,.png";
 export const ID_CARD_ALLOWED_MIME = new Set(["application/pdf", "image/jpeg", "image/png"]);
 export const ID_CARD_MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
-
-
-

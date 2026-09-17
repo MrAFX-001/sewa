@@ -67,6 +67,3 @@ export default function (session) {
 export function handleSummary(data) {
   return createSummaryOutput(data, 'stress');
 }
-
-
-

@@ -1,7 +1,7 @@
 import { prisma } from "../config/prisma.js";
 import { hashPassword, verifyPassword, verifyOtpAgainstDummy } from "../utils/hash.js";
 import { AppError } from "../middleware/errorHandler.js";
-import { issueOtp, consumeOtp } from "./otp.service.js";
+import { issueOtp, consumeOtp, requestPasswordResetOtp } from "./otp.service.js";
 import type { ResetPasswordInput, SignupInput, SigninInput } from "../schemas/auth.schema.js";
 
 
@@ -26,7 +26,11 @@ export async function signupUser(input: SignupInput) {
         },
       });
 
-      await issueOtp(user.id, user.email, "email_verify");
+      try {
+        await issueOtp(user.id, user.email, "email_verify");
+      } catch (err) {
+        if (!(err instanceof AppError && err.statusCode === 429)) throw err;
+      }
 
       return user;
     }
@@ -133,23 +137,7 @@ export async function authenticateUser(input: SigninInput) {
  * it to the audit log. Callers must not branch their HTTP response on it.
  */
 export async function requestPasswordReset(email: string): Promise<string | undefined> {
-  const user = await prisma.user.findUnique({ where: { email } });
-
-  // An unverified or suspended account can't reset a password: for the
-  // former, email ownership was never proven; for the latter, a reset
-  // would be a way to quietly regain access.
-  if (!user || !user.emailVerified || user.status === "suspended") return undefined;
-
-  try {
-    await issueOtp(user.id, user.email, "password_reset");
-  } catch (err) {
-    // Swallow the cooldown 429 only - otherwise a repeated request would
-    // reveal that this email is registered while an unknown one wouldn't.
-    if (err instanceof AppError && err.statusCode === 429) return user.id;
-    throw err;
-  }
-
-  return user.id;
+  return requestPasswordResetOtp(email);
 }
 
 export async function resetPassword(input: ResetPasswordInput) {
@@ -171,6 +159,3 @@ export async function resetPassword(input: ResetPasswordInput) {
     },
   });
 }
-
-
-

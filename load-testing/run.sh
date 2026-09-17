@@ -144,7 +144,3 @@ exec k6 run \
   ${LOAD_MAX_VUS:+-e LOAD_MAX_VUS="$LOAD_MAX_VUS"} \
   "$TARGET_FILE" \
   "$@"
-
-
-
-

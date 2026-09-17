@@ -90,6 +90,10 @@ export async function sendTeamRegistrationEmail(
   if (!recipients.length) return;
 
   const subject = `SEWA 2026: Team Registration Confirmed - ${team.name}`;
+  const safeTeamName = escapeHtml(team.name);
+  const safeInstitute = escapeHtml(team.institute);
+  const safeTheme = escapeHtml(team.theme);
+  const safeProblemStatement = escapeHtml(team.problemStatement);
 
   const memberListText = team.members
     .map(
@@ -100,17 +104,25 @@ export async function sendTeamRegistrationEmail(
 
   const memberListHtml = team.members
     .map(
-      (m) => `
+      (m) => {
+        const safeFirstName = escapeHtml(m.firstName);
+        const safeLastName = escapeHtml(m.lastName);
+        const safeEmail = escapeHtml(m.email);
+        const safePhone = escapeHtml(m.phone || "-");
+        const safeRole = escapeHtml(m.role);
+        const roleStyle = m.role === "leader"
+          ? "#dbeafe; color: #1e40af"
+          : "#f3f4f6; color: #374151";
+        return `
       <tr style="border-bottom: 1px solid #e5e7eb;">
-        <td style="padding: 10px 12px; font-weight: 500; color: #111827;">${m.firstName} ${m.lastName}</td>
+        <td style="padding: 10px 12px; font-weight: 500; color: #111827;">${safeFirstName} ${safeLastName}</td>
         <td style="padding: 10px 12px; color: #4b5563;">
-          <span style="display: inline-block; padding: 2px 8px; font-size: 12px; font-weight: 600; border-radius: 9999px; background-color: ${
-            m.role === "leader" ? "#dbeafe; color: #1e40af" : "#f3f4f6; color: #374151"
-          }; text-transform: uppercase;">${m.role}</span>
+          <span style="display: inline-block; padding: 2px 8px; font-size: 12px; font-weight: 600; border-radius: 9999px; background-color: ${roleStyle}; text-transform: uppercase;">${safeRole}</span>
         </td>
-        <td style="padding: 10px 12px; color: #4b5563;">${m.email}</td>
-        <td style="padding: 10px 12px; color: #4b5563;">${m.phone || "-"}</td>
-      </tr>`,
+        <td style="padding: 10px 12px; color: #4b5563;">${safeEmail}</td>
+        <td style="padding: 10px 12px; color: #4b5563;">${safePhone}</td>
+      </tr>`;
+      },
     )
     .join("");
 
@@ -175,14 +187,14 @@ DTU Youth Innovation Challenge
       <div style="text-align: center; margin-bottom: 20px;">
         <span class="badge-success">✓ Registration Submitted</span>
       </div>
-      <p>Dear <strong>${team.name}</strong>,</p>
+      <p>Dear <strong>${safeTeamName}</strong>,</p>
       <p>Your team registration for the <strong>SEWA 2026 Youth Innovation Challenge</strong> has been successfully submitted and confirmed.</p>
 
       <div class="card">
         <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
           <tr>
             <td style="padding: 6px 0; color: #64748b; font-weight: 500;">Team Name:</td>
-            <td style="padding: 6px 0; color: #0f172a; font-weight: 600; text-align: right;">${team.name}</td>
+            <td style="padding: 6px 0; color: #0f172a; font-weight: 600; text-align: right;">${safeTeamName}</td>
           </tr>
           <tr>
             <td style="padding: 6px 0; color: #64748b; font-weight: 500;">Team Reference ID:</td>
@@ -190,15 +202,15 @@ DTU Youth Innovation Challenge
           </tr>
           <tr>
             <td style="padding: 6px 0; color: #64748b; font-weight: 500;">Institution:</td>
-            <td style="padding: 6px 0; color: #0f172a; font-weight: 600; text-align: right;">${team.institute}</td>
+            <td style="padding: 6px 0; color: #0f172a; font-weight: 600; text-align: right;">${safeInstitute}</td>
           </tr>
           <tr>
             <td style="padding: 6px 0; color: #64748b; font-weight: 500;">Theme:</td>
-            <td style="padding: 6px 0; color: #0f172a; font-weight: 600; text-align: right;">${team.theme}</td>
+            <td style="padding: 6px 0; color: #0f172a; font-weight: 600; text-align: right;">${safeTheme}</td>
           </tr>
           <tr>
             <td style="padding: 6px 0; color: #64748b; font-weight: 500;">Problem Statement:</td>
-            <td style="padding: 6px 0; color: #0f172a; font-weight: 600; text-align: right;">${team.problemStatement}</td>
+            <td style="padding: 6px 0; color: #0f172a; font-weight: 600; text-align: right;">${safeProblemStatement}</td>
           </tr>
         </table>
       </div>
@@ -559,5 +571,3 @@ export async function sendAdminBroadcastEmail({
     errors,
   };
 }
-
-

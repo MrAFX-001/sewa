@@ -1,4 +1,7 @@
 import type { Request, Response } from "express";
+import path from "node:path";
+import { access } from "node:fs/promises";
+import { env } from "../config/env.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { writeAuditLog } from "../lib/audit.js";
 import * as teamService from "../services/team.service.js";
@@ -82,6 +85,39 @@ export async function updateMember(req: Request, res: Response) {
   res.status(200).json({ member });
 }
 
+
+export async function getMemberIdCard(req: Request, res: Response) {
+  const { teamId, memberId } = req.params;
+  const team = await teamService.getTeamForIdCardAccess(teamId!, memberId!, req.user!.id, req.user!.role);
+
+  if (!team.member.idCardPath) {
+    throw new AppError(404, "Identity document not found.");
+  }
+
+  const storedFilename = path.basename(team.member.idCardPath);
+  const absolutePath = path.resolve(env.UPLOAD_DIR, storedFilename);
+
+  try {
+    await access(absolutePath);
+  } catch {
+    throw new AppError(404, "Identity document not found.");
+  }
+
+  if (team.member.idCardMimeType) {
+    res.type(team.member.idCardMimeType);
+  }
+
+  res.download(
+    absolutePath,
+    team.member.idCardOriginalName || "id-card",
+    (err) => {
+      if (err && !res.headersSent) {
+        res.status(404).json({ error: "Identity document not found." });
+      }
+    },
+  );
+}
+
 export async function removeMember(req: Request, res: Response) {
   await teamService.removeTeamMember(req.params.teamId!, req.user!.id, req.params.memberId!);
   await writeAuditLog({
@@ -98,6 +134,3 @@ export async function submitTeam(req: Request, res: Response) {
   await writeAuditLog({ req, userId: req.user!.id, action: "team_submit", metadata: { teamId: team.id } });
   res.status(200).json({ team });
 }
-
-
-

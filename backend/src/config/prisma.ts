@@ -11,6 +11,3 @@ export const prisma =
   });
 
 if (!isProd) globalForPrisma.prisma = prisma;
-
-
-

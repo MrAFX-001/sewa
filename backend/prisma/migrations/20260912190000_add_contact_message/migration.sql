@@ -21,6 +21,3 @@ CREATE TABLE "contact_messages" (
 
 -- CreateIndex
 CREATE INDEX "contact_messages_status_created_at_idx" ON "contact_messages"("status", "created_at");
-
-
-

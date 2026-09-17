@@ -710,7 +710,7 @@ export const resourceApi = {
       method: "PUT",
       body: JSON.stringify({ updates }),
     }),
-  getHeroSlides: (all = true) =>
+  getHeroSlides: (all = false) =>
     request<{ slides: HeroSlideItem[] }>(`/api/resources/hero-slides${all ? "?all=true" : ""}`),
   createHeroSlide: (data: {
     title: string;
@@ -732,7 +732,7 @@ export const resourceApi = {
     request<{ success: boolean }>(`/api/resources/hero-slides/${id}`, {
       method: "DELETE",
     }),
-  getFaqs: (all = true) =>
+  getFaqs: (all = false) =>
     request<{ faqs: FaqItem[] }>(`/api/resources/faqs${all ? "?all=true" : ""}`),
   createFaq: (data: {
     question: string;
@@ -755,7 +755,7 @@ export const resourceApi = {
       method: "DELETE",
     }),
   getAdminAnnouncements: () =>
-    request<{ announcements: AnnouncementItem[] }>("/api/resources/announcements"),
+    request<{ announcements: AnnouncementItem[] }>("/api/resources/announcements?all=true"),
   createAnnouncement: (data: {
     title: string;
     summary: string;
@@ -811,7 +811,3 @@ export const resourceApi = {
       body: JSON.stringify({ updates }),
     }),
 };
-
-
-
-

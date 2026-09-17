@@ -22,6 +22,3 @@ export const Route = createFileRoute("/events")({
   }),
   component: EventsPage,
 });
-
-
-

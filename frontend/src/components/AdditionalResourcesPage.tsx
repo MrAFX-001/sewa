@@ -255,6 +255,3 @@ export function AdditionalResourcesPage() {
     </div>
   );
 }
-
-
-

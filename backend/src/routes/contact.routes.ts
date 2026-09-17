@@ -16,6 +16,3 @@ contactRouter.post(
   validateBody(createContactMessageSchema),
   asyncHandler(contactController.createContactMessage),
 );
-
-
-

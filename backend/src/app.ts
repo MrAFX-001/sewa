@@ -19,7 +19,7 @@ app.set("trust proxy", (ip: string) => {
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));
-app.use("/uploads", express.static(path.resolve("uploads")));
+app.use("/uploads/resources", express.static(path.resolve("uploads/resources")));
 app.use(express.json({ limit: "20kb" }));
 app.use(cookieParser());
 app.use(
@@ -50,6 +50,3 @@ app.use((_req, res) => {
 });
 
 app.use(errorHandler);
-
-
-

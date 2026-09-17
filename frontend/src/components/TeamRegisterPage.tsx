@@ -2490,6 +2490,3 @@ export function TeamRegisterPage() {
     </div>
   );
 }
-
-
-

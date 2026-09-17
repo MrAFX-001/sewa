@@ -53,6 +53,3 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
   logger.error({ err, path: req.path, method: req.method }, "unhandled_error");
   res.status(500).json({ error: "Something went wrong. Please try again." });
 }
-
-
-

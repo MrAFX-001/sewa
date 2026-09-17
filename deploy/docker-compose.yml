@@ -59,7 +59,6 @@ services:
       HOST: 127.0.0.1
       PORT: "4001"
       REDIS_URL: redis://127.0.0.1:6379
-      TRUST_PROXY_HOPS: "1"
       UPLOAD_DIR: uploads/id-cards
       ENABLE_IN_PROCESS_CRON: "true"   # only this replica runs OTP cleanup
   api-2:
@@ -80,6 +79,3 @@ services:
       <<: *apienv
       PORT: "4004"
       ENABLE_IN_PROCESS_CRON: "false"
-
-
-

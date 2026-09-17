@@ -12,6 +12,3 @@ Allow: /
 
 User-agent: *
 Allow: /
-
-
-

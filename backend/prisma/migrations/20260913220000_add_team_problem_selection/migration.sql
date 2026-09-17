@@ -50,6 +50,3 @@ ALTER TABLE "teams" ADD CONSTRAINT "teams_proposed_statement_matches_option_type
     OR
     ("problem_option_type" = 'ps' AND "proposed_problem_statement" IS NULL)
   );
-
-
-

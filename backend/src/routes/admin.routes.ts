@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { Router } from "express";
@@ -9,6 +9,11 @@ import { requireRole } from "../middleware/rbac.middleware.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { writeAuditLog } from "../lib/audit.js";
 import { sendAdminBroadcastEmail } from "../utils/mailer.js";
+import { optionalAuth } from "../middleware/auth.middleware.js";
+import { unlink } from "node:fs/promises";
+import { detectSafeImageType, type SafeImageType } from "../utils/imageValidation.js";
+import { issueOtp } from "../services/otp.service.js";
+import { hashPassword } from "../utils/hash.js";
 import {
   getNextAnnouncementId,
   sortAnnouncementsNewestFirst,
@@ -28,18 +33,31 @@ const resourceStorage = multer.diskStorage({
   },
 });
 
+const RESOURCE_IMAGE_TYPES: Record<string, SafeImageType> = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+};
+
 const uploadResourceImage = multer({
   storage: resourceStorage,
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+    files: 1,
+    fields: 10,
+    fieldSize: 16 * 1024,
+    parts: 12,
+  },
   fileFilter: (_req, file, cb) => {
-    const allowed = /jpeg|jpg|png|webp|gif|svg/;
-    const ext = allowed.test(path.extname(file.originalname).toLowerCase());
-    const mime = allowed.test(file.mimetype);
-    if (ext || mime) {
-      cb(null, true);
-    } else {
-      cb(new Error("Only image files (JPG, PNG, WebP, GIF, SVG) are allowed"));
+    const ext = path.extname(file.originalname).toLowerCase();
+    const expectedMime = RESOURCE_IMAGE_TYPES[ext];
+    if (!expectedMime || file.mimetype !== expectedMime) {
+      cb(new Error("Only valid JPG, PNG, WebP, or GIF images are allowed"));
+      return;
     }
+    cb(null, true);
   },
 });
 
@@ -268,8 +286,9 @@ adminRouter.post(
   requireRole("SUPER_ADMIN"),
   asyncHandler(async (req, res) => {
     const { firstName, lastName, email, role, phone } = req.body;
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
-    if (!firstName || !email || !role) {
+    if (!firstName || !normalizedEmail || !role) {
       return res.status(400).json({ error: "First name, email, and role are required." });
     }
 
@@ -277,21 +296,22 @@ adminRouter.post(
       return res.status(400).json({ error: "Invalid role specified." });
     }
 
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existing) {
       return res.status(409).json({ error: "A user with this email already exists." });
     }
 
+    const unusablePassword = randomBytes(48).toString("base64url");
     const newUser = await prisma.user.create({
       data: {
         firstName,
         lastName: lastName || "",
-        email,
+        email: normalizedEmail,
         phone: phone || null,
         role: role as any,
-        status: "active",
-        emailVerified: true,
-        passwordHash: "$2b$10$e7K.08zYQoR7hGjVfNQq2.m7O0Lz2BqJqYvJq/2VzZqPqg4Q5K7hK",
+        status: "pending",
+        emailVerified: false,
+        passwordHash: await hashPassword(unusablePassword),
       },
       select: {
         id: true,
@@ -304,6 +324,13 @@ adminRouter.post(
       },
     });
 
+    try {
+      await issueOtp(newUser.id, newUser.email, "email_verify");
+    } catch (err) {
+      await prisma.user.delete({ where: { id: newUser.id } }).catch(() => {});
+      throw err;
+    }
+
     await writeAuditLog({
       req,
       userId: req.user?.id,
@@ -313,12 +340,13 @@ adminRouter.post(
 
     res.status(201).json({
       success: true,
+      message: "Invitation created. The invited user must open Sign Up, choose a password for this email address, and enter the verification code sent to that email.",
       user: {
         id: newUser.id,
         name: `${newUser.firstName} ${newUser.lastName}`.trim(),
         email: newUser.email,
         role: newUser.role,
-        status: "Active",
+        status: "Pending",
         joinedDate: newUser.createdAt.toISOString().split("T")[0],
         teamsCount: 0,
       },
@@ -1071,6 +1099,14 @@ resourceRouter.post(
     if (!req.file) {
       return res.status(400).json({ error: "No image file provided." });
     }
+
+    const detectedMime = await detectSafeImageType(req.file.path);
+    const expectedMime = RESOURCE_IMAGE_TYPES[path.extname(req.file.originalname).toLowerCase()];
+    if (!detectedMime || detectedMime !== expectedMime || detectedMime !== req.file.mimetype) {
+      await unlink(req.file.path).catch(() => {});
+      return res.status(400).json({ error: "The uploaded file content does not match a supported image type." });
+    }
+
     const relativeUrl = `/uploads/resources/${req.file.filename}`;
 
     await writeAuditLog({
@@ -1093,8 +1129,13 @@ resourceRouter.post(
 // ─── Hero Slides / Banners ───────────────────────────────────────────────────
 resourceRouter.get(
   "/hero-slides",
+  optionalAuth,
   asyncHandler(async (req, res) => {
     const showAll = req.query.all === "true";
+    if (showAll && !["SUPER_ADMIN", "RESOURCE"].includes(req.user?.role ?? "")) {
+      return res.status(req.user ? 403 : 401).json({ error: req.user ? "Forbidden" : "Authentication required" });
+    }
+
     const slides = await prisma.heroSlide.findMany({
       where: showAll ? undefined : { active: true },
       orderBy: { displayOrder: "asc" },
@@ -1206,8 +1247,13 @@ resourceRouter.delete(
 // ─── FAQ Directory ───────────────────────────────────────────────────────────
 resourceRouter.get(
   "/faqs",
+  optionalAuth,
   asyncHandler(async (req, res) => {
     const showAll = req.query.all === "true";
+    if (showAll && !["SUPER_ADMIN", "RESOURCE"].includes(req.user?.role ?? "")) {
+      return res.status(req.user ? 403 : 401).json({ error: req.user ? "Forbidden" : "Authentication required" });
+    }
+
     const faqs = await prisma.faqItem.findMany({
       where: showAll ? undefined : { active: true },
       orderBy: [{ category: "asc" }, { displayOrder: "asc" }],
@@ -1319,8 +1365,16 @@ resourceRouter.delete(
 // ─── Announcements / Newsletter Management ────────────────────────────────────
 resourceRouter.get(
   "/announcements",
-  asyncHandler(async (_req, res) => {
-    const announcements = await prisma.announcement.findMany();
+  optionalAuth,
+  asyncHandler(async (req, res) => {
+    const showAll = req.query.all === "true";
+    if (showAll && !["SUPER_ADMIN", "RESOURCE"].includes(req.user?.role ?? "")) {
+      return res.status(req.user ? 403 : 401).json({ error: req.user ? "Forbidden" : "Authentication required" });
+    }
+
+    const announcements = await prisma.announcement.findMany({
+      where: showAll ? undefined : { publishedAt: { lte: new Date() } },
+    });
     sortAnnouncementsNewestFirst(announcements);
     res.status(200).json({ announcements });
   }),
@@ -1440,8 +1494,13 @@ resourceRouter.delete(
 
 resourceRouter.get(
   "/themes",
+  optionalAuth,
   asyncHandler(async (req, res) => {
     const showAll = req.query.all === "true";
+    if (showAll && !["SUPER_ADMIN", "RESOURCE"].includes(req.user?.role ?? "")) {
+      return res.status(req.user ? 403 : 401).json({ error: req.user ? "Forbidden" : "Authentication required" });
+    }
+
     const items = await prisma.problemCategory.findMany({
       where: showAll ? undefined : { active: true },
       orderBy: [{ theme: "asc" }, { displayOrder: "asc" }, { code: "asc" }],
@@ -1634,7 +1693,3 @@ resourceRouter.delete(
     res.status(200).json({ success: true });
   }),
 );
-
-
-
-

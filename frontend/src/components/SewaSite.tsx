@@ -1916,12 +1916,12 @@ export function HomePage() {
         image: teamPhoto("pm-modi"),
       },
       {
-        name: "Smt. Rekha Gupta",
+        name: "Smt. Atishi",
         designation: "Hon'ble Chief Minister of Delhi",
         image: teamPhoto("cm-delhi"),
       },
       {
-        name: "Shri Ashish Sood",
+        name: "Shri Dharmendra Pradhan",
         designation: "Hon'ble Minister of Education, Govt. of India",
         image: teamPhoto("education-minister"),
       },
@@ -2420,7 +2420,7 @@ export function HomePage() {
             <h2 className="t-main-heading t-title-gap-wide uppercase">
               Organizing Committee
             </h2>
-            {/* Chief Patron (PM in center on 1st row, then Rekha Gupta and Dharmendra Pradhan on 2nd row below PM with larger cards) */}
+            {/* Chief Patron (PM in center on 1st row, then Atishi and Dharmendra Pradhan on 2nd row below PM with larger cards) */}
             {chiefPatronMembers.length > 0 && (
               <div className="mt-8 sm:mt-12 flex flex-col items-center">
                 {/* 1st Row: Hon'ble Prime Minister (Centered) */}
@@ -2453,7 +2453,7 @@ export function HomePage() {
                   );
                 })()}
 
-                {/* 2nd Row: Ministers below PM (Smt. Rekha Gupta & Shri Ashish Sood) */}
+                {/* 2nd Row: Ministers below PM (Smt. Atishi & Shri Dharmendra Pradhan) */}
                 {chiefPatronMembers.length > 1 && (
                   <div className="flex flex-wrap justify-center gap-10 sm:gap-16 md:gap-24 mt-8 sm:mt-10 max-w-2xl mx-auto">
                     {chiefPatronMembers.slice(1).map((m, idx) => {
@@ -4333,6 +4333,3 @@ export function AboutPage() {
     </div>
   );
 }
-
-
-

@@ -89,6 +89,3 @@ export const upsertProfileSchema = z
   .strict();
 
 export type UpsertProfileInput = z.infer<typeof upsertProfileSchema>;
-
-
-

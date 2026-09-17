@@ -242,6 +242,3 @@ export function StatSummaryModal({
     </div>
   );
 }
-
-
-

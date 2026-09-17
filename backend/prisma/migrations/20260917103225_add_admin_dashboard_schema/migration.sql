@@ -110,6 +110,3 @@ CREATE UNIQUE INDEX "problem_categories_code_key" ON "problem_categories"("code"
 
 -- AddForeignKey
 ALTER TABLE "admin_mails" ADD CONSTRAINT "admin_mails_sender_id_fkey" FOREIGN KEY ("sender_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
-
-

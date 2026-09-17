@@ -75,6 +75,3 @@ export const uploadIdCard = makeIdCardUpload(MAX_FILE_SIZE_BYTES);
 // The Event Registration UI requires an identity / affiliation document for
 // every participant and caps each participant document at 500 KB.
 export const uploadMemberIdCard = makeIdCardUpload(MEMBER_ID_CARD_MAX_FILE_SIZE_BYTES);
-
-
-

@@ -18,6 +18,3 @@ export const phoneSchema = z
   .string()
   .transform((v) => v.replace(/\s+/g, ""))
   .pipe(z.string().regex(phoneRegex, "Invalid Indian mobile number"));
-
-
-

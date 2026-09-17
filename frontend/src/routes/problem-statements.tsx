@@ -22,5 +22,3 @@ export const Route = createFileRoute("/problem-statements")({
   }),
   component: ProblemStatementsPage,
 });
-
-

@@ -17,6 +17,3 @@ export const Route = createFileRoute("/team-register")({
     </RequireAuth>
   ),
 });
-
-
-

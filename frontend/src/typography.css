@@ -155,5 +155,3 @@
   --section-gap-half: calc(var(--section-gap) / 2);
   padding-block: calc(var(--section-gap-half) * var(--u));
 }
-
-

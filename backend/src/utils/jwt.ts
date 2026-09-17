@@ -20,6 +20,3 @@ export function verifySession(token: string): SessionPayload {
   // Throws on invalid/expired token - caller (auth middleware) handles it.
   return jwt.verify(token, env.JWT_SECRET, { algorithms: ["HS256"] }) as SessionPayload;
 }
-
-
-

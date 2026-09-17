@@ -1,6 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
-
 const prisma = new PrismaClient();
 
 const COMMITTEE_DATA = [
@@ -767,27 +765,7 @@ const ANNOUNCEMENTS_DATA = [
 async function main() {
   console.log("Starting comprehensive database seed...");
 
-  // 1. Seed Super Admin User if none exists
-  const adminEmail = "superadmin@dtu.ac.in";
-  const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
-  if (!existingAdmin) {
-    const passwordHash = await bcrypt.hash("Admin@123456", 10);
-    await prisma.user.create({
-      data: {
-        email: adminEmail,
-        passwordHash,
-        firstName: "Super",
-        lastName: "Admin",
-        phone: "9999999999",
-        emailVerified: true,
-        role: "SUPER_ADMIN",
-        status: "active",
-      }
-    });
-    console.log("Seeded Super Admin user:", adminEmail);
-  }
-
-  // 2. Seed Committee Members
+  // 1. Seed Committee Members
   for (const item of COMMITTEE_DATA) {
     await prisma.committeeMember.upsert({
       where: { id: item.id },
@@ -797,7 +775,7 @@ async function main() {
   }
   console.log(`✅ Seeded ${COMMITTEE_DATA.length} Committee Members.`);
 
-  // 3. Seed Themes
+  // 2. Seed Themes
   for (const item of THEMES_DATA) {
     await prisma.problemCategory.upsert({
       where: { id: item.id },
@@ -817,7 +795,7 @@ async function main() {
   }
   console.log(`✅ Seeded ${HERO_SLIDES_DATA.length} Hero Slides.`);
 
-  // 5. Seed FAQs
+  // 3. Seed FAQs
   for (const item of FAQ_DATA) {
     await prisma.faqItem.upsert({
       where: { id: item.id },
@@ -827,7 +805,7 @@ async function main() {
   }
   console.log(`✅ Seeded ${FAQ_DATA.length} FAQ items.`);
 
-  // 6. Seed Announcements
+  // 4. Seed Announcements
   for (const item of ANNOUNCEMENTS_DATA) {
     await prisma.announcement.upsert({
       where: { id: item.id },
@@ -846,6 +824,3 @@ main()
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());
-
-
-

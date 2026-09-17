@@ -6,6 +6,3 @@ export const announcementsRouter = Router();
 
 // Public — no auth required; announcements are displayed on the homepage
 announcementsRouter.get("/", asyncHandler(listAnnouncements));
-
-
-

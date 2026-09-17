@@ -19,6 +19,3 @@ export function validateBody(schema: ZodTypeAny) {
     next();
   };
 }
-
-
-

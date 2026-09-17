@@ -123,6 +123,3 @@ sudo nginx -t && sudo systemctl reload nginx
 
 Uploads remain at `/home/sewa/sewa/backend/uploads/id-cards` (bind-mounted),
 so existing `id_card_path` values in the database stay valid.
-
-
-

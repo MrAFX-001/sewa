@@ -10,6 +10,3 @@ export function asyncHandler(fn: AsyncFn) {
     fn(req, res).catch(next);
   };
 }
-
-
-

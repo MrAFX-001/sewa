@@ -14,6 +14,3 @@ export async function upsertProfile(req: Request, res: Response) {
   await writeAuditLog({ req, userId: req.user!.id, action: "profile_update" });
   res.status(200).json({ profile });
 }
-
-
-

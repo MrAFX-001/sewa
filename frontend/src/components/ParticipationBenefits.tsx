@@ -369,6 +369,3 @@ export function ParticipationBenefits() {
     </div>
   );
 }
-
-
-

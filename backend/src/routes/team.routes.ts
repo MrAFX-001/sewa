@@ -6,6 +6,7 @@ import { requireAuth, requireVerifiedEmail } from "../middleware/auth.middleware
 import { createTeamSchema, updateTeamSchema, addMemberSchema } from "../schemas/team.schema.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { cleanupRejectedUpload } from "../middleware/uploadCleanup.middleware.js";
+import { validateIdCardContent } from "../middleware/uploadContentValidation.middleware.js";
 export const teamRouter = Router();
 import { teamMemberAddLimiter } from "../middleware/rateLimiter.js";
 // Every route here requires a signed-in, email-verified user - team
@@ -19,6 +20,7 @@ teamRouter.use(requireAuth, requireVerifiedEmail);
 teamRouter.post(
   "/",
   uploadIdCard,
+  validateIdCardContent,
   cleanupRejectedUpload,
   validateBody(createTeamSchema),
   asyncHandler(teamController.createTeam),
@@ -28,6 +30,7 @@ teamRouter.get("/me", asyncHandler(teamController.getMyTeam));
 teamRouter.patch(
   "/:teamId",
   uploadIdCard,
+  validateIdCardContent,
   cleanupRejectedUpload,
   validateBody(updateTeamSchema),
   asyncHandler(teamController.updateTeam),
@@ -36,6 +39,7 @@ teamRouter.post(
   "/:teamId/members",
   teamMemberAddLimiter,
   uploadMemberIdCard,
+  validateIdCardContent,
   cleanupRejectedUpload,
   validateBody(addMemberSchema),
   asyncHandler(teamController.addMember),
@@ -43,12 +47,14 @@ teamRouter.post(
 teamRouter.patch(
   "/:teamId/members/:memberId",
   uploadMemberIdCard,
+  validateIdCardContent,
   cleanupRejectedUpload,
   validateBody(addMemberSchema),
   asyncHandler(teamController.updateMember),
 );
+teamRouter.get(
+  "/:teamId/members/:memberId/id-card",
+  asyncHandler(teamController.getMemberIdCard),
+);
 teamRouter.delete("/:teamId/members/:memberId", asyncHandler(teamController.removeMember));
 teamRouter.post("/:teamId/submit", asyncHandler(teamController.submitTeam));
-
-
-

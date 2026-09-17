@@ -29,6 +29,3 @@ export async function createContactMessage(input: CreateContactMessageInput, ipA
 
   return created;
 }
-
-
-

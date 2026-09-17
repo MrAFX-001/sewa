@@ -62,6 +62,3 @@ export async function upsertProfile(userId: string, input: UpsertProfileInput) {
 
   return profile;
 }
-
-
-

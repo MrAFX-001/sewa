@@ -16,6 +16,3 @@ export const Route = createFileRoute("/signin")({
   }),
   component: () => <AuthPage mode="login" />,
 });
-
-
-

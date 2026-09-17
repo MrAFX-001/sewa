@@ -404,6 +404,3 @@ export function TimelineRoadmap() {
     </div>
   );
 }
-
-
-

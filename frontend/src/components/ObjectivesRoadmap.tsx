@@ -329,6 +329,3 @@ export function ObjectivesRoadmap() {
     </div>
   );
 }
-
-
-

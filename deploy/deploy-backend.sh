@@ -41,6 +41,3 @@ done
 docker image prune -f >/dev/null
 echo "==> public check"
 curl -fsS https://sewafirstryic.dtu.ac.in/api/health && echo
-
-
-

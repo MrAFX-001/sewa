@@ -877,5 +877,3 @@ export function ProblemStatementsPage() {
     </div>
   );
 }
-
-

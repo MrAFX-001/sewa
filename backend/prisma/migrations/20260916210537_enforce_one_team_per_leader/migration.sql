@@ -6,6 +6,3 @@
 */
 -- CreateIndex
 CREATE UNIQUE INDEX "teams_leader_user_id_key" ON "teams"("leader_user_id");
-
-
-

@@ -322,6 +322,3 @@ export function ParticipationSteps() {
     </div>
   );
 }
-
-
-

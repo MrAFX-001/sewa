@@ -199,5 +199,3 @@ export type CreateTeamInput = z.infer<typeof createTeamSchema>;
 export type UpdateTeamInput = z.infer<typeof updateTeamSchema>;
 export type AddMemberInput = z.infer<typeof addMemberSchema>;
 export type UpdateMemberInput = AddMemberInput;
-
-

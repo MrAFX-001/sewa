@@ -387,8 +387,3 @@ export function createSummaryOutput(data, scenarioName) {
 
   return outputs;
 }
-
-
-
-
-

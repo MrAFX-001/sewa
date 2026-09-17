@@ -73,7 +73,3 @@ export default function (session) {
 export function handleSummary(data) {
   return createSummaryOutput(data, 'arrival-10k');
 }
-
-
-
-

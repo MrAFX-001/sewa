@@ -10,6 +10,3 @@ export function generateOtp(): string {
   const max = 10 ** env.OTP_LENGTH - 1;
   return randomInt(min, max + 1).toString();
 }
-
-
-

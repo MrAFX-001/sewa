@@ -27,6 +27,3 @@ export async function hashOtp(code: string): Promise<string> {
 export async function verifyOtp(code: string, hash: string): Promise<boolean> {
   return bcrypt.compare(code, hash);
 }
-
-
-

@@ -393,8 +393,3 @@ model ProblemCategory {
 
   @@map("problem_categories")
 }
-
-
-
-
-

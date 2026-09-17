@@ -335,5 +335,3 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
     </div>
   );
 }
-
-

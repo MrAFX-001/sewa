@@ -39,6 +39,3 @@ apiRouter.get("/health", async (_req, res) => {
     res.status(503).json({ status: "ERROR", message: "Database connection failed" });
   }
 });
-
-
-

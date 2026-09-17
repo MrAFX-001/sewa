@@ -21,7 +21,3 @@ export function resolveMediaUrl(url?: string | null): string {
   }
   return url;
 }
-
-
-
-

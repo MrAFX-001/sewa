@@ -56,6 +56,38 @@ export function requireVerifiedEmail(req: Request, res: Response, next: NextFunc
   }
   next();
 }
+/**
+ * Best-effort authentication for endpoints that are public by default but
+ * expose an authenticated/admin-only view when explicitly requested. Invalid
+ * or expired cookies are treated as anonymous rather than blocking the public
+ * response.
+ */
+export async function optionalAuth(req: Request, _res: Response, next: NextFunction) {
+  const token = req.cookies?.[env.COOKIE_NAME];
+  if (!token) {
+    return next();
+  }
 
+  try {
+    const payload = verifySession(token);
+    const user = await prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: {
+        id: true,
+        email: true,
+        emailVerified: true,
+        status: true,
+        tokenVersion: true,
+        role: true,
+      },
+    });
 
+    if (user && user.status !== "suspended" && payload.ver === user.tokenVersion) {
+      req.user = user;
+    }
+  } catch {
+    // Anonymous/public request.
+  }
 
+  next();
+}

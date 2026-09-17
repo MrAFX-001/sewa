@@ -76,6 +76,3 @@ export async function writeAuditLog({ req, userId, action, metadata }: AuditPara
     logger.error({ err, action, userId }, "audit_log_write_failed");
   }
 }
-
-
-
