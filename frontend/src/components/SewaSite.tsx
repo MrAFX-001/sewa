@@ -65,7 +65,6 @@ import govtofnctLogo from "../assets/govtofnctdelhi.svg";
 import vikasitBharatLogo from "../assets/vikasit_bharat.png";
 import dtuCampusMapPreview from "../assets/dtu-campus-map-preview.webp";
 import sewaLogo from "../assets/sewalogo.svg";
-import sewaWhiteLogo from "../assets/sewawhite.svg";
 import uniqueFeaturesSvg from "../assets/unique_features.svg";
 import { InnovationJourney } from "./InnovationJourney";
 import { ObjectivesRoadmap } from "./ObjectivesRoadmap";
@@ -2361,11 +2360,11 @@ export function HomePage() {
           {/* Hero content - centered */}
           <div className="site-shell relative flex min-h-[580px] items-start justify-center z-10">
             <div className="animate-rise flex flex-col items-center text-center pt-10 pb-20 max-w-3xl w-full">
-              {/* SEVA white logo in hero */}
+              {/* SEVA original logo in hero as-is */}
               <div className="mb-6 select-none drop-shadow-xl">
                 <img
-                  src={sewaWhiteLogo}
-                  alt="SEVA First"
+                  src={sewaLogo}
+                  alt="SEVA First Innovation Challenge 2026"
                   className="h-28 sm:h-32 md:h-36 w-auto object-contain"
                 />
               </div>
