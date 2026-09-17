@@ -28,6 +28,9 @@ export interface ProblemCategoryDef {
    * solves its own problem, so there is nothing to put here.
    */
   psTitle?: string;
+  psUrl?: string;
+  psId?: string;
+  openId?: string;
 }
 
 export const PROBLEM_CATEGORIES: ProblemCategoryDef[] = [

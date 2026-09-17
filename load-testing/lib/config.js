@@ -10,6 +10,9 @@ export const config = {
   // Target Host
   baseUrl: getBaseUrl(),
 
+  // SSL/TLS Settings: Allow testing internal/private IP deployments with self-signed certs
+  insecureSkipTLSVerify: true,
+
   // Authentication Settings
   // Backend session cookie name is 'sewa_session'
   cookieName: __ENV.COOKIE_NAME || 'sewa_session',

@@ -3,7 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
 import { logger } from "../config/logger.js";
 
-type AuditAction =
+export type AuditAction =
   | "signup"
   | "otp_send"
   | "otp_verify_success"
@@ -20,7 +20,35 @@ type AuditAction =
   | "team_member_remove"
   | "team_submit"
   | "profile_update"
-  | "contact_message_submit";
+  | "contact_message_submit"
+  | "role_assign"
+  | "status_update"
+  | "user_invite"
+  | "team_evaluate"
+  | "broadcast_mail"
+  | "committee_member_create"
+  | "committee_member_update"
+  | "committee_member_delete"
+  | "committee_layout_reorder"
+  | "gallery_image_create"
+  | "gallery_image_update"
+  | "gallery_image_delete"
+  | "gallery_layout_reorder"
+  | "hero_slide_create"
+  | "hero_slide_update"
+  | "hero_slide_delete"
+  | "faq_create"
+  | "faq_update"
+  | "faq_delete"
+  | "announcement_create"
+  | "announcement_update"
+  | "announcement_delete"
+  | "theme_create"
+  | "theme_update"
+  | "theme_delete"
+  | "theme_layout_reorder"
+  | "media_upload"
+  | (string & {});
 
 interface AuditParams {
   req: Request;

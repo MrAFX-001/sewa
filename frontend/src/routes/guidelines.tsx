@@ -102,7 +102,7 @@ const eligibilityCards = [
   {
     key: "northern-region",
     category: "Northern Region COORDINATION",
-    text: "Participants from Jammu & Kashmir, Ladakh, Himachal Pradesh, Uttarakhand, Chandigarh, NCT of Delhi, Punjab, Haryana and Uttar Pradesh are eligible to participate under the Northern Region coordinated by DTU.",
+    text: "Participants from Jammu & Kashmir, Ladakh, Himachal Pradesh, Uttarakhand, Chandigarh, NCT of Delhi, Punjab and Haryana are eligible to participate under the Northern Region coordinated by DTU.",
     cardBg: "bg-[#FFF4F4]",
     badgeBg: "bg-[#F2DCDC]",
     titleColor: "text-[#F53838]",

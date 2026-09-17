@@ -411,3 +411,125 @@ DTU Youth Innovation Challenge
     logger.error({ err: error, to }, "failed_to_send_contact_receipt_email");
   }
 }
+
+export interface AdminBroadcastEmailOptions {
+  recipients: string[];
+  subject: string;
+  content: string;
+  senderName?: string;
+}
+
+export interface AdminBroadcastEmailResult {
+  total: number;
+  sent: number;
+  failed: number;
+  errors: string[];
+}
+
+export async function sendAdminBroadcastEmail({
+  recipients,
+  subject,
+  content,
+  senderName = "SEWA 2026 Organizing Committee",
+}: AdminBroadcastEmailOptions): Promise<AdminBroadcastEmailResult> {
+  const cleanRecipients = Array.from(
+    new Set(
+      recipients
+        .map((r) => r.trim().toLowerCase())
+        .filter((r) => r.length > 0 && r.includes("@")),
+    ),
+  );
+
+  if (cleanRecipients.length === 0) {
+    return { total: 0, sent: 0, failed: 0, errors: ["No valid recipient email addresses found."] };
+  }
+
+  const formattedHtmlContent = content
+    .split("\n\n")
+    .map((paragraph) => `<p style="margin: 0 0 14px 0; line-height: 1.6;">${paragraph.replace(/\n/g, "<br/>")}</p>`)
+    .join("");
+
+  const textBody = `${subject}\n\n${content}\n\n---\nSent by: ${senderName}\nSEWA 2026 | Delhi Technological University\nhttps://sewa2026.dtu.ac.in`;
+
+  const htmlBody = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f1f5f9; margin: 0; padding: 24px; color: #1e293b; }
+    .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+    .header { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); color: #ffffff; padding: 28px 32px; }
+    .badge { display: inline-block; background-color: rgba(255, 255, 255, 0.15); color: #93c5fd; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 9999px; margin-bottom: 8px; }
+    .title { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: #ffffff; }
+    .subtitle { margin: 6px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500; }
+    .subject-banner { background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 16px 32px; font-size: 15px; font-weight: 700; color: #0f172a; }
+    .content { padding: 32px; font-size: 15px; color: #334155; }
+    .card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; margin-top: 24px; font-size: 13px; color: #64748b; }
+    .footer { background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px 32px; text-align: center; font-size: 12px; color: #94a3b8; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="badge">Official Announcement</span>
+      <h1 class="title">SEWA 2026</h1>
+      <p class="subtitle">Delhi Technological University &bull; Youth Innovation Challenge</p>
+    </div>
+    <div class="subject-banner">
+      ${subject}
+    </div>
+    <div class="content">
+      ${formattedHtmlContent}
+      <div class="card">
+        <strong style="color: #1e293b; display: block; margin-bottom: 4px;">Important Note</strong>
+        This communication has been dispatched by <strong>${senderName}</strong> via the official SEWA 2026 Administration Portal. Please do not reply directly to this automated email if you have specific queries. Use the Portal Contact Desk instead.
+      </div>
+    </div>
+    <div class="footer">
+      <p style="margin: 0 0 6px 0; font-weight: 600; color: #64748b;">Organizing Committee &bull; SEWA 2026</p>
+      <p style="margin: 0;">Delhi Technological University, Shahbad Daulatpur, Bawana Road, Delhi - 110042</p>
+    </div>
+  </div>
+</body>
+</html>
+`.trim();
+
+  let sent = 0;
+  let failed = 0;
+  const errors: string[] = [];
+
+  const CHUNK_SIZE = 5;
+  for (let i = 0; i < cleanRecipients.length; i += CHUNK_SIZE) {
+    const chunk = cleanRecipients.slice(i, i + CHUNK_SIZE);
+    const promises = chunk.map(async (to) => {
+      try {
+        await transporter.sendMail({
+          from: env.SMTP_FROM,
+          to,
+          subject: `[SEWA 2026] ${subject}`,
+          text: textBody,
+          html: htmlBody,
+        });
+        sent++;
+        logger.info({ to, subject }, "admin_broadcast_email_delivered");
+      } catch (err: any) {
+        failed++;
+        const errMsg = err?.message || String(err);
+        errors.push(`${to}: ${errMsg}`);
+        logger.error({ to, subject, err: errMsg }, "admin_broadcast_email_failed");
+      }
+    });
+    await Promise.all(promises);
+  }
+
+  return {
+    total: cleanRecipients.length,
+    sent,
+    failed,
+    errors,
+  };
+}
+

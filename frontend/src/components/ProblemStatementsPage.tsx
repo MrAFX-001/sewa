@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Search, X } from "lucide-react";
 import { Header, Footer } from "./SewaSite";
+import { resourceApi, type ThemeCategoryItem } from "../lib/api";
 
 /* ── Reusable Pagination ──────────────────────────────────────────── */
 function Pagination({
@@ -734,8 +735,54 @@ function TableCard({
 
 /* ── Page ────────────────────────────────────────────────────────────── */
 export function ProblemStatementsPage() {
+  const [nationalCategories, setNationalCategories] = useState<NationalCategory[]>(NATIONAL_CATEGORIES);
+  const [communityCategories, setCommunityCategories] = useState<Category[]>(COMMUNITY_CATEGORIES);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    resourceApi.getThemes(false)
+      .then(({ items }) => {
+        if (cancelled) return;
+        const national: NationalCategory[] = [];
+        const community: Category[] = [];
+        items.forEach((item: ThemeCategoryItem) => {
+          const badgeBg = item.badgeBg || "#DBEAFE";
+          const badgeText = item.badgeText || "#0284C7";
+          if (item.theme === "NATIONAL") {
+            national.push({
+              label: item.label,
+              idNumber: item.code,
+              badgeBg,
+              badgeText,
+              psTitle: item.psTitle || "Problem Statement",
+              psUrl: item.psUrl || undefined,
+              psId: item.psId || `${item.code}-PS`,
+              openId: item.openId || `${item.code}-OP`,
+            });
+          } else {
+            community.push({
+              label: item.label,
+              idNumber: item.openId || `${item.code}-OP`,
+              badgeBg,
+              badgeText,
+            });
+          }
+        });
+        if (national.length > 0) setNationalCategories(national);
+        if (community.length > 0) setCommunityCategories(community);
+      })
+      .catch(() => {
+        // Silently fall back to static data
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, []);
 
   return (
@@ -776,7 +823,11 @@ export function ProblemStatementsPage() {
                 </p>
 
                 <div className="mt-8">
-                  <TableCard categories={NATIONAL_CATEGORIES} showPsColumn />
+                  {loading ? (
+                    <p className="py-8 text-center text-sm text-[#60718B]">Loading categories…</p>
+                  ) : (
+                    <TableCard categories={nationalCategories} showPsColumn />
+                  )}
                 </div>
               </section>
 
@@ -809,7 +860,11 @@ export function ProblemStatementsPage() {
                 </p>
 
                 <div className="mt-8">
-                  <TableCard categories={COMMUNITY_CATEGORIES} showPsColumn={false} />
+                  {loading ? (
+                    <p className="py-8 text-center text-sm text-[#60718B]">Loading categories…</p>
+                  ) : (
+                    <TableCard categories={communityCategories} showPsColumn={false} />
+                  )}
                 </div>
               </section>
 

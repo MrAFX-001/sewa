@@ -38,6 +38,13 @@ enum ContactMessageStatus {
   resolved
 }
 
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  RESOURCE
+  MEMBER
+}
+
 model User {
   id              String   @id @default(uuid())
   firstName       String   @map("first_name") @db.VarChar(100)
@@ -46,6 +53,7 @@ model User {
   phone           String?  @db.VarChar(15)
   passwordHash    String   @map("password_hash")
   emailVerified   Boolean  @default(false) @map("email_verified")
+  role            UserRole @default(MEMBER)
   status          UserStatus @default(pending)
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
@@ -55,6 +63,7 @@ model User {
   teamMemberships TeamMember[]
   auditLogs       AuditLog[]
   candidateProfile CandidateProfile?
+  sentMails       AdminMail[]
 
   @@map("users")
 }
@@ -171,6 +180,10 @@ model Team {
   leader       User       @relation("TeamLeader", fields: [leaderUserId], references: [id])
   status       TeamStatus @default(draft)
   submittedAt  DateTime?  @map("submitted_at")
+  score        Int?
+  evaluatorNotes String?  @map("evaluator_notes") @db.Text
+  evaluatedAt  DateTime?  @map("evaluated_at")
+  evaluatedBy  String?    @map("evaluated_by")
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
 
@@ -256,4 +269,95 @@ model Announcement {
   @@index([publishedAt(sort: Desc)])
   @@map("announcements")
 }
+
+model GalleryImage {
+  id           String   @id @default(uuid())
+  url          String   @db.VarChar(500)
+  title        String   @db.VarChar(200)
+  active       Boolean  @default(true)
+  displayOrder Int      @default(0) @map("display_order")
+  uploadedBy   String?  @map("uploaded_by")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("gallery_images")
+}
+
+model AdminMail {
+  id             String   @id @default(uuid())
+  senderId       String?  @map("sender_id")
+  sender         User?    @relation(fields: [senderId], references: [id])
+  targetAudience String   @default("ALL") @map("target_audience") @db.VarChar(50)
+  targetEmail    String?  @map("target_email") @db.VarChar(255)
+  subject        String   @db.VarChar(255)
+  content        String   @db.Text
+  folder         String   @default("Inbox") @db.VarChar(50)
+  starred        Boolean  @default(false)
+  archived       Boolean  @default(false)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("admin_mails")
+}
+
+model CommitteeMember {
+  id           String   @id @default(uuid())
+  name         String   @db.VarChar(150)
+  designation  String   @db.VarChar(150)
+  category     String   @db.VarChar(50) // organizing, mentor, dev_team
+  affiliation  String?  @db.VarChar(200)
+  imageUrl     String?  @map("image_url") @db.VarChar(500)
+  rowNumber    Int      @default(1) @map("row_number")
+  rowTitle     String?  @map("row_title") @db.VarChar(100)
+  displayOrder Int      @default(0) @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("committee_members")
+}
+
+model HeroSlide {
+  id           String   @id @default(uuid())
+  title        String   @db.VarChar(255)
+  subtitle     String?  @db.VarChar(255)
+  imageUrl     String   @map("image_url") @db.VarChar(500)
+  active       Boolean  @default(true)
+  displayOrder Int      @default(0) @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("hero_slides")
+}
+
+model FaqItem {
+  id           String   @id @default(uuid())
+  question     String   @db.Text
+  answer       String   @db.Text
+  category     String   @default("general") @db.VarChar(50)
+  displayOrder Int      @default(0) @map("display_order")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("faq_items")
+}
+
+model ProblemCategory {
+  id           String   @id @default(uuid())
+  code         String   @unique @db.VarChar(50) // e.g. "NAT-001", "REG-001"
+  theme        String   @db.VarChar(50) // "NATIONAL" or "REGIONAL"
+  label        String   @db.VarChar(255)
+  psTitle      String?  @map("ps_title") @db.VarChar(255) // For National: official PS title
+  psUrl        String?  @map("ps_url") @db.VarChar(500) // Optional problem brief PDF/link
+  psId         String?  @map("ps_id") @db.VarChar(50) // e.g. "NAT-001-PS"
+  openId       String?  @map("open_id") @db.VarChar(50) // e.g. "NAT-001-OP"
+  badgeBg      String?  @default("#DBEAFE") @map("badge_bg") @db.VarChar(30)
+  badgeText    String?  @default("#0284C7") @map("badge_text") @db.VarChar(30)
+  displayOrder Int      @default(0) @map("display_order")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("problem_categories")
+}
+
 

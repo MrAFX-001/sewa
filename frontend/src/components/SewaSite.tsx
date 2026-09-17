@@ -32,7 +32,8 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { ApiError, authApi, contactApi, announcementsApi, CONTACT_CATEGORIES, type ContactCategory, type Announcement } from "../lib/api";
+import { ApiError, authApi, contactApi, announcementsApi, resourceApi, CONTACT_CATEGORIES, type ContactCategory, type Announcement } from "../lib/api";
+import { sortAnnouncementsNewestFirst } from "../lib/announcements";
 import { useAuth } from "../lib/auth";
 import campusImage from "../assets/dtu-campus-aerial.jpeg";
 import campus2Image from "../assets/campus2.jpeg";
@@ -58,6 +59,21 @@ import {
   SheetHeader,
   SheetTitle,
 } from "./ui/sheet";
+import { resolveMediaUrl } from "../lib/utils";
+
+const assetImages = import.meta.glob("../assets/**/*.{png,jpg,jpeg,webp,avif,PNG,JPG,JPEG,WEBP}", {
+  eager: true,
+  import: "default",
+}) as Record<string, string>;
+
+const photoByStem: Record<string, string> = {};
+for (const [path, url] of Object.entries(assetImages)) {
+  const stem = path.split("/").pop()!.replace(/\.[^.]+$/, "").toLowerCase();
+  photoByStem[stem] = url;
+}
+
+/** teamPhoto("mrvc") -> URL of src/assets/mrvc.jpeg (or undefined if absent). */
+const teamPhoto = (stem: string): string | undefined => photoByStem[stem.toLowerCase()];
 
 const heroImages = [
   {
@@ -156,7 +172,7 @@ function XLogo({ className = "size-3.5" }: { className?: string }) {
 }
 
 export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" | "guidelines" | "about" | "problems" | "contact" | "faq" | "resources" | "signin" | "signup" | "team-register" | string } = {}) {
-  const { user, isSignedIn, signOut } = useAuth();
+  const { user, isSignedIn, hasRegisteredTeamOrAdmin, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -165,7 +181,10 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
   useEffect(() => {
     announcementsApi
       .list()
-      .then((items) => setLatestAnnouncement(items[0] ?? null))
+      .then((items) => {
+        const sorted = sortAnnouncementsNewestFirst(items);
+        setLatestAnnouncement(sorted[0] ?? null);
+      })
       .catch(() => {
         // Keep the ticker available even if the public announcements endpoint is unavailable.
       });
@@ -238,21 +257,25 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
           </button>
 
           {/* Login / Auth */}
-          {isSignedIn ? (
+          {hasRegisteredTeamOrAdmin ? (
             <div className="flex items-center gap-2">
-              <span
-                className="hidden max-w-[110px] truncate text-xs text-muted-foreground sm:inline"
-                title={user?.firstName}
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-1.5 text-xs sm:text-sm font-semibold border border-gray-200 shadow-2xs hover:shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
+                title="Go to Dashboard & Profile"
               >
-                Hi, {user?.firstName}
-              </span>
-              <button
-                type="button"
-                onClick={() => signOut()}
-                className="button button-outline shrink-0 cursor-pointer text-xs sm:text-sm"
+                <User size={14} className="text-[#ff4d4f]" />
+                <span>Profile</span>
+              </Link>
+            </div>
+          ) : isSignedIn ? (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/team-register"
+                className="inline-flex items-center justify-center rounded-full bg-[#ff4d4f] px-5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-[#e03d3f] transition-colors sm:px-6 sm:py-2 sm:text-sm"
               >
-                Sign Out
-              </button>
+                Register Team
+              </Link>
             </div>
           ) : (
             <Link
@@ -497,32 +520,25 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
                 </Link>
 
                 <div className="mt-5 flex flex-col gap-3 border-t border-gray-200 pt-5">
-                  <Link
-                    to="/event-register"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="inline-flex w-full items-center justify-center rounded-full border-2 border-[#ff4d4f] bg-white px-5 py-2.5 text-sm font-semibold text-[#ff4d4f] shadow-sm transition-colors hover:bg-red-50"
-                  >
-                    Register My Team
-                  </Link>
-                  {isSignedIn ? (
-                    <div className="flex flex-col gap-3">
-                      {user?.firstName && (
-                        <div className="text-xs text-muted-foreground px-1">
-                          Signed in as <span className="font-semibold text-gray-900">{user.firstName} {user.lastName || ""}</span>
-                        </div>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          signOut();
-                        }}
-                        className="button button-outline w-full cursor-pointer justify-center text-sm"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
+                  {hasRegisteredTeamOrAdmin ? (
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gray-100 px-5 py-2.5 text-sm font-semibold text-gray-800 shadow-sm border border-gray-200 transition-colors hover:bg-gray-200"
+                    >
+                      <User size={16} className="text-[#ff4d4f]" />
+                      <span>Profile ({user?.firstName || "My Account"})</span>
+                    </Link>
                   ) : (
+                    <Link
+                      to="/event-register"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="inline-flex w-full items-center justify-center rounded-full border-2 border-[#ff4d4f] bg-white px-5 py-2.5 text-sm font-semibold text-[#ff4d4f] shadow-sm transition-colors hover:bg-red-50"
+                    >
+                      Register My Team
+                    </Link>
+                  )}
+                  {!isSignedIn && (
                     <Link
                       to="/signin"
                       onClick={() => setMobileMenuOpen(false)}
@@ -653,22 +669,24 @@ export function Header({ activeNav = "home" }: { activeNav?: "home" | "events" |
                 <Search size={15} className="text-[#ff4d4f] group-hover:scale-110 transition-transform" />
               </button>
 
-              {isSignedIn ? (
+              {hasRegisteredTeamOrAdmin ? (
                 <div className="flex items-center gap-2">
-                  <span
-                    className="hidden max-w-[110px] truncate text-xs text-muted-foreground sm:inline"
-                    title={user?.firstName}
+                  <Link
+                    to="/dashboard"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-1.5 text-xs sm:text-sm font-semibold border border-gray-200 shadow-2xs hover:shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
+                    title="Go to Dashboard & Profile"
                   >
-                    Hi, {user?.firstName}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => signOut()}
-                    className="button button-outline shrink-0 cursor-pointer text-xs sm:text-sm"
-                  >
-                    Sign Out
-                  </button>
+                    <User size={14} className="text-[#ff4d4f]" />
+                    <span>Profile</span>
+                  </Link>
                 </div>
+              ) : isSignedIn ? (
+                <Link
+                  to="/team-register"
+                  className="inline-flex items-center justify-center rounded-full bg-[#ff4d4f] px-4 sm:px-5 py-1.5 sm:py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#e03d3f] transition-colors sm:text-sm shrink-0"
+                >
+                  Register Team
+                </Link>
               ) : (
                 <Link
                   to="/signin"
@@ -1696,25 +1714,94 @@ export function StatisticsSection() {
 }
 
 export function HomePage() {
+  const { isSignedIn, hasRegisteredTeamOrAdmin, user } = useAuth();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All Categories");
   const [open, setOpen] = useState<number | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const [dbHeroSlides, setDbHeroSlides] = useState<Array<{ src: string; alt: string }>>([]);
+  const [dbCommittee, setDbCommittee] = useState<
+    Array<{
+      name: string;
+      designation?: string;
+      image?: string;
+      category: string;
+      rowNumber?: number;
+      rowTitle?: string | null;
+      displayOrder?: number;
+    }>
+  >([]);
+
   useEffect(() => {
+    let isMounted = true;
+    resourceApi
+      .getHeroSlides(false)
+      .then((res) => {
+        if (!isMounted) return;
+        const slides = res?.slides;
+        if (Array.isArray(slides) && slides.length > 0) {
+          setDbHeroSlides(slides.map((s) => ({ src: resolveMediaUrl(s.imageUrl), alt: s.title })));
+        }
+      })
+      .catch(() => { });
+
+    resourceApi
+      .getCommittee()
+      .then((res) => {
+        if (!isMounted) return;
+        const members = res?.members;
+        if (Array.isArray(members) && members.length > 0) {
+          setDbCommittee(
+            members.map((m) => {
+              const item: {
+                name: string;
+                designation?: string;
+                image?: string;
+                category: string;
+                rowNumber?: number;
+                rowTitle?: string | null;
+                displayOrder?: number;
+              } = {
+                name: m.name,
+                category: m.category,
+                rowNumber: m.rowNumber || 1,
+                rowTitle: m.rowTitle || null,
+                displayOrder: m.displayOrder || 0,
+              };
+              if (m.designation) item.designation = m.designation;
+              if (m.imageUrl) item.image = resolveMediaUrl(m.imageUrl);
+              return item;
+            })
+          );
+        }
+      })
+      .catch(() => { });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const activeHeroImages = dbHeroSlides.length > 0 ? dbHeroSlides : heroImages;
+
+  useEffect(() => {
+    if (!activeHeroImages || activeHeroImages.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev === heroImages.length - 1 ? 0 : prev + 1));
+      setCurrentSlide((prev) => (prev >= activeHeroImages.length - 1 ? 0 : prev + 1));
     }, 5500);
 
     return () => clearInterval(timer);
-  }, [currentSlide]);
+  }, [currentSlide, activeHeroImages]);
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? heroImages.length - 1 : prev - 1));
+    if (!activeHeroImages.length) return;
+    setCurrentSlide((prev) => (prev === 0 ? activeHeroImages.length - 1 : prev - 1));
   };
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev === heroImages.length - 1 ? 0 : prev + 1));
+    if (!activeHeroImages.length) return;
+    setCurrentSlide((prev) => (prev >= activeHeroImages.length - 1 ? 0 : prev + 1));
   };
 
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -1722,11 +1809,15 @@ export function HomePage() {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    if (e.targetTouches[0]) {
+      setTouchStart(e.targetTouches[0].clientX);
+    }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    if (e.targetTouches[0]) {
+      setTouchEnd(e.targetTouches[0].clientX);
+    }
   };
 
   const handleTouchEnd = () => {
@@ -1742,22 +1833,170 @@ export function HomePage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   useEffect(() => {
-    announcementsApi.list()
-      .then(setAnnouncements)
+    announcementsApi
+      .list()
+      .then((items) => setAnnouncements(sortAnnouncementsNewestFirst(items)))
       .catch(() => { }); // fail silently — section just stays empty
   }, []);
 
   const filtered = useMemo(
     () =>
-      announcements
-        .filter(
+      sortAnnouncementsNewestFirst(
+        announcements.filter(
           (n) =>
             (category === "All" || category === "All Categories" || n.category === category) &&
-            [n.category, n.title, n.summary, n.detail ?? ""].join(" ").toLowerCase().includes(query.toLowerCase()),
+            [n.category, n.title, n.summary, n.detail ?? "", n.refNumber ?? ""].join(" ").toLowerCase().includes(query.toLowerCase()),
         )
-        .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()),
+      ),
     [announcements, query, category],
   );
+
+
+
+  const organizingMembers = useMemo(() => {
+    return dbCommittee.filter((m) => m.category === "organizing");
+  }, [dbCommittee]);
+
+  const chiefPatronMembers = useMemo(() => {
+    const list = organizingMembers
+      .filter(
+        (m) =>
+          m.rowTitle === "chief_patron" ||
+          m.designation?.toLowerCase().includes("chief patron") ||
+          m.designation?.toLowerCase().includes("patron-in-chief") ||
+          m.designation?.toLowerCase().includes("patron in chief")
+      )
+      .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    if (list.length > 0) {
+      return list.map((m) => ({ name: m.name, designation: m.designation, image: m.image }));
+    }
+    return [
+      {
+        name: "Shri Narendra Modi",
+        designation: "Hon'ble Prime Minister of India",
+        image: teamPhoto("pm-modi"),
+      },
+      {
+        name: "Smt. Atishi",
+        designation: "Hon'ble Chief Minister of Delhi",
+        image: teamPhoto("cm-delhi"),
+      },
+      {
+        name: "Shri Dharmendra Pradhan",
+        designation: "Hon'ble Minister of Education, Govt. of India",
+        image: teamPhoto("education-minister"),
+      },
+    ];
+  }, [organizingMembers]);
+
+  const patronMember = useMemo(() => {
+    const found = organizingMembers
+      .filter(
+        (m) =>
+          (m.rowTitle === "patron" ||
+            (!m.rowTitle &&
+              (m.designation?.toLowerCase().includes("patron") ||
+                m.designation?.toLowerCase().includes("vice chancellor")))) &&
+          m.rowTitle !== "chief_patron" &&
+          !m.designation?.toLowerCase().includes("chief")
+      )
+      .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    if (found.length > 0) {
+      return found.map((m) => ({
+        name: m.name,
+        designation: m.designation,
+        image: m.image || teamPhoto("mrvc"),
+      }));
+    }
+    return [{ name: "Prof. Prateek Kumar", designation: "Vice Chancellor, DTU Delhi", image: teamPhoto("mrvc") }];
+  }, [organizingMembers]);
+
+  const coordinatorMembers = useMemo(() => {
+    const list = organizingMembers
+      .filter(
+        (m) =>
+          m.rowTitle !== "chief_patron" &&
+          m.rowTitle !== "patron" &&
+          !m.designation?.toLowerCase().includes("patron") &&
+          !m.designation?.toLowerCase().includes("vice chancellor")
+      )
+      .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    if (list.length > 0) {
+      return list.map((m) => ({ name: m.name, designation: m.designation, image: m.image }));
+    }
+    return [
+      { name: "Prof. K.C. Tiwari", designation: "Coordinator-1", image: teamPhoto("mrkctiwari") },
+      { name: "Prof. Girish Kumar", designation: "Coordinator-2", image: teamPhoto("mrgirish") },
+    ];
+  }, [organizingMembers]);
+
+  const mentorMembers = useMemo(() => {
+    const list = dbCommittee
+      .filter((m) => m.category === "mentor")
+      .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    return list.length > 0 ? list.map((m) => ({ name: m.name, designation: m.designation, image: m.image })) : null;
+  }, [dbCommittee]);
+
+  const devTeamFaculty = useMemo(() => {
+    const list = dbCommittee
+      .filter(
+        (m) =>
+          m.category === "dev_team" &&
+          (m.designation?.toLowerCase().includes("head") ||
+            m.designation?.toLowerCase().includes("coordinator") ||
+            m.designation?.toLowerCase().includes("manager") ||
+            m.designation?.toLowerCase().includes("prof") ||
+            m.designation?.toLowerCase().includes("dr."))
+      )
+      .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    if (list.length > 0) {
+      return list.map((m) => ({ name: m.name, designation: m.designation, image: m.image }));
+    }
+    return [
+      { name: "Kaustubh Ranjan Singh", designation: "Design and Development Head", image: teamPhoto("mrkaustubh") },
+      { name: "Prof. Shailender Kumar", designation: "Head, Computer Center", image: teamPhoto("mrshailendra") },
+      { name: "Dr. Anamika Chauhan", designation: "Co-Coordinator", image: teamPhoto("msanamika") },
+      { name: "Dr. Trasha Gupta", designation: "Co-Coordinator", image: teamPhoto("mstrasha") },
+      { name: "Dr. Anshul Arora", designation: "Co-Coordinator", image: teamPhoto("mranshul") },
+      { name: "Mr. Vikas", designation: "System Manager, Computer Center", image: teamPhoto("mrvikas") },
+    ];
+  }, [dbCommittee]);
+
+  const devTeamCore = useMemo(() => {
+    const list = dbCommittee
+      .filter(
+        (m) =>
+          m.category === "dev_team" &&
+          !(
+            m.designation?.toLowerCase().includes("head") ||
+            m.designation?.toLowerCase().includes("coordinator") ||
+            m.designation?.toLowerCase().includes("manager") ||
+            m.designation?.toLowerCase().includes("prof") ||
+            m.designation?.toLowerCase().includes("dr.")
+          )
+      )
+      .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    if (list.length > 0) {
+      return list.map((m) => ({
+        name: m.name,
+        designation: m.designation || undefined,
+        image: m.image,
+      }));
+    }
+    return [
+      { name: "Narayan Mishra", designation: "Lead Systems Architect", image: teamPhoto("mrnarayan") },
+      { name: "Daksh Panchal", designation: "Robotics & Hardware Systems", image: teamPhoto("mrdaksh") },
+      { name: "Ankit Kumar Roy", designation: "Fullstack Platform Engineer", image: teamPhoto("mrankit") },
+      { name: "Vedant Singh", designation: "Embedded Systems Specialist", image: teamPhoto("mrvedant") },
+      { name: "Afroz Hadil Pookkodan", designation: "Machine Learning & AI Lead", image: teamPhoto("mrafroz") },
+      { name: "Ilisha Dabas", designation: "Product Design & Frontend Lead", image: teamPhoto("msilisha") },
+      { name: "Suraj Jaiswal", designation: "Fullstack Developer", image: teamPhoto("mrsuraj") },
+      { name: "Prakhar Awasthi", designation: "DevOps & Cloud Infrastructure", image: teamPhoto("mrprakhar") },
+      { name: "Soumya Saurav Das", designation: "Backend & Database Engineer", image: teamPhoto("mrsoumya") },
+      { name: "Sudhanshu Shekhar", designation: "Security & Testing Engineer", image: teamPhoto("mrsudhanshu") },
+    ];
+  }, [dbCommittee]);
+
   return (
     <div>
       <Header />
@@ -1769,10 +2008,10 @@ export function HomePage() {
           onTouchEnd={handleTouchEnd}
         >
           <div className="absolute inset-0 overflow-hidden">
-            {heroImages.map((image, idx) => (
+            {activeHeroImages.map((image, idx) => (
               <img
                 key={idx}
-                src={image.src}
+                src={resolveMediaUrl(image.src)}
                 alt={image.alt}
                 className={`absolute inset-0 size-full object-cover transition-opacity duration-1000 ease-in-out ${idx === currentSlide
                   ? "opacity-100 z-[1]"
@@ -1829,10 +2068,26 @@ export function HomePage() {
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3 justify-center">
-                <Link to="/event-register" className="inline-flex items-center gap-2 rounded-md bg-[#e53e3e] hover:bg-[#c53030] px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 shadow-lg">
-                  Register Your Team
-                </Link>
-                <a href="#about" className="inline-flex items-center gap-2 rounded-md bg-white/15 hover:bg-white/25 border border-white/30 backdrop-blur-sm px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5">
+                {hasRegisteredTeamOrAdmin ? (
+                  <Link
+                    to="/dashboard"
+                    className="inline-flex items-center gap-2 rounded-md bg-[#e53e3e] hover:bg-[#c53030] px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 shadow-lg"
+                  >
+                    <User size={16} />
+                    <span>Go to Profile</span>
+                  </Link>
+                ) : (
+                  <Link
+                    to="/event-register"
+                    className="inline-flex items-center gap-2 rounded-md bg-[#e53e3e] hover:bg-[#c53030] px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 shadow-lg"
+                  >
+                    Register Your Team
+                  </Link>
+                )}
+                <a
+                  href="#about"
+                  className="inline-flex items-center gap-2 rounded-md bg-white/15 hover:bg-white/25 border border-white/30 backdrop-blur-sm px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5"
+                >
                   Latest Updates
                 </a>
               </div>
@@ -1848,15 +2103,15 @@ export function HomePage() {
                   <ChevronLeft size={14} strokeWidth={2.5} />
                 </button>
                 <div className="flex items-center gap-1.5">
-                  {heroImages.map((_, idx) => (
+                  {activeHeroImages.map((_, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => setCurrentSlide(idx)}
                       aria-label={`Go to slide ${idx + 1}`}
                       className={`transition-all duration-300 rounded-full cursor-pointer ${idx === currentSlide
-                          ? "w-4 h-1 bg-white"
-                          : "size-1 bg-white/40 hover:bg-white/70"
+                        ? "w-4 h-1 bg-white"
+                        : "size-1 bg-white/40 hover:bg-white/70"
                         }`}
                     />
                   ))}
@@ -2177,10 +2432,7 @@ export function HomePage() {
                 Coordinators
               </h3>
               <PeopleGrid
-                people={[
-                  { name: "Prof. K.C. Tiwari", designation: "Coordinator-1", image: teamPhoto("mrkctiwari") },
-                  { name: "Prof. Girish Kumar", designation: "Coordinator-2", image: teamPhoto("mrgirish") },
-                ]}
+                people={coordinatorMembers}
               />
             </div>
           </div>
@@ -2192,7 +2444,7 @@ export function HomePage() {
             <h2 className="t-main-heading t-title-gap-wide uppercase">
               Mentors
             </h2>
-            <PeopleGrid rows={2} />
+            {mentorMembers ? <PeopleGrid people={mentorMembers} /> : <PeopleGrid rows={2} />}
           </div>
         </section>
 
@@ -2205,39 +2457,12 @@ export function HomePage() {
 
             {/* Faculty */}
             <h3 className="t-main-heading uppercase text-[length:calc(var(--fs-main-heading)*0.6)]!">Faculty</h3>
-            <PeopleGrid
-              people={[
-                { name: "Kaustubh Ranjan Singh", designation: "Design and Development Head", image: teamPhoto("mrkaustubh") },
-                { name: "Prof. Shailender Kumar", designation: "Head, Computer Center", image: teamPhoto("mrshailendra") },
-                { name: "Dr. Anamika Chauhan", designation: "Co-Coordinator", image: teamPhoto("msanamika") },
-              ]}
-            />
-            {/* Second row; top margin matches the grid's row gap */}
-            <div className="mt-10 sm:mt-12 md:mt-16">
-              <PeopleGrid
-                people={[
-                  { name: "Dr. Trasha Gupta", designation: "Co-Coordinator", image: teamPhoto("mstrasha") },
-                  { name: "Dr. Anshul Arora", designation: "Co-Coordinator", image: teamPhoto("mranshul") },
-                  { name: "Mr. Vikas", designation: "System Manager, Computer Center", image: teamPhoto("mrvikas") },
-                ]}
-              />
-            </div>
+            <PeopleGrid people={devTeamFaculty} />
 
             {/* Students */}
             <h3 className="t-main-heading uppercase text-[length:calc(var(--fs-main-heading)*0.6)]! mt-14 sm:mt-20">Students</h3>
             <PeopleGrid
-              people={[
-                { name: "Narayan Mishra", image: teamPhoto("mrnarayan") },
-                { name: "Daksh Panchal", image: teamPhoto("mrdaksh") },
-                { name: "Ankit Kumar Roy", image: teamPhoto("mrankit") },
-                { name: "Vedant Singh", image: teamPhoto("mrvedant") },
-                { name: "Afroz Hadil Pookkodan", image: teamPhoto("mrafroz") },
-                { name: "Ilisha Dabas", image: teamPhoto("msilisha") },
-                { name: "Suraj Jaiswal", image: teamPhoto("mrsuraj") },
-                { name: "Prakhar Awasthi", image: teamPhoto("mrprakhar") },
-                { name: "Soumya Saurav Das", image: teamPhoto("mrsoumya") },
-                { name: "Sudhanshu Shekhar", image: teamPhoto("mrsudhanshu") },
-              ]}
+              people={devTeamCore}
               showDesignation={false}
             />
           </div>
@@ -2257,26 +2482,6 @@ export function HomePage() {
  * Still placeholder content: swap the Array.from for the real roster when the
  * names and photos land.
  */
-/**
- * Team photos live in src/assets (any subfolder). They're looked up by file
- * name without extension, case-insensitive, via import.meta.glob, so a
- * missing or renamed photo just falls back to the grey circle instead of
- * breaking the build the way a hard `import` would.
- */
-const assetImages = import.meta.glob("../assets/**/*.{png,jpg,jpeg,webp,avif,PNG,JPG,JPEG,WEBP}", {
-  eager: true,
-  import: "default",
-}) as Record<string, string>;
-
-const photoByStem: Record<string, string> = {};
-for (const [path, url] of Object.entries(assetImages)) {
-  const stem = path.split("/").pop()!.replace(/\.[^.]+$/, "").toLowerCase();
-  photoByStem[stem] = url;
-}
-
-/** teamPhoto("mrvc") -> URL of src/assets/mrvc.jpeg (or undefined if absent). */
-const teamPhoto = (stem: string): string | undefined => photoByStem[stem.toLowerCase()];
-
 function PeopleGrid({
   rows,
   names,
@@ -2301,28 +2506,28 @@ function PeopleGrid({
   return (
     <div className="flex flex-wrap justify-center gap-x-6 sm:gap-x-12 md:gap-x-16 gap-y-10 sm:gap-y-12 md:gap-y-16 max-w-4xl mx-auto">
       {people.map(({ name, designation, image }, idx) => {
-        const photo = image;
+        const photo = image || teamPhoto((name ? name.split(" ")[0] || "" : "").toLowerCase());
         return (
-        <div
-          key={`${name}-${idx}`}
-          className="flex w-[calc(50%-0.75rem)] flex-col items-center text-center sm:w-[calc(25%-2.25rem)] md:w-[calc(25%-3rem)]"
-        >
-          {photo ? (
-            <img
-              src={photo}
-              alt={name}
-              loading="lazy"
-              decoding="async"
-              className="size-20 sm:size-24 md:size-28 rounded-full bg-[#d2d2d2] object-cover object-top mb-3 sm:mb-3.5 shadow-sm ring-1 ring-black/5 transition-transform duration-200 hover:scale-105"
-            />
-          ) : (
-            <div className="size-20 sm:size-24 md:size-28 rounded-full bg-[#d2d2d2] mb-3 sm:mb-3.5 transition-transform duration-200 hover:scale-105" />
-          )}
-          <h3 className="t-subheading-2 text-gray-900">{name}</h3>
-          {showDesignation && designation && (
-            <p className="t-content text-gray-500 mt-1 text-center [hyphens:none]">{designation}</p>
-          )}
-        </div>
+          <div
+            key={`${name}-${idx}`}
+            className="flex w-[calc(50%-0.75rem)] flex-col items-center text-center sm:w-[calc(25%-2.25rem)] md:w-[calc(25%-3rem)]"
+          >
+            {photo ? (
+              <img
+                src={resolveMediaUrl(photo)}
+                alt={name}
+                loading="lazy"
+                decoding="async"
+                className="size-20 sm:size-24 md:size-28 rounded-full bg-[#d2d2d2] object-cover object-top mb-3 sm:mb-3.5 shadow-sm ring-1 ring-black/5 transition-transform duration-200 hover:scale-105"
+              />
+            ) : (
+              <div className="size-20 sm:size-24 md:size-28 rounded-full bg-[#d2d2d2] mb-3 sm:mb-3.5 transition-transform duration-200 hover:scale-105" />
+            )}
+            <h3 className="t-subheading-2 text-gray-900">{name}</h3>
+            {showDesignation && designation && (
+              <p className="t-content text-gray-500 mt-1 text-center [hyphens:none]">{designation}</p>
+            )}
+          </div>
         );
       })}
     </div>
@@ -3767,7 +3972,7 @@ const faqData = [
   },
   {
     q: "Who is the Regional Coordinator for the Northern Region?",
-    a: "Delhi Technological University (DTU) is the Regional Coordinator for the Northern Region. The region includes J&K, Ladakh, Himachal Pradesh, Uttarakhand, Chandigarh, Delhi, Punjab, Haryana and Uttar Pradesh.",
+    a: "Delhi Technological University (DTU) is the Regional Coordinator for the Northern Region. The region includes J&K, Ladakh, Himachal Pradesh, Uttarakhand, Chandigarh, Delhi, Punjab and Haryana.",
   },
   {
     q: "Do I need a fully developed product to participate?",
@@ -3809,6 +4014,27 @@ const faqData = [
 
 export function FaqPage() {
   const [openIndices, setOpenIndices] = useState<Set<number>>(new Set());
+  const [dbFaqs, setDbFaqs] = useState<Array<{ q: string; a: string }>>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    resourceApi
+      .getFaqs(false)
+      .then((res) => {
+        if (!isMounted) return;
+        const faqs = res?.faqs;
+        if (Array.isArray(faqs) && faqs.length > 0) {
+          setDbFaqs(faqs.map((f) => ({ q: f.question, a: f.answer })));
+        }
+      })
+      .catch(() => { });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const activeFaqs = dbFaqs.length > 0 ? dbFaqs : faqData;
 
   const toggle = (idx: number) => {
     setOpenIndices((curr) => {
@@ -3836,7 +4062,7 @@ export function FaqPage() {
             </p>
 
             <div className="space-y-3.5 sm:space-y-4">
-              {faqData.map((item, idx) => {
+              {activeFaqs.map((item, idx) => {
                 const isOpen = openIndices.has(idx);
                 return (
                   <div

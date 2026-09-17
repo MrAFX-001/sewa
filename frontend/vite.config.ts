@@ -29,6 +29,12 @@ export default defineConfig(({ command }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      "/uploads": {
+        target: "http://localhost:4000",
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [
     tailwindcss(),
