@@ -116,7 +116,13 @@ const arrow = (
     aria-hidden="true"
     className="absolute -right-3 top-7 pointer-events-none z-10 text-slate-400"
   >
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      viewBox="0 0 24 24"
+    >
       <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   </div>
@@ -203,8 +209,18 @@ export function InnovationJourney() {
                   {/* Same arrow everywhere: between steps and before the next phase */}
                   {!isLastStepOverall && (
                     <div aria-hidden="true" className="flex justify-center text-slate-400">
-                      <svg className="size-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                        <path d="M19 14l-7 7m0 0l-7-7m7 7V3" strokeLinecap="round" strokeLinejoin="round" />
+                      <svg
+                        className="size-5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
                       </svg>
                     </div>
                   )}
@@ -219,14 +235,23 @@ export function InnovationJourney() {
       <div className="hidden lg:block overflow-x-auto pb-4">
         <div className="flex min-w-[1180px] flex-col gap-10 lg:gap-12">
           {/* Eight sequential steps */}
-          <div className="relative grid grid-cols-8 items-start" aria-label="Eight steps of innovation">
+          <div
+            className="relative grid grid-cols-8 items-start"
+            aria-label="Eight steps of innovation"
+          >
             {steps.map((step, i) => (
-              <div key={step.number} className="group relative flex flex-col items-center px-2.5 text-center">
+              <div
+                key={step.number}
+                className="group relative flex flex-col items-center px-2.5 text-center"
+              >
                 <div
                   className="mb-5 flex size-20 shrink-0 items-center justify-center rounded-full shadow-sm transition-transform duration-200 group-hover:scale-105"
                   style={{ backgroundColor: step.surface }}
                 >
-                  <span className="text-2xl font-extrabold tracking-tight" style={{ color: step.ink }}>
+                  <span
+                    className="text-2xl font-extrabold tracking-tight"
+                    style={{ color: step.ink }}
+                  >
                     {step.number}
                   </span>
                 </div>
@@ -242,7 +267,10 @@ export function InnovationJourney() {
           </div>
 
           {/* Phase ribbons, aligned to the same eight columns */}
-          <div className="grid w-full grid-cols-8 items-center gap-0" aria-label="Innovation phases">
+          <div
+            className="grid w-full grid-cols-8 items-center gap-0"
+            aria-label="Innovation phases"
+          >
             {phases.map((phase) => (
               <div key={phase.label} className={phase.span}>
                 <div

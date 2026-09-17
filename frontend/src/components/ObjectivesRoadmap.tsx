@@ -256,9 +256,7 @@ export function ObjectivesRoadmap() {
                   {item.title}
                 </h3>
               </div>
-              <p className="text-sm leading-relaxed text-[#475569] [hyphens:none]">
-                {item.body}
-              </p>
+              <p className="text-sm leading-relaxed text-[#475569] [hyphens:none]">{item.body}</p>
             </div>
 
             {i < objectives.length - 1 && (
@@ -317,9 +315,7 @@ export function ObjectivesRoadmap() {
               <h3 className="t-content font-bold! mb-2 text-left tracking-tight text-[#0f172a] [hyphens:none]">
                 {item.title}
               </h3>
-              <p className="t-content text-left text-[#475569] [hyphens:none]">
-                {item.body}
-              </p>
+              <p className="t-content text-left text-[#475569] [hyphens:none]">{item.body}</p>
             </div>
 
             {i < objectives.length - 1 && downArrow}

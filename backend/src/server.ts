@@ -9,7 +9,7 @@ import { startOtpCleanupJob } from "./services/cleanup.service.js";
 mkdirSync(env.UPLOAD_DIR, { recursive: true });
 
 const server = app.listen(env.PORT, env.HOST, () => {
-  logger.info(`SEWA 2026 backend listening on ${env.HOST}:${env.PORT} [${env.NODE_ENV}]`);
+  logger.info(`SEVA 2026 backend listening on ${env.HOST}:${env.PORT} [${env.NODE_ENV}]`);
 });
 
 // Longer than Nginx's upstream keepalive_timeout (60s) to avoid sporadic 502s.

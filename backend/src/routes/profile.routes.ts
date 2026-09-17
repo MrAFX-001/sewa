@@ -36,7 +36,7 @@ profileRouter.get(
 
     const formatted = mails.map((m) => ({
       id: m.id,
-      sender: m.sender ? `${m.sender.firstName} ${m.sender.lastName}`.trim() : "SEWA Secretariat",
+      sender: m.sender ? `${m.sender.firstName} ${m.sender.lastName}`.trim() : "SEVA Secretariat",
       email: m.sender?.email || "sewa2026@dtu.ac.in",
       title: m.subject,
       snippet: m.content.slice(0, 90) + (m.content.length > 90 ? "..." : ""),

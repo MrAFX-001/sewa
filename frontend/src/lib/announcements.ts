@@ -4,13 +4,13 @@
 
 export function extractCircularNumber(ref?: string | null): number {
   if (!ref) return 0;
-  // Match standard CIR-XX pattern (e.g. CIR-07, SEWA-CIR-01)
+  // Match standard CIR-XX pattern (e.g. CIR-07, SEVA-CIR-01)
   const cirMatch = ref.match(/CIR[-_\s]?(\d+)/i);
   if (cirMatch && cirMatch[1]) {
     const num = parseInt(cirMatch[1], 10);
     if (!isNaN(num)) return num;
   }
-  // Fallback: match the last digit cluster in string, ignoring prefix years like 2026 in DTU/SEWA/2026/CIR-07
+  // Fallback: match the last digit cluster in string, ignoring prefix years like 2026 in DTU/SEVA/2026/CIR-07
   const allDigits = ref.match(/\d+/g);
   if (allDigits && allDigits.length > 0) {
     const lastDigits = allDigits[allDigits.length - 1];
@@ -30,11 +30,11 @@ export function getNextAnnouncementId(existingRefs: (string | null | undefined)[
   }
   const next = max + 1;
   const padded = String(next).padStart(2, "0");
-  return `DTU/SEWA/2026/CIR-${padded}`;
+  return `DTU/SEVA/2026/CIR-${padded}`;
 }
 
 export function sortAnnouncementsNewestFirst<
-  T extends { refNumber?: string | null; publishedAt?: Date | string; createdAt?: Date | string }
+  T extends { refNumber?: string | null; publishedAt?: Date | string; createdAt?: Date | string },
 >(list: T[]): T[] {
   return [...list].sort((a, b) => {
     const numA = extractCircularNumber(a.refNumber);

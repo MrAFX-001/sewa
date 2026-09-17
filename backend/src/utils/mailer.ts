@@ -25,11 +25,11 @@ type OtpEmailPurpose = "email_verify" | "password_reset";
 
 const COPY: Record<OtpEmailPurpose, { subject: string; lead: string }> = {
   email_verify: {
-    subject: "Your SEWA 2026 verification code",
+    subject: "Your SEVA 2026 verification code",
     lead: "Your verification code is",
   },
   password_reset: {
-    subject: "Your SEWA 2026 password reset code",
+    subject: "Your SEVA 2026 password reset code",
     lead: "Your password reset code is",
   },
 };
@@ -55,7 +55,7 @@ export async function sendOtpEmail(
       subject,
       text: `${lead} ${code}. It expires in ${env.OTP_EXPIRY_MINUTES} minutes. Do not share this code with anyone.`,
       html: `<p>${lead} <strong>${code}</strong>.</p>
-             <p>It expires in ${env.OTP_EXPIRY_MINUTES} minutes. Do not share this code with anyone, including SEWA staff.</p>`,
+             <p>It expires in ${env.OTP_EXPIRY_MINUTES} minutes. Do not share this code with anyone, including SEVA staff.</p>`,
     });
     logger.info({ to, purpose }, "otp_email_sent");
   } catch (err) {
@@ -89,7 +89,7 @@ export async function sendTeamRegistrationEmail(
 ): Promise<void> {
   if (!recipients.length) return;
 
-  const subject = `SEWA 2026: Team Registration Confirmed - ${team.name}`;
+  const subject = `SEVA 2026: Team Registration Confirmed - ${team.name}`;
   const safeTeamName = escapeHtml(team.name);
   const safeInstitute = escapeHtml(team.institute);
   const safeTheme = escapeHtml(team.theme);
@@ -129,7 +129,7 @@ export async function sendTeamRegistrationEmail(
   const textBody = `
 Dear Team ${team.name},
 
-Congratulations! Your team registration for the SEWA 2026 Youth Innovation Challenge has been successfully submitted.
+Congratulations! Your team registration for the SEVA 2026 Youth Innovation Challenge has been successfully submitted.
 
 Team Details:
 - Team Name: ${team.name}
@@ -146,10 +146,10 @@ What's Next?
 2. Shortlisted teams will be notified via email for the next evaluation round.
 3. Keep an eye on your inbox and ensure all team members stay tuned for updates.
 
-If you have any questions or require support, please reply to this email or reach out to the SEWA 2026 Organizing Committee.
+If you have any questions or require support, please reply to this email or reach out to the SEVA 2026 Organizing Committee.
 
 Best regards,
-SEWA 2026 Organizing Committee
+SEVA 2026 Organizing Committee
 DTU Youth Innovation Challenge
 `.trim();
 
@@ -180,7 +180,7 @@ DTU Youth Innovation Challenge
 <body>
   <div class="container">
     <div class="header">
-      <h1>SEWA 2026</h1>
+      <h1>SEVA 2026</h1>
       <p>DTU Youth Innovation Challenge</p>
     </div>
     <div class="content">
@@ -188,7 +188,7 @@ DTU Youth Innovation Challenge
         <span class="badge-success">✓ Registration Submitted</span>
       </div>
       <p>Dear <strong>${safeTeamName}</strong>,</p>
-      <p>Your team registration for the <strong>SEWA 2026 Youth Innovation Challenge</strong> has been successfully submitted and confirmed.</p>
+      <p>Your team registration for the <strong>SEVA 2026 Youth Innovation Challenge</strong> has been successfully submitted and confirmed.</p>
 
       <div class="card">
         <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
@@ -244,7 +244,7 @@ DTU Youth Innovation Challenge
       <p style="margin-top: 24px; font-size: 14px;">If you have any questions or notice any discrepancy in your details, please reach out immediately.</p>
     </div>
     <div class="footer">
-      <p style="margin: 0 0 4px 0;">SEWA 2026 Organizing Committee • Delhi Technological University</p>
+      <p style="margin: 0 0 4px 0;">SEVA 2026 Organizing Committee • Delhi Technological University</p>
       <p style="margin: 0;">This is an automated notification. Please do not reply directly to this email if automated.</p>
     </div>
   </div>
@@ -272,7 +272,7 @@ export async function sendTeamMemberAddedEmail(
   team: { name: string; institute: string; theme: string },
   leaderName: string,
 ): Promise<void> {
-  const subject = `SEWA 2026: You've been added to Team ${team.name}`;
+  const subject = `SEVA 2026: You've been added to Team ${team.name}`;
   const safeMemberFirstName = escapeHtml(member.firstName);
   const safeLeaderName = escapeHtml(leaderName);
   const safeTeamName = escapeHtml(team.name);
@@ -282,7 +282,7 @@ export async function sendTeamMemberAddedEmail(
   const textBody = `
 Dear ${member.firstName} ${member.lastName},
 
-You have been added as a team member to "${team.name}" by ${leaderName} for the SEWA 2026 Youth Innovation Challenge.
+You have been added as a team member to "${team.name}" by ${leaderName} for the SEVA 2026 Youth Innovation Challenge.
 
 Team Details:
 - Team Name: ${team.name}
@@ -292,15 +292,15 @@ Team Details:
 Once your team leader finalizes and submits the team application, you will receive a confirmation with the complete team roster and next steps.
 
 Best regards,
-SEWA 2026 Organizing Committee
+SEVA 2026 Organizing Committee
 DTU Youth Innovation Challenge
 `.trim();
 
   const htmlBody = renderTeamMemberAddedHtml(
-  member,
-  team,
-  leaderName,
-);
+    member,
+    team,
+    leaderName,
+  );
 
   try {
     await transporter.sendMail({
@@ -333,7 +333,7 @@ export async function sendContactReceiptEmail(
   to: string,
   message: ContactMessagePayload,
 ): Promise<void> {
-  const subject = `SEWA 2026: We've received your message - ${message.subject}`;
+  const subject = `SEVA 2026: We've received your message - ${message.subject}`;
   const safeFullName = escapeHtml(message.fullName);
   const safeCategory = escapeHtml(message.category);
   const safeSubject = escapeHtml(message.subject);
@@ -341,7 +341,7 @@ export async function sendContactReceiptEmail(
   const textBody = `
 Dear ${message.fullName},
 
-This confirms we've received your message to SEWA 2026.
+This confirms we've received your message to SEVA 2026.
 
 Category: ${message.category}
 Subject: ${message.subject}
@@ -351,7 +351,7 @@ urgent, call the Northern Region Coordinator Helpdesk at
 +91 11 27871018 (Ext: 442) or +91 11 27871020.
 
 Best regards,
-SEWA 2026 Organizing Committee
+SEVA 2026 Organizing Committee
 DTU Youth Innovation Challenge
 `.trim();
 
@@ -386,7 +386,7 @@ export function renderContactReceiptHtml(message: ContactMessagePayload): string
   <div class="container">
     <div class="content">
       <p>Dear <strong>${safeFullName}</strong>,</p>
-      <p>This confirms we've received your message to SEWA 2026.</p>
+      <p>This confirms we've received your message to SEVA 2026.</p>
 
       <div class="card">
         <p><strong>Category:</strong> ${safeCategory}</p>
@@ -427,12 +427,12 @@ export function renderTeamMemberAddedHtml(
 <body>
   <div class="container">
     <div class="header">
-      <h2 style="margin: 0; font-size: 20px;">SEWA 2026</h2>
+      <h2 style="margin: 0; font-size: 20px;">SEVA 2026</h2>
       <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9;">DTU Youth Innovation Challenge</p>
     </div>
     <div class="content">
       <p>Dear <strong>${safeMemberFirstName}</strong>,</p>
-      <p><strong>${safeLeaderName}</strong> has added you as a team member to <strong>${safeTeamName}</strong> for SEWA 2026.</p>
+      <p><strong>${safeLeaderName}</strong> has added you as a team member to <strong>${safeTeamName}</strong> for SEVA 2026.</p>
 
       <div class="card">
         <p style="margin: 0 0 6px 0;"><strong>Team:</strong> ${safeTeamName}</p>
@@ -443,7 +443,7 @@ export function renderTeamMemberAddedHtml(
       <p style="font-size: 14px; color: #6b7280;">When your team leader completes the team submission, you will receive full confirmation and schedule updates.</p>
     </div>
     <div class="footer">
-      <p style="margin: 0;">SEWA 2026 Organizing Committee</p>
+      <p style="margin: 0;">SEVA 2026 Organizing Committee</p>
     </div>
   </div>
 </body>
@@ -469,7 +469,7 @@ export async function sendAdminBroadcastEmail({
   recipients,
   subject,
   content,
-  senderName = "SEWA 2026 Organizing Committee",
+  senderName = "SEVA 2026 Organizing Committee",
 }: AdminBroadcastEmailOptions): Promise<AdminBroadcastEmailResult> {
   const cleanRecipients = Array.from(
     new Set(
@@ -514,7 +514,7 @@ export async function sendAdminBroadcastEmail({
   <div class="container">
     <div class="header">
       <span class="badge">Official Announcement</span>
-      <h1 class="title">SEWA 2026</h1>
+      <h1 class="title">SEVA 2026</h1>
       <p class="subtitle">Delhi Technological University &bull; Youth Innovation Challenge</p>
     </div>
     <div class="subject-banner">
@@ -524,11 +524,11 @@ export async function sendAdminBroadcastEmail({
       ${formattedHtmlContent}
       <div class="card">
         <strong style="color: #1e293b; display: block; margin-bottom: 4px;">Important Note</strong>
-        This communication has been dispatched by <strong>${senderName}</strong> via the official SEWA 2026 Administration Portal. Please do not reply directly to this automated email if you have specific queries. Use the Portal Contact Desk instead.
+        This communication has been dispatched by <strong>${senderName}</strong> via the official SEVA 2026 Administration Portal. Please do not reply directly to this automated email if you have specific queries. Use the Portal Contact Desk instead.
       </div>
     </div>
     <div class="footer">
-      <p style="margin: 0 0 6px 0; font-weight: 600; color: #64748b;">Organizing Committee &bull; SEWA 2026</p>
+      <p style="margin: 0 0 6px 0; font-weight: 600; color: #64748b;">Organizing Committee &bull; SEVA 2026</p>
       <p style="margin: 0;">Delhi Technological University, Shahbad Daulatpur, Bawana Road, Delhi - 110042</p>
     </div>
   </div>
@@ -548,7 +548,7 @@ export async function sendAdminBroadcastEmail({
         await transporter.sendMail({
           from: env.SMTP_FROM,
           to,
-          subject: `[SEWA 2026] ${subject}`,
+          subject: `[SEVA 2026] ${subject}`,
           text: textBody,
           html: htmlBody,
         });

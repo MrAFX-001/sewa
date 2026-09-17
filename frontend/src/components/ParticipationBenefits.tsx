@@ -33,7 +33,7 @@ type BenefitCard = {
 };
 
 const iconPath = (d: string) => (
-  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
     <path d={d} />
   </svg>
 );
@@ -46,12 +46,12 @@ const cards: BenefitCard[] = [
     surface: "#fff6ea",
     badge: "#f7e1be",
     ink: "#b4691e",
-    left: 110,
-    top: 115,
+    left: 131,
+    top: 59,
     width: 216,
-    minHeight: 154,
+    minHeight: 166,
     icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M20 6h-4V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-8-2h4v2h-4V4zm8 15H4V8h16v11z" />
         <path d="M10 11h4v2h-4z" />
       </svg>
@@ -59,13 +59,13 @@ const cards: BenefitCard[] = [
   },
   {
     id: "sewa-first",
-    title: "Sewa First Motto",
-    body: "Imbibe the spirit of Sewa First in service of the nation.",
+    title: "Seva First Motto",
+    body: "Imbibe the spirit of Seva First in service of the nation.",
     surface: "#ebf3ff",
     badge: "#cce1ff",
     ink: "#1e4b88",
-    left: 480,
-    top: 58,
+    left: 501,
+    top: 59,
     width: 228,
     minHeight: 140,
     centered: true,
@@ -78,8 +78,8 @@ const cards: BenefitCard[] = [
     surface: "#eaf8ee",
     badge: "#c7eed2",
     ink: "#1f6e3c",
-    left: 790,
-    top: 145,
+    left: 811,
+    top: 146,
     width: 222,
     minHeight: 154,
     icon: iconPath(
@@ -88,16 +88,16 @@ const cards: BenefitCard[] = [
   },
   {
     id: "prototype-funding",
-    title: "Prototype Funding",
-    body: "Opportunity for support / funding for building prototypes.",
+    title: "Prize Pool",
+    body: "Opportunity for support / funding for building prototypes. Award is up to ₹2 Cr.",
     surface: "#ebf9f1",
     badge: "#caeedb",
     ink: "#1b6b3e",
-    left: 170,
-    top: 442,
+    left: 191,
+    top: 488,
     width: 210,
-    minHeight: 146,
-    icon: <span className="text-lg font-black leading-none">₹</span>,
+    minHeight: 156,
+    icon: <span className="text-xl font-black leading-none">₹</span>,
   },
   {
     id: "networking",
@@ -106,8 +106,8 @@ const cards: BenefitCard[] = [
     surface: "#eaf3fd",
     badge: "#c7defa",
     ink: "#1b5597",
-    left: 420,
-    top: 442,
+    left: 441,
+    top: 488,
     width: 210,
     minHeight: 146,
     icon: iconPath(
@@ -121,11 +121,13 @@ const cards: BenefitCard[] = [
     surface: "#fdecef",
     badge: "#fad2d9",
     ink: "#9e3346",
-    left: 672,
-    top: 432,
+    left: 693,
+    top: 478,
     width: 210,
     minHeight: 146,
-    icon: iconPath("M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"),
+    icon: iconPath(
+      "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z",
+    ),
   },
   {
     id: "confidence",
@@ -134,8 +136,8 @@ const cards: BenefitCard[] = [
     surface: "#f4ecfd",
     badge: "#dfcefc",
     ink: "#5e329b",
-    left: 928,
-    top: 432,
+    left: 949,
+    top: 478,
     width: 210,
     minHeight: 146,
     icon: iconPath(
@@ -147,53 +149,53 @@ const cards: BenefitCard[] = [
 /** Connector paths, in the same 1200x680 coordinate space as the cards. */
 const connectors: { d: string; color: string; dots: [number, number][] }[] = [
   {
-    d: "M 125 348 L 74 348 A 12 12 0 0 1 62 336 L 62 202 A 12 12 0 0 1 74 190 L 108 190",
-    color: "#f3b467",
-    dots: [[74, 348]],
+    d: "M 103.7 348 H 95.55 C 88.94 348 83.58 342.62 83.58 336.01 V 145.37 C 83.58 138.76 88.94 133.4 95.55 133.4 H 140",
+    color: "#F3B467",
+    dots: [[103.7, 348]],
   },
   {
-    d: "M 148 438 L 148 480 A 12 12 0 0 0 160 492 L 170 492",
-    color: "#7fcaa4",
-    dots: [[148, 438]],
+    d: "M 169.3 437.7 V 524.6 A 12 12 0 0 0 181.3 536.6 H 191",
+    color: "#7FCAA4",
+    dots: [[169.3, 437.7]],
   },
   {
-    d: "M 508 300 L 580 300 A 14 14 0 0 0 594 286 L 594 220",
-    color: "#7baee2",
+    d: "M 528.3 300.1 H 600 A 14 14 0 0 0 614 286.2 V 199",
+    color: "#7BAEE2",
     dots: [
-      [508, 300],
-      [594, 216],
+      [528.3, 300.1],
+      [614, 199],
     ],
   },
   {
-    d: "M 508 322 L 892 322 A 14 14 0 0 0 906 308 L 906 288 A 8 8 0 0 1 914 280 L 916 280",
-    color: "#7fcaa4",
+    d: "M 528.3 322 H 911.1 A 14 14 0 0 0 925.1 308.1 V 288.2 A 8 8 0 0 1 933.1 280.2 H 935",
+    color: "#7FCAA4",
     dots: [
-      [508, 322],
-      [916, 280],
+      [528.3, 322],
+      [935, 280.2],
     ],
   },
   {
-    d: "M 508 344 L 1022 344 A 14 14 0 0 1 1036 358 L 1036 414",
-    color: "#b39ddb",
+    d: "M 528.3 344 H 1040.8 A 14 14 0 0 1 1054.7 358 V 478",
+    color: "#B39DDB",
     dots: [
-      [508, 344],
-      [1036, 414],
+      [528.3, 344],
+      [1054.7, 458.8],
     ],
   },
   {
-    d: "M 508 366 L 758 366 A 14 14 0 0 1 772 380 L 772 432",
-    color: "#f09696",
+    d: "M 528.3 365.9 H 777.5 A 14 14 0 0 1 791.5 379.9 V 478",
+    color: "#F09696",
     dots: [
-      [508, 366],
-      [772, 432],
+      [528.3, 365.9],
+      [791.5, 476.7],
     ],
   },
   {
-    d: "M 508 388 L 626 388 A 14 14 0 0 1 640 402 L 640 488 A 12 12 0 0 1 628 500 L 618 500",
-    color: "#7fb3e8",
+    d: "M 528.3 387.9 H 645.9 A 14 14 0 0 1 659.9 401.8 V 532.6 A 12 12 0 0 1 647.9 544.5 H 641",
+    color: "#7FB3E8",
     dots: [
-      [508, 388],
-      [640, 500],
+      [528.3, 387.9],
+      [651, 544.5],
     ],
   },
 ];
@@ -223,18 +225,18 @@ export function ParticipationBenefits() {
       {/* Mobile / Tablet Responsive Layout (< 1024px) */}
       <div className="block lg:hidden">
         {/* Central label card */}
-        <div className="bg-white rounded-2xl p-5 sm:p-7 soft-card-shadow border border-slate-100 mb-6">
-          <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-800 text-center sm:text-left">
+        <div className="bg-white rounded-2xl p-6 sm:p-8 soft-card-shadow border border-slate-100 mb-6">
+          <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-slate-800 text-center sm:text-left [hyphens:none]">
             Participation <span className="text-[#0e3b43]">Benefits</span>
           </p>
 
-          <div className="flex h-[3px] w-full rounded-full overflow-hidden mt-3 mb-3.5 bg-slate-200">
+          <div className="flex h-[3.5px] w-full rounded-full overflow-hidden mt-3.5 mb-4 bg-slate-200">
             <div className="w-[32%] bg-[#e58a2d]" />
             <div className="w-[28%] bg-[#4fa77f]" />
             <div className="w-[40%] bg-[#0e3b43]" />
           </div>
 
-          <div className="text-[10.5px] sm:text-xs font-bold text-slate-700 tracking-wider flex items-center justify-between uppercase">
+          <div className="text-[11px] sm:text-xs font-bold text-slate-700 tracking-wider flex items-center justify-between uppercase">
             <span>Learn</span>
             <span className="text-slate-300 font-normal">|</span>
             <span>Connect</span>
@@ -254,19 +256,19 @@ export function ParticipationBenefits() {
               style={{ backgroundColor: card.surface }}
             >
               <div
-                className="w-11 h-11 sm:w-12 sm:h-12 rounded-full shrink-0 flex items-center justify-center badge-shadow"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full shrink-0 flex items-center justify-center badge-shadow"
                 style={{ backgroundColor: card.badge, color: card.ink }}
               >
                 {card.icon}
               </div>
               <div className="flex-1 min-w-0">
                 <p
-                  className="text-xs sm:text-sm font-black tracking-wide uppercase mb-1 leading-snug"
+                  className="text-sm sm:text-base font-black tracking-wide uppercase mb-1.5 leading-snug text-left [hyphens:none]"
                   style={{ color: card.ink }}
                 >
                   {card.title}
                 </p>
-                <p className="text-[13px] sm:text-sm leading-relaxed text-slate-700 font-medium">
+                <p className="text-sm sm:text-[15px] leading-relaxed text-slate-700 font-medium text-left [hyphens:none]">
                   {card.body}
                 </p>
               </div>
@@ -281,14 +283,14 @@ export function ParticipationBenefits() {
         className="hidden lg:block diagram-frame"
         style={{ "--diagram-scale": scale } as React.CSSProperties}
         role="img"
-        aria-label="Participation Benefits — seven benefits of taking part in SEWA FIRST RYIC 2026"
+        aria-label="Participation Benefits — seven benefits of taking part in SEVA FIRST RYIC 2026"
       >
         <div className="diagram-stage">
           {/* Connector network, drawn under the cards */}
           <svg
             className="absolute inset-0 w-full h-full pointer-events-none z-10"
             fill="none"
-            viewBox="0 0 1200 680"
+            viewBox="0 0 1200 740"
             xmlns="http://www.w3.org/2000/svg"
             aria-hidden="true"
           >
@@ -310,14 +312,14 @@ export function ParticipationBenefits() {
 
           {/* Central label card */}
           <div
-            className="absolute z-20 bg-white rounded-2xl p-6 px-8 soft-card-shadow border border-slate-100 flex flex-col justify-center"
-            style={{ left: 95, top: 295, width: 400, height: 132 }}
+            className="absolute z-20 bg-white rounded-2xl p-6 px-7 soft-card-shadow border border-slate-100 flex flex-col justify-center"
+            style={{ left: 116, top: 296, width: 400, height: 132 }}
           >
-            <p className="text-3xl font-extrabold tracking-tight text-slate-800 text-left">
+            <p className="text-3xl sm:text-[32px] font-extrabold tracking-tight text-slate-800 text-left [hyphens:none]">
               Participation <span className="text-[#0e3b43]">Benefits</span>
             </p>
 
-            <div className="flex h-[3px] w-full rounded-full overflow-hidden mt-3 mb-3 bg-slate-200">
+            <div className="flex h-[3.5px] w-full rounded-full overflow-hidden mt-3 mb-3 bg-slate-200">
               <div className="w-[32%] bg-[#e58a2d]" />
               <div className="w-[28%] bg-[#4fa77f]" />
               <div className="w-[40%] bg-[#0e3b43]" />
@@ -338,7 +340,7 @@ export function ParticipationBenefits() {
           {cards.map((card) => (
             <article
               key={card.id}
-              className={`absolute z-20 rounded-2xl p-5 pt-8 soft-card-shadow transition-transform hover:-translate-y-0.5 ${card.centered ? "text-center" : ""}`}
+              className={`absolute z-20 rounded-2xl p-5 pt-8 soft-card-shadow transition-transform hover:-translate-y-0.5 [hyphens:none] ${card.centered ? "text-center" : ""}`}
               style={{
                 left: card.left,
                 top: card.top,
@@ -354,12 +356,15 @@ export function ParticipationBenefits() {
                 {card.icon}
               </div>
               <p
-                className="text-xs font-black tracking-wide uppercase mb-1.5 leading-snug text-left"
+                className="text-[13.5px] sm:text-sm font-black tracking-wide uppercase mb-1.5 leading-snug text-left [hyphens:none]"
                 style={{ color: card.ink, textAlign: card.centered ? "center" : "left" }}
               >
                 {card.title}
               </p>
-              <p className="text-[11.5px] leading-relaxed text-slate-700 font-medium text-left">
+              <p
+                className="text-[12.5px] sm:text-[13px] leading-relaxed text-slate-700 font-medium text-left [hyphens:none]"
+                style={{ textAlign: card.centered ? "center" : "left" }}
+              >
                 {card.body}
               </p>
             </article>

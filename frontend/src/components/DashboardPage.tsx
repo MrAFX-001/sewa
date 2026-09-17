@@ -79,7 +79,6 @@ import {
 import { resolveMediaUrl } from "../lib/utils";
 import { getNextAnnouncementId, sortAnnouncementsNewestFirst } from "../lib/announcements";
 
-
 // ─── Stat Cards Data (for Super Admin & Admin) ──────────────────────────────
 
 interface StatCardProps {
@@ -228,7 +227,9 @@ export function DashboardPage() {
   const [isCreatingUser, setIsCreatingUser] = useState(false);
 
   // Resources & Content State
-  const [resourceSubTab, setResourceSubTab] = useState<"hero" | "announcements" | "faqs" | "committee" | "gallery">("hero");
+  const [resourceSubTab, setResourceSubTab] = useState<
+    "hero" | "announcements" | "faqs" | "committee" | "gallery"
+  >("hero");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // Themes / Problem Categories State
@@ -244,7 +245,6 @@ export function DashboardPage() {
   const [themeFormActive, setThemeFormActive] = useState(true);
   const [themeFilterTrack, setThemeFilterTrack] = useState<"ALL" | "NATIONAL" | "REGIONAL">("ALL");
   const [themeSearch, setThemeSearch] = useState("");
-
 
   // Hero Slides
   const [heroSlides, setHeroSlides] = useState<HeroSlideItem[]>([]);
@@ -283,21 +283,28 @@ export function DashboardPage() {
 
   // Committee Members State
   const [committeeMemberList, setCommitteeMemberList] = useState<ApiCommitteeMember[]>([]);
-  const [committeeMembers, setCommitteeMembers] = useState<CommitteeMemberItem[]>(INITIAL_COMMITTEE);
+  const [committeeMembers, setCommitteeMembers] =
+    useState<CommitteeMemberItem[]>(INITIAL_COMMITTEE);
   const [committeeModalOpen, setCommitteeModalOpen] = useState(false);
   const [editingCommittee, setEditingCommittee] = useState<ApiCommitteeMember | null>(null);
   const [committeeFormName, setCommitteeFormName] = useState("");
   const [committeeFormDesignation, setCommitteeFormDesignation] = useState("");
-  const [committeeFormCategory, setCommitteeFormCategory] = useState<"organizing" | "mentor" | "dev_team">("organizing");
+  const [committeeFormCategory, setCommitteeFormCategory] = useState<
+    "organizing" | "mentor" | "dev_team"
+  >("organizing");
   const [committeeFormSubCategory, setCommitteeFormSubCategory] = useState<string>("coordinator");
   const [committeeFormAffiliation, setCommitteeFormAffiliation] = useState("");
   const [committeeFormImageUrl, setCommitteeFormImageUrl] = useState("");
   const [committeeFormOrder, setCommitteeFormOrder] = useState(1);
-  const [committeeFilterCategory, setCommitteeFilterCategory] = useState<"all" | "chief_patron" | "organizing" | "mentor" | "dev_team">("all");
+  const [committeeFilterCategory, setCommitteeFilterCategory] = useState<
+    "all" | "chief_patron" | "organizing" | "mentor" | "dev_team"
+  >("all");
 
   const [newMemberName, setNewMemberName] = useState("");
   const [newMemberRole, setNewMemberRole] = useState("Organizing");
-  const [newMemberCategory, setNewMemberCategory] = useState<"organizing" | "mentor" | "dev_team">("organizing");
+  const [newMemberCategory, setNewMemberCategory] = useState<"organizing" | "mentor" | "dev_team">(
+    "organizing",
+  );
   const [newMemberAffiliation, setNewMemberAffiliation] = useState("");
 
   // Resources / Gallery
@@ -403,11 +410,19 @@ export function DashboardPage() {
 
   const getMemberSubCategory = (m: ApiCommitteeMember): string => {
     if (m.category === "organizing") {
-      if (m.rowTitle === "chief_patron" || m.rowTitle === "patron" || m.rowTitle === "coordinator") {
+      if (
+        m.rowTitle === "chief_patron" ||
+        m.rowTitle === "patron" ||
+        m.rowTitle === "coordinator"
+      ) {
         return m.rowTitle;
       }
       const d = (m.designation || "").toLowerCase();
-      if (d.includes("chief patron") || d.includes("patron-in-chief") || d.includes("patron in chief")) {
+      if (
+        d.includes("chief patron") ||
+        d.includes("patron-in-chief") ||
+        d.includes("patron in chief")
+      ) {
         return "chief_patron";
       }
       if (d.includes("patron") || d.includes("vice chancellor")) {
@@ -470,11 +485,19 @@ export function DashboardPage() {
     oldCat?: string,
     oldSub?: string,
   ) => {
-    const updates: Array<{ id: string; rowNumber: number; displayOrder: number; rowTitle?: string | null }> = [];
+    const updates: Array<{
+      id: string;
+      rowNumber: number;
+      displayOrder: number;
+      rowTitle?: string | null;
+    }> = [];
     const targetRowNumber = getRowNumberForCategoryAndSub(targetCat, targetSub);
 
     const targetOthers = committeeMemberList
-      .filter((m) => m.id !== memberId && m.category === targetCat && getMemberSubCategory(m) === targetSub)
+      .filter(
+        (m) =>
+          m.id !== memberId && m.category === targetCat && getMemberSubCategory(m) === targetSub,
+      )
       .sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999));
 
     const targetIndex = Math.max(0, Math.min(Math.floor(targetOrder) - 1, targetOthers.length));
@@ -506,7 +529,9 @@ export function DashboardPage() {
     if (memberId && oldCat && oldSub && (oldCat !== targetCat || oldSub !== targetSub)) {
       const oldRowNumber = getRowNumberForCategoryAndSub(oldCat, oldSub);
       const oldOthers = committeeMemberList
-        .filter((m) => m.id !== memberId && m.category === oldCat && getMemberSubCategory(m) === oldSub)
+        .filter(
+          (m) => m.id !== memberId && m.category === oldCat && getMemberSubCategory(m) === oldSub,
+        )
         .sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999));
 
       oldOthers.forEach((m, idx) => {
@@ -574,7 +599,11 @@ export function DashboardPage() {
             name: m.name,
             designation: m.designation,
             affiliation: m.affiliation || "DTU",
-            roleType: (m.category === "mentor" ? "Advisory" : m.category === "dev_team" ? "Technical" : "Organizing") as any,
+            roleType: (m.category === "mentor"
+              ? "Advisory"
+              : m.category === "dev_team"
+                ? "Technical"
+                : "Organizing") as any,
           })),
         );
       }
@@ -699,10 +728,15 @@ export function DashboardPage() {
     return {
       hasTeam: !!myTeam,
       teamName: myTeam?.name || "No Team Registered",
-      teamLead: myTeam ? `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Team Leader" : "Not Registered",
+      teamLead: myTeam
+        ? `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Team Leader"
+        : "Not Registered",
       theme: myTeam?.theme || "Not Selected",
       problemStatementId: myTeam?.problemStatementId || "N/A",
-      problemTitle: myTeam?.problemStatement || myTeam?.proposedProblemStatement || "No problem statement selected",
+      problemTitle:
+        myTeam?.problemStatement ||
+        myTeam?.proposedProblemStatement ||
+        "No problem statement selected",
       status: myTeam?.status || "unregistered",
       statusBadge: isShortlisted
         ? "Shortlisted for Round 2"
@@ -713,26 +747,54 @@ export function DashboardPage() {
             : isSubmitted
               ? "Submitted"
               : "Draft / Incomplete",
-      round1Status: (isShortlisted ? "Cleared" : isUnderReview ? "Pending" : myTeam?.status === "rejected" ? "Not Cleared" : "Pending") as "Cleared" | "Pending" | "Not Cleared",
+      round1Status: (isShortlisted
+        ? "Cleared"
+        : isUnderReview
+          ? "Pending"
+          : myTeam?.status === "rejected"
+            ? "Not Cleared"
+            : "Pending") as "Cleared" | "Pending" | "Not Cleared",
       round2Date: "12 Oct 2026",
-      score: myTeam?.score !== null && myTeam?.score !== undefined ? `${myTeam.score} / 100` : "Pending Evaluation",
+      score:
+        myTeam?.score !== null && myTeam?.score !== undefined
+          ? `${myTeam.score} / 100`
+          : "Pending Evaluation",
       institution: myTeam?.institute || "Not Registered",
-      dossierId: myTeam?.problemStatementId ? `SEWA-2026-${myTeam.problemStatementId}` : "SEWA-2026-PENDING",
-      evaluatorNotes: myTeam?.evaluatorNotes || "Evaluation notes will appear here once the Technical Jury Committee completes their review.",
+      dossierId: myTeam?.problemStatementId
+        ? `SEVA-2026-${myTeam.problemStatementId}`
+        : "SEVA-2026-PENDING",
+      evaluatorNotes:
+        myTeam?.evaluatorNotes ||
+        "Evaluation notes will appear here once the Technical Jury Committee completes their review.",
       timelineMilestones: [
         {
           title: "Team Registration & Problem Statement Selection",
-          date: myTeam?.createdAt ? new Date(myTeam.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" }) : "Pending",
+          date: myTeam?.createdAt
+            ? new Date(myTeam.createdAt).toLocaleDateString("en-IN", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
+            : "Pending",
           done: !!myTeam,
         },
         {
           title: "Dossier Submission & Verification",
-          date: myTeam?.submittedAt ? new Date(myTeam.submittedAt).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" }) : "Pending Submission",
+          date: myTeam?.submittedAt
+            ? new Date(myTeam.submittedAt).toLocaleDateString("en-IN", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
+            : "Pending Submission",
           done: isSubmitted,
         },
         {
           title: "Round 1 Technical Screening",
-          date: isShortlisted || (myTeam?.score !== null && myTeam?.score !== undefined) ? "Completed" : "In Progress",
+          date:
+            isShortlisted || (myTeam?.score !== null && myTeam?.score !== undefined)
+              ? "Completed"
+              : "In Progress",
           done: isShortlisted || (myTeam?.score !== null && myTeam?.score !== undefined),
         },
         {
@@ -1015,13 +1077,14 @@ export function DashboardPage() {
     if (!url) return;
     try {
       await resourceApi.updateCommitteeMember(id, { imageUrl: url });
-      setCommitteeMemberList((prev) => prev.map((m) => (m.id === id ? { ...m, imageUrl: url } : m)));
+      setCommitteeMemberList((prev) =>
+        prev.map((m) => (m.id === id ? { ...m, imageUrl: url } : m)),
+      );
       await loadCommittee();
     } catch (err: any) {
       alert("Failed to update member photo: " + (err.message || "Unknown error"));
     }
   };
-
 
   // ─── FAQ Handlers ───────────────────────────────────────────────────────────
   const handleSaveFaq = async (e: React.FormEvent) => {
@@ -1102,7 +1165,7 @@ export function DashboardPage() {
     }
     try {
       const assignedRef = editingAnnouncement
-        ? (editingAnnouncement.refNumber || announcementFormRef || null)
+        ? editingAnnouncement.refNumber || announcementFormRef || null
         : nextGeneratedAnnouncementId;
 
       if (editingAnnouncement) {
@@ -1164,7 +1227,14 @@ export function DashboardPage() {
   const handleReorderCommitteeMember = async (member: ApiCommitteeMember, newOrder: number) => {
     if (newOrder < 1) newOrder = 1;
     const sub = getMemberSubCategory(member);
-    const { updates } = computeReorderLayout(member.id, member.category, sub, newOrder, member.category, sub);
+    const { updates } = computeReorderLayout(
+      member.id,
+      member.category,
+      sub,
+      newOrder,
+      member.category,
+      sub,
+    );
 
     try {
       if (updates.length > 0) {
@@ -1197,7 +1267,10 @@ export function DashboardPage() {
       oldSub,
     );
 
-    const targetRowNumber = getRowNumberForCategoryAndSub(committeeFormCategory, committeeFormSubCategory);
+    const targetRowNumber = getRowNumberForCategoryAndSub(
+      committeeFormCategory,
+      committeeFormSubCategory,
+    );
 
     try {
       if (updates.length > 0) {
@@ -1289,9 +1362,7 @@ export function DashboardPage() {
   const toggleGalleryActive = async (id: string) => {
     const current = galleryItems.find((g) => g.id === id);
     const nextVal = !current?.active;
-    setGalleryItems((prev) =>
-      prev.map((g) => (g.id === id ? { ...g, active: nextVal } : g)),
-    );
+    setGalleryItems((prev) => prev.map((g) => (g.id === id ? { ...g, active: nextVal } : g)));
     try {
       await resourceApi.updateGalleryItem(id, { active: nextVal });
     } catch (err) {
@@ -1324,7 +1395,10 @@ export function DashboardPage() {
 
   const handleSaveTheme = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!themeFormLabel) { alert("Label is required."); return; }
+    if (!themeFormLabel) {
+      alert("Label is required.");
+      return;
+    }
     try {
       if (editingTheme) {
         await resourceApi.updateTheme(editingTheme.id, {
@@ -1336,7 +1410,10 @@ export function DashboardPage() {
           active: themeFormActive,
         });
       } else {
-        if (!themeFormCode) { alert("Code is required for new themes."); return; }
+        if (!themeFormCode) {
+          alert("Code is required for new themes.");
+          return;
+        }
         await resourceApi.createTheme({
           code: themeFormCode,
           theme: themeFormTheme,
@@ -1350,8 +1427,12 @@ export function DashboardPage() {
       await loadThemes();
       setThemeModalOpen(false);
       setEditingTheme(null);
-      setThemeFormCode(""); setThemeFormLabel(""); setThemeFormPsTitle("");
-      setThemeFormPsUrl(""); setThemeFormOrder(1); setThemeFormActive(true);
+      setThemeFormCode("");
+      setThemeFormLabel("");
+      setThemeFormPsTitle("");
+      setThemeFormPsUrl("");
+      setThemeFormOrder(1);
+      setThemeFormActive(true);
     } catch (err: any) {
       alert("Failed to save theme: " + (err.message || "Unknown error"));
     }
@@ -1403,7 +1484,8 @@ export function DashboardPage() {
             <span>Homepage Hero Carousel &amp; Banners</span>
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">
-            Configured banners rotate on the main homepage. Inactive slides are hidden from public view.
+            Configured banners rotate on the main homepage. Inactive slides are hidden from public
+            view.
           </p>
         </div>
 
@@ -1432,7 +1514,8 @@ export function DashboardPage() {
           </div>
           <h4 className="text-sm font-bold text-gray-900">No Hero Slides in Database</h4>
           <p className="text-xs text-gray-500 max-w-md mx-auto">
-            The public homepage is currently displaying the default DTU campus aerial banner. Add your first custom hero slide to start customizing the homepage.
+            The public homepage is currently displaying the default DTU campus aerial banner. Add
+            your first custom hero slide to start customizing the homepage.
           </p>
           <button
             type="button"
@@ -1473,8 +1556,9 @@ export function DashboardPage() {
                   </div>
                   <div className="absolute top-3 right-3">
                     <span
-                      className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow ${slide.active ? "bg-emerald-500 text-white" : "bg-gray-700/90 text-gray-200"
-                        }`}
+                      className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow ${
+                        slide.active ? "bg-emerald-500 text-white" : "bg-gray-700/90 text-gray-200"
+                      }`}
                     >
                       {slide.active ? "Active" : "Inactive"}
                     </span>
@@ -1482,7 +1566,9 @@ export function DashboardPage() {
                   <div className="absolute bottom-3 left-3 right-3 text-white">
                     <h4 className="text-sm font-bold leading-snug line-clamp-1">{slide.title}</h4>
                     {slide.subtitle && (
-                      <p className="text-[11px] text-gray-200 line-clamp-1 mt-0.5">{slide.subtitle}</p>
+                      <p className="text-[11px] text-gray-200 line-clamp-1 mt-0.5">
+                        {slide.subtitle}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -1517,8 +1603,11 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => handleToggleHeroActive(slide.id, slide.active)}
-                  className={`text-xs font-bold cursor-pointer inline-flex items-center gap-1 ${slide.active ? "text-amber-600 hover:text-amber-700" : "text-emerald-600 hover:text-emerald-700"
-                    }`}
+                  className={`text-xs font-bold cursor-pointer inline-flex items-center gap-1 ${
+                    slide.active
+                      ? "text-amber-600 hover:text-amber-700"
+                      : "text-emerald-600 hover:text-emerald-700"
+                  }`}
                 >
                   {slide.active ? <EyeOff size={13} /> : <Eye size={13} />}
                   <span>{slide.active ? "Deactivate" : "Activate"}</span>
@@ -1559,7 +1648,8 @@ export function DashboardPage() {
             <span>Announcements &amp; Circular Bulletins</span>
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">
-            Official circulars and notifications displayed on the homepage bulletin board and sent to participants.
+            Official circulars and notifications displayed on the homepage bulletin board and sent
+            to participants.
           </p>
         </div>
 
@@ -1589,7 +1679,8 @@ export function DashboardPage() {
           </div>
           <h4 className="text-sm font-bold text-gray-900">No Announcements in Database</h4>
           <p className="text-xs text-gray-500 max-w-md mx-auto">
-            Publish official circulars, problem statement updates, registration deadlines, and challenge results.
+            Publish official circulars, problem statement updates, registration deadlines, and
+            challenge results.
           </p>
         </div>
       ) : (
@@ -1668,7 +1759,8 @@ export function DashboardPage() {
             <span>Frequently Asked Questions (FAQ) Desk</span>
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">
-            Manage questions and answers displayed on the public /faq route. Items can be toggled, reordered, and categorized.
+            Manage questions and answers displayed on the public /faq route. Items can be toggled,
+            reordered, and categorized.
           </p>
         </div>
 
@@ -1697,7 +1789,8 @@ export function DashboardPage() {
           </div>
           <h4 className="text-sm font-bold text-gray-900">No FAQs in Database</h4>
           <p className="text-xs text-gray-500 max-w-md mx-auto">
-            The public /faq page currently displays standard static fallback items. Add FAQs to PostgreSQL to manage them interactively.
+            The public /faq page currently displays standard static fallback items. Add FAQs to
+            PostgreSQL to manage them interactively.
           </p>
         </div>
       ) : (
@@ -1716,22 +1809,28 @@ export function DashboardPage() {
                     Order #{faq.displayOrder}
                   </span>
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.2 rounded-full ${faq.active ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"
-                      }`}
+                    className={`text-[10px] font-bold px-2 py-0.2 rounded-full ${
+                      faq.active ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"
+                    }`}
                   >
                     {faq.active ? "Active" : "Hidden"}
                   </span>
                 </div>
                 <h4 className="text-sm font-bold text-gray-900 leading-snug">{faq.question}</h4>
-                <p className="text-xs text-gray-600 leading-relaxed pt-1 whitespace-pre-line">{faq.answer}</p>
+                <p className="text-xs text-gray-600 leading-relaxed pt-1 whitespace-pre-line">
+                  {faq.answer}
+                </p>
               </div>
 
               <div className="flex items-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 shrink-0">
                 <button
                   type="button"
                   onClick={() => handleToggleFaqActive(faq.id, faq.active)}
-                  className={`text-xs font-bold cursor-pointer inline-flex items-center gap-1 px-2.5 py-1 rounded-lg ${faq.active ? "bg-amber-50 text-amber-700 hover:bg-amber-100" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                    }`}
+                  className={`text-xs font-bold cursor-pointer inline-flex items-center gap-1 px-2.5 py-1 rounded-lg ${
+                    faq.active
+                      ? "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                      : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                  }`}
                 >
                   {faq.active ? "Hide" : "Publish"}
                 </button>
@@ -1778,7 +1877,8 @@ export function DashboardPage() {
               <span>Committee Members &amp; Mentors Roster</span>
             </h3>
             <p className="text-xs text-gray-500 mt-0.5">
-              Organizing committee, technical advisory mentors, and student development team profiles.
+              Organizing committee, technical advisory mentors, and student development team
+              profiles.
             </p>
           </div>
 
@@ -1830,10 +1930,11 @@ export function DashboardPage() {
               key={f.key}
               type="button"
               onClick={() => setCommitteeFilterCategory(f.key as any)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${committeeFilterCategory === f.key
-                ? "bg-gray-900 text-white shadow-xs"
-                : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                }`}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                committeeFilterCategory === f.key
+                  ? "bg-gray-900 text-white shadow-xs"
+                  : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+              }`}
             >
               {f.label}
             </button>
@@ -1845,9 +1946,12 @@ export function DashboardPage() {
             <div className="size-12 rounded-2xl bg-rose-50 text-[#ff3355] flex items-center justify-center mx-auto">
               <UserCheck size={24} />
             </div>
-            <h4 className="text-sm font-bold text-gray-900">No Committee Members in this Category</h4>
+            <h4 className="text-sm font-bold text-gray-900">
+              No Committee Members in this Category
+            </h4>
             <p className="text-xs text-gray-500 max-w-md mx-auto">
-              Add committee members or mentors with designations, affiliations, and photos to populate the roster in PostgreSQL.
+              Add committee members or mentors with designations, affiliations, and photos to
+              populate the roster in PostgreSQL.
             </p>
           </div>
         ) : (
@@ -1873,38 +1977,52 @@ export function DashboardPage() {
 
                     <div className="min-w-0 flex-1">
                       <span
-                        className={`text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block mb-1 ${m.category === "mentor"
-                          ? "bg-blue-50 text-blue-700"
-                          : m.category === "dev_team"
-                            ? (getMemberSubCategory(m) === "faculty" ? "bg-purple-50 text-purple-700" : "bg-emerald-50 text-emerald-700")
-                            : getMemberSubCategory(m) === "chief_patron"
-                              ? "bg-amber-50 text-amber-700 font-black border border-amber-200/60"
-                              : getMemberSubCategory(m) === "patron"
-                                ? "bg-rose-50 text-[#ff3355]"
-                                : "bg-orange-50 text-orange-700"
-                          }`}
+                        className={`text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block mb-1 ${
+                          m.category === "mentor"
+                            ? "bg-blue-50 text-blue-700"
+                            : m.category === "dev_team"
+                              ? getMemberSubCategory(m) === "faculty"
+                                ? "bg-purple-50 text-purple-700"
+                                : "bg-emerald-50 text-emerald-700"
+                              : getMemberSubCategory(m) === "chief_patron"
+                                ? "bg-amber-50 text-amber-700 font-black border border-amber-200/60"
+                                : getMemberSubCategory(m) === "patron"
+                                  ? "bg-rose-50 text-[#ff3355]"
+                                  : "bg-orange-50 text-orange-700"
+                        }`}
                       >
                         {m.category === "mentor"
                           ? "Mentor"
                           : m.category === "dev_team"
-                            ? (getMemberSubCategory(m) === "faculty"
+                            ? getMemberSubCategory(m) === "faculty"
                               ? "Dev Team • Faculty"
-                              : "Dev Team • Student")
-                            : (getMemberSubCategory(m) === "chief_patron"
+                              : "Dev Team • Student"
+                            : getMemberSubCategory(m) === "chief_patron"
                               ? "Organizing • Chief Patron"
                               : getMemberSubCategory(m) === "patron"
                                 ? "Organizing • Patron"
-                                : "Organizing • Coordinator")}
+                                : "Organizing • Coordinator"}
                       </span>
-                      <h4 className="text-xs font-bold text-gray-900 truncate leading-snug">{m.name}</h4>
-                      <p className="text-[11px] font-semibold text-gray-500 truncate mt-0.5">{m.designation}</p>
+                      <h4 className="text-xs font-bold text-gray-900 truncate leading-snug">
+                        {m.name}
+                      </h4>
+                      <p className="text-[11px] font-semibold text-gray-500 truncate mt-0.5">
+                        {m.designation}
+                      </p>
                     </div>
                   </div>
 
                   <div className="text-[11px] text-gray-500 bg-gray-50 p-2 rounded-xl border border-gray-100 flex items-center justify-between gap-2">
-                    <span className="font-semibold text-gray-600 truncate">{m.affiliation || "DTU"}</span>
-                    <div className="flex items-center gap-1 shrink-0" title="Change display order (cascades automatically)">
-                      <span className="text-[10px] text-gray-400 font-mono font-bold">Order: #</span>
+                    <span className="font-semibold text-gray-600 truncate">
+                      {m.affiliation || "DTU"}
+                    </span>
+                    <div
+                      className="flex items-center gap-1 shrink-0"
+                      title="Change display order (cascades automatically)"
+                    >
+                      <span className="text-[10px] text-gray-400 font-mono font-bold">
+                        Order: #
+                      </span>
                       <input
                         type="number"
                         min={1}
@@ -1972,7 +2090,6 @@ export function DashboardPage() {
     );
   };
 
-
   const renderGalleryPanel = () => (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1982,7 +2099,8 @@ export function DashboardPage() {
             <span>Homepage Gallery &amp; Media Assets</span>
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">
-            Upload images directly or paste image URLs, configure display order, and toggle visibility on the landing page carousel.
+            Upload images directly or paste image URLs, configure display order, and toggle
+            visibility on the landing page carousel.
           </p>
         </div>
       </div>
@@ -2041,7 +2159,11 @@ export function DashboardPage() {
 
         {newImageUrl && (
           <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-            <img src={resolveMediaUrl(newImageUrl)} alt="Preview" className="size-12 rounded-lg object-cover border" />
+            <img
+              src={resolveMediaUrl(newImageUrl)}
+              alt="Preview"
+              className="size-12 rounded-lg object-cover border"
+            />
             <span className="text-[11px] text-gray-500 font-mono truncate">{newImageUrl}</span>
           </div>
         )}
@@ -2065,10 +2187,15 @@ export function DashboardPage() {
             className="bg-white rounded-2xl border border-gray-200/80 overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col"
           >
             <div className="h-40 w-full overflow-hidden bg-gray-100 relative">
-              <img src={resolveMediaUrl(img.url)} alt={img.title} className="w-full h-full object-cover" />
+              <img
+                src={resolveMediaUrl(img.url)}
+                alt={img.title}
+                className="w-full h-full object-cover"
+              />
               <span
-                className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow ${img.active ? "bg-emerald-500 text-white" : "bg-gray-700/80 text-white"
-                  }`}
+                className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow ${
+                  img.active ? "bg-emerald-500 text-white" : "bg-gray-700/80 text-white"
+                }`}
               >
                 {img.active ? "Active in Rotation" : "Inactive"}
               </span>
@@ -2105,7 +2232,9 @@ export function DashboardPage() {
   );
 
   const renderContactQueriesPanel = () => {
-    const queryItems = emails.filter((m) => m.isQuery || (m.subject && m.subject.includes("Query")));
+    const queryItems = emails.filter(
+      (m) => m.isQuery || (m.subject && m.subject.includes("Query")),
+    );
     return (
       <div className="space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
@@ -2115,7 +2244,8 @@ export function DashboardPage() {
               <span>Contact &amp; Grievance Queries Desk</span>
             </h3>
             <p className="text-xs text-gray-500 mt-0.5">
-              Real incoming inquiries and technical grievances submitted by participants and institutions via the Contact Us desk.
+              Real incoming inquiries and technical grievances submitted by participants and
+              institutions via the Contact Us desk.
             </p>
           </div>
         </div>
@@ -2127,7 +2257,8 @@ export function DashboardPage() {
             </div>
             <h4 className="text-sm font-bold text-gray-900">No Contact Queries</h4>
             <p className="text-xs text-gray-500 max-w-md mx-auto">
-              Inquiries and grievance tickets submitted through the Contact Us form will appear here in real time.
+              Inquiries and grievance tickets submitted through the Contact Us form will appear here
+              in real time.
             </p>
           </div>
         ) : (
@@ -2178,7 +2309,8 @@ export function DashboardPage() {
     const filtered = themesList.filter((t) => {
       const matchTrack = themeFilterTrack === "ALL" || t.theme === themeFilterTrack;
       const q = themeSearch.trim().toLowerCase();
-      const matchSearch = !q || t.label.toLowerCase().includes(q) || t.code.toLowerCase().includes(q);
+      const matchSearch =
+        !q || t.label.toLowerCase().includes(q) || t.code.toLowerCase().includes(q);
       return matchTrack && matchSearch;
     });
     const national = filtered.filter((t) => t.theme === "NATIONAL");
@@ -2194,16 +2326,21 @@ export function DashboardPage() {
               <span>Problem Categories & Themes ({themesList.length})</span>
             </h3>
             <p className="text-xs text-gray-500 mt-0.5">
-              Manage problem statement categories. Teams registered under a category prevent its deletion (deactivate instead).
+              Manage problem statement categories. Teams registered under a category prevent its
+              deletion (deactivate instead).
             </p>
           </div>
           <button
             type="button"
             onClick={() => {
               setEditingTheme(null);
-              setThemeFormCode(""); setThemeFormLabel("");
-              setThemeFormTheme("NATIONAL"); setThemeFormPsTitle("");
-              setThemeFormPsUrl(""); setThemeFormOrder(themesList.length + 1); setThemeFormActive(true);
+              setThemeFormCode("");
+              setThemeFormLabel("");
+              setThemeFormTheme("NATIONAL");
+              setThemeFormPsTitle("");
+              setThemeFormPsUrl("");
+              setThemeFormOrder(themesList.length + 1);
+              setThemeFormActive(true);
               setThemeModalOpen(true);
             }}
             className="inline-flex items-center gap-1.5 bg-[#ff3355] hover:bg-[#d62544] text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition-colors cursor-pointer shrink-0"
@@ -2217,16 +2354,25 @@ export function DashboardPage() {
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex gap-1 p-1 bg-gray-100/90 rounded-xl">
             {(["ALL", "NATIONAL", "REGIONAL"] as const).map((f) => (
-              <button key={f} type="button"
+              <button
+                key={f}
+                type="button"
                 onClick={() => setThemeFilterTrack(f)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${themeFilterTrack === f ? "bg-white text-[#ff3355] shadow-xs" : "text-gray-600 hover:text-gray-900"}`}
               >
-                {f === "ALL" ? `All (${themesList.length})` : f === "NATIONAL" ? `National (${themesList.filter(t => t.theme === "NATIONAL").length})` : `Regional (${themesList.filter(t => t.theme === "REGIONAL").length})`}
+                {f === "ALL"
+                  ? `All (${themesList.length})`
+                  : f === "NATIONAL"
+                    ? `National (${themesList.filter((t) => t.theme === "NATIONAL").length})`
+                    : `Regional (${themesList.filter((t) => t.theme === "REGIONAL").length})`}
               </button>
             ))}
           </div>
           <div className="relative flex-1 max-w-xs">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <Search
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+            />
             <input
               type="search"
               placeholder="Search themes..."
@@ -2245,38 +2391,68 @@ export function DashboardPage() {
             </h4>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {national.map((t) => (
-                <div key={t.id} className={`bg-white rounded-2xl p-4 border shadow-xs flex flex-col gap-2.5 ${t.active ? "border-gray-200/80" : "border-orange-200 bg-orange-50/30"}`}>
+                <div
+                  key={t.id}
+                  className={`bg-white rounded-2xl p-4 border shadow-xs flex flex-col gap-2.5 ${t.active ? "border-gray-200/80" : "border-orange-200 bg-orange-50/30"}`}
+                >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex flex-col gap-1">
-                      <span className="text-[10px] font-mono font-extrabold text-[#ff3355] bg-rose-50 px-2 py-0.5 rounded-full self-start">{t.code}</span>
-                      {!t.active && <span className="text-[9px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-full self-start">INACTIVE</span>}
+                      <span className="text-[10px] font-mono font-extrabold text-[#ff3355] bg-rose-50 px-2 py-0.5 rounded-full self-start">
+                        {t.code}
+                      </span>
+                      {!t.active && (
+                        <span className="text-[9px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-full self-start">
+                          INACTIVE
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-1">
-                      <button type="button" onClick={() => openThemeEditModal(t)}
-                        className="size-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-colors cursor-pointer">
+                      <button
+                        type="button"
+                        onClick={() => openThemeEditModal(t)}
+                        className="size-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
+                      >
                         <Edit3 size={12} />
                       </button>
-                      <button type="button" onClick={() => handleToggleThemeActive(t.id, t.active)}
-                        className="size-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-yellow-50 text-gray-500 hover:text-yellow-600 transition-colors cursor-pointer">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleThemeActive(t.id, t.active)}
+                        className="size-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-yellow-50 text-gray-500 hover:text-yellow-600 transition-colors cursor-pointer"
+                      >
                         {t.active ? <EyeOff size={12} /> : <Eye size={12} />}
                       </button>
-                      <button type="button" onClick={() => handleDeleteTheme(t.id, t.code)}
-                        className="size-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors cursor-pointer">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTheme(t.id, t.code)}
+                        className="size-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
+                      >
                         <Trash2 size={12} />
                       </button>
                     </div>
                   </div>
                   <h4 className="text-xs font-bold text-gray-900 leading-snug">{t.label}</h4>
-                  {t.psTitle && <p className="text-[11px] text-gray-500 line-clamp-1">PS: {t.psTitle}</p>}
+                  {t.psTitle && (
+                    <p className="text-[11px] text-gray-500 line-clamp-1">PS: {t.psTitle}</p>
+                  )}
                   <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
                     <div className="flex gap-1.5">
-                      {t.psId && <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-mono">{t.psId}</span>}
-                      {t.openId && <span className="text-[10px] bg-green-50 text-green-700 px-1.5 py-0.5 rounded font-mono">{t.openId}</span>}
+                      {t.psId && (
+                        <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-mono">
+                          {t.psId}
+                        </span>
+                      )}
+                      {t.openId && (
+                        <span className="text-[10px] bg-green-50 text-green-700 px-1.5 py-0.5 rounded font-mono">
+                          {t.openId}
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-1">
                       <span className="text-[10px] text-gray-400">Order:</span>
                       <input
-                        type="number" min={1} value={t.displayOrder}
+                        type="number"
+                        min={1}
+                        value={t.displayOrder}
                         onChange={(e) => handleThemeOrderChange(t.id, Number(e.target.value))}
                         onBlur={(e) => handleSaveThemeOrder(t.id, Number(e.target.value))}
                         className="w-12 h-6 border border-gray-200 rounded text-[10px] text-center focus:outline-none focus:border-[#ff3355]"
@@ -2297,34 +2473,58 @@ export function DashboardPage() {
             </h4>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {regional.map((t) => (
-                <div key={t.id} className={`bg-white rounded-2xl p-4 border shadow-xs flex flex-col gap-2.5 ${t.active ? "border-gray-200/80" : "border-orange-200 bg-orange-50/30"}`}>
+                <div
+                  key={t.id}
+                  className={`bg-white rounded-2xl p-4 border shadow-xs flex flex-col gap-2.5 ${t.active ? "border-gray-200/80" : "border-orange-200 bg-orange-50/30"}`}
+                >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex flex-col gap-1">
-                      <span className="text-[10px] font-mono font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full self-start">{t.code}</span>
-                      {!t.active && <span className="text-[9px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-full self-start">INACTIVE</span>}
+                      <span className="text-[10px] font-mono font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full self-start">
+                        {t.code}
+                      </span>
+                      {!t.active && (
+                        <span className="text-[9px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-full self-start">
+                          INACTIVE
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-1">
-                      <button type="button" onClick={() => openThemeEditModal(t)}
-                        className="size-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-colors cursor-pointer">
+                      <button
+                        type="button"
+                        onClick={() => openThemeEditModal(t)}
+                        className="size-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
+                      >
                         <Edit3 size={12} />
                       </button>
-                      <button type="button" onClick={() => handleToggleThemeActive(t.id, t.active)}
-                        className="size-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-yellow-50 text-gray-500 hover:text-yellow-600 transition-colors cursor-pointer">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleThemeActive(t.id, t.active)}
+                        className="size-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-yellow-50 text-gray-500 hover:text-yellow-600 transition-colors cursor-pointer"
+                      >
                         {t.active ? <EyeOff size={12} /> : <Eye size={12} />}
                       </button>
-                      <button type="button" onClick={() => handleDeleteTheme(t.id, t.code)}
-                        className="size-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors cursor-pointer">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTheme(t.id, t.code)}
+                        className="size-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
+                      >
                         <Trash2 size={12} />
                       </button>
                     </div>
                   </div>
                   <h4 className="text-xs font-bold text-gray-900 leading-snug">{t.label}</h4>
                   <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
-                    {t.openId && <span className="text-[10px] bg-green-50 text-green-700 px-1.5 py-0.5 rounded font-mono">{t.openId}</span>}
+                    {t.openId && (
+                      <span className="text-[10px] bg-green-50 text-green-700 px-1.5 py-0.5 rounded font-mono">
+                        {t.openId}
+                      </span>
+                    )}
                     <div className="flex items-center gap-1 ml-auto">
                       <span className="text-[10px] text-gray-400">Order:</span>
                       <input
-                        type="number" min={1} value={t.displayOrder}
+                        type="number"
+                        min={1}
+                        value={t.displayOrder}
                         onChange={(e) => handleThemeOrderChange(t.id, Number(e.target.value))}
                         onBlur={(e) => handleSaveThemeOrder(t.id, Number(e.target.value))}
                         className="w-12 h-6 border border-gray-200 rounded text-[10px] text-center focus:outline-none focus:border-[#ff3355]"
@@ -2339,9 +2539,13 @@ export function DashboardPage() {
 
         {filtered.length === 0 && (
           <div className="bg-white rounded-2xl p-12 border border-gray-200/80 text-center space-y-3">
-            <div className="size-12 rounded-2xl bg-rose-50 text-[#ff3355] flex items-center justify-center mx-auto"><Tag size={24} /></div>
+            <div className="size-12 rounded-2xl bg-rose-50 text-[#ff3355] flex items-center justify-center mx-auto">
+              <Tag size={24} />
+            </div>
             <h4 className="text-sm font-bold text-gray-900">No themes found</h4>
-            <p className="text-xs text-gray-500">{themeSearch ? "Try a different search term." : "Add your first theme above."}</p>
+            <p className="text-xs text-gray-500">
+              {themeSearch ? "Try a different search term." : "Add your first theme above."}
+            </p>
           </div>
         )}
 
@@ -2350,69 +2554,123 @@ export function DashboardPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-gray-900">{editingTheme ? "Edit Theme/Category" : "Add New Theme"}</h3>
-                <button type="button" onClick={() => setThemeModalOpen(false)} className="size-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 cursor-pointer"><X size={16} /></button>
+                <h3 className="font-bold text-gray-900">
+                  {editingTheme ? "Edit Theme/Category" : "Add New Theme"}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setThemeModalOpen(false)}
+                  className="size-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
               </div>
               <form onSubmit={handleSaveTheme} className="space-y-3">
                 {!editingTheme && (
                   <div>
-                    <label className="text-xs font-bold text-gray-700 block mb-1">Code <span className="text-red-500">*</span></label>
-                    <input value={themeFormCode} onChange={(e) => setThemeFormCode(e.target.value)} required
+                    <label className="text-xs font-bold text-gray-700 block mb-1">
+                      Code <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      value={themeFormCode}
+                      onChange={(e) => setThemeFormCode(e.target.value)}
+                      required
                       placeholder="e.g. NAT-006 or REG-012"
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#ff3355] font-mono uppercase" />
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#ff3355] font-mono uppercase"
+                    />
                   </div>
                 )}
                 <div>
-                  <label className="text-xs font-bold text-gray-700 block mb-1">Track <span className="text-red-500">*</span></label>
-                  <select value={themeFormTheme} onChange={(e) => setThemeFormTheme(e.target.value as any)}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#ff3355]">
+                  <label className="text-xs font-bold text-gray-700 block mb-1">
+                    Track <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={themeFormTheme}
+                    onChange={(e) => setThemeFormTheme(e.target.value as any)}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#ff3355]"
+                  >
                     <option value="NATIONAL">National Level (Theme 1)</option>
                     <option value="REGIONAL">Regional/Community Level (Theme 2)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-700 block mb-1">Category Label <span className="text-red-500">*</span></label>
-                  <input value={themeFormLabel} onChange={(e) => setThemeFormLabel(e.target.value)} required
+                  <label className="text-xs font-bold text-gray-700 block mb-1">
+                    Category Label <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    value={themeFormLabel}
+                    onChange={(e) => setThemeFormLabel(e.target.value)}
+                    required
                     placeholder="e.g. Defence, Intelligence, Space & National Security"
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#ff3355]" />
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#ff3355]"
+                  />
                 </div>
                 {themeFormTheme === "NATIONAL" && (
                   <>
                     <div>
-                      <label className="text-xs font-bold text-gray-700 block mb-1">Problem Statement Title</label>
-                      <input value={themeFormPsTitle} onChange={(e) => setThemeFormPsTitle(e.target.value)}
+                      <label className="text-xs font-bold text-gray-700 block mb-1">
+                        Problem Statement Title
+                      </label>
+                      <input
+                        value={themeFormPsTitle}
+                        onChange={(e) => setThemeFormPsTitle(e.target.value)}
                         placeholder="Official PS title (National only)"
-                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#ff3355]" />
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#ff3355]"
+                      />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-gray-700 block mb-1">PS Download URL</label>
-                      <input value={themeFormPsUrl} onChange={(e) => setThemeFormPsUrl(e.target.value)} type="url"
+                      <label className="text-xs font-bold text-gray-700 block mb-1">
+                        PS Download URL
+                      </label>
+                      <input
+                        value={themeFormPsUrl}
+                        onChange={(e) => setThemeFormPsUrl(e.target.value)}
+                        type="url"
                         placeholder="https://... (optional)"
-                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#ff3355]" />
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#ff3355]"
+                      />
                     </div>
                   </>
                 )}
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label className="text-xs font-bold text-gray-700 block mb-1">Display Order</label>
-                    <input type="number" min={1} value={themeFormOrder} onChange={(e) => setThemeFormOrder(Number(e.target.value))}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#ff3355]" />
+                    <label className="text-xs font-bold text-gray-700 block mb-1">
+                      Display Order
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={themeFormOrder}
+                      onChange={(e) => setThemeFormOrder(Number(e.target.value))}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#ff3355]"
+                    />
                   </div>
                   <div className="flex items-end pb-0.5">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <span className="text-xs font-bold text-gray-700">Active</span>
-                      <div onClick={() => setThemeFormActive(!themeFormActive)}
-                        className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${themeFormActive ? "bg-emerald-500" : "bg-gray-300"}`}>
-                        <span className={`absolute top-0.5 left-0.5 size-4 rounded-full bg-white shadow transition-transform ${themeFormActive ? "translate-x-5" : ""}`} />
+                      <div
+                        onClick={() => setThemeFormActive(!themeFormActive)}
+                        className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${themeFormActive ? "bg-emerald-500" : "bg-gray-300"}`}
+                      >
+                        <span
+                          className={`absolute top-0.5 left-0.5 size-4 rounded-full bg-white shadow transition-transform ${themeFormActive ? "translate-x-5" : ""}`}
+                        />
                       </div>
                     </label>
                   </div>
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={() => setThemeModalOpen(false)}
-                    className="flex-1 border border-gray-200 text-gray-700 rounded-xl py-2 text-sm font-bold hover:bg-gray-50 cursor-pointer">Cancel</button>
-                  <button type="submit"
-                    className="flex-1 bg-[#ff3355] hover:bg-[#d62544] text-white rounded-xl py-2 text-sm font-bold transition-colors cursor-pointer">
+                  <button
+                    type="button"
+                    onClick={() => setThemeModalOpen(false)}
+                    className="flex-1 border border-gray-200 text-gray-700 rounded-xl py-2 text-sm font-bold hover:bg-gray-50 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 bg-[#ff3355] hover:bg-[#d62544] text-white rounded-xl py-2 text-sm font-bold transition-colors cursor-pointer"
+                  >
                     {editingTheme ? "Save Changes" : "Create Theme"}
                   </button>
                 </div>
@@ -2425,7 +2683,6 @@ export function DashboardPage() {
   };
 
   return (
-
     <div className="min-h-screen bg-[#f8fafc] text-gray-800 flex flex-col font-sans selection:bg-[#ff3355] selection:text-white">
       {/* ─── Top Header Bar matching Screenshot ─── */}
       <header className="sticky top-0 z-40 bg-white border-b border-gray-200/80 px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between shadow-2xs">
@@ -2484,7 +2741,10 @@ export function DashboardPage() {
             className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold shadow-2xs hover:border-gray-300 transition-all cursor-pointer disabled:opacity-50"
             title="Refresh database records"
           >
-            <RefreshCw size={12} className={isRefreshing ? "animate-spin text-[#ff3355]" : "text-gray-500"} />
+            <RefreshCw
+              size={12}
+              className={isRefreshing ? "animate-spin text-[#ff3355]" : "text-gray-500"}
+            />
             <span className="hidden md:inline">{isRefreshing ? "Syncing..." : "Sync DB"}</span>
           </button>
 
@@ -2521,7 +2781,10 @@ export function DashboardPage() {
               <span className="text-xs font-bold text-gray-900 truncate max-w-[150px]">
                 Hi, {user?.firstName || "Admin"}
               </span>
-              <span className="text-[11px] text-gray-500 font-medium truncate max-w-[150px]" title={user?.email}>
+              <span
+                className="text-[11px] text-gray-500 font-medium truncate max-w-[150px]"
+                title={user?.email}
+              >
                 {user?.email}
               </span>
             </div>
@@ -2554,10 +2817,11 @@ export function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("dashboard")}
-                    className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "dashboard"
-                      ? "bg-[#ff3355] text-white shadow-sm"
-                      : "text-gray-700 hover:bg-gray-100 font-semibold"
-                      }`}
+                    className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                      activeTab === "dashboard"
+                        ? "bg-[#ff3355] text-white shadow-sm"
+                        : "text-gray-700 hover:bg-gray-100 font-semibold"
+                    }`}
                   >
                     Dashboard
                   </button>
@@ -2565,10 +2829,11 @@ export function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("statistics")}
-                    className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "statistics"
-                      ? "bg-[#ff3355] text-white shadow-sm"
-                      : "text-gray-700 hover:bg-gray-100 font-semibold"
-                      }`}
+                    className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                      activeTab === "statistics"
+                        ? "bg-[#ff3355] text-white shadow-sm"
+                        : "text-gray-700 hover:bg-gray-100 font-semibold"
+                    }`}
                   >
                     Statistics
                   </button>
@@ -2576,10 +2841,11 @@ export function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("mail")}
-                    className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "mail"
-                      ? "bg-[#ff3355] text-white shadow-sm"
-                      : "text-gray-700 hover:bg-gray-100 font-semibold"
-                      }`}
+                    className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                      activeTab === "mail"
+                        ? "bg-[#ff3355] text-white shadow-sm"
+                        : "text-gray-700 hover:bg-gray-100 font-semibold"
+                    }`}
                   >
                     Mail
                   </button>
@@ -2587,10 +2853,11 @@ export function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("submissions")}
-                    className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "submissions"
-                      ? "bg-[#ff3355] text-white shadow-sm"
-                      : "text-gray-700 hover:bg-gray-100 font-semibold"
-                      }`}
+                    className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                      activeTab === "submissions"
+                        ? "bg-[#ff3355] text-white shadow-sm"
+                        : "text-gray-700 hover:bg-gray-100 font-semibold"
+                    }`}
                   >
                     Submissions
                   </button>
@@ -2599,10 +2866,11 @@ export function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("users")}
-                    className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "users"
-                      ? "bg-[#ff3355] text-white shadow-sm"
-                      : "text-gray-700 hover:bg-gray-100 font-semibold"
-                      }`}
+                    className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                      activeTab === "users"
+                        ? "bg-[#ff3355] text-white shadow-sm"
+                        : "text-gray-700 hover:bg-gray-100 font-semibold"
+                    }`}
                   >
                     Users
                   </button>
@@ -2612,10 +2880,11 @@ export function DashboardPage() {
                     <button
                       type="button"
                       onClick={() => setActiveTab("resources")}
-                      className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "resources"
-                        ? "bg-[#ff3355] text-white shadow-sm"
-                        : "text-gray-700 hover:bg-gray-100 font-semibold"
-                        }`}
+                      className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                        activeTab === "resources"
+                          ? "bg-[#ff3355] text-white shadow-sm"
+                          : "text-gray-700 hover:bg-gray-100 font-semibold"
+                      }`}
                     >
                       Resources
                     </button>
@@ -2624,10 +2893,11 @@ export function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("announcement")}
-                    className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "announcement"
-                      ? "bg-[#ff3355] text-white shadow-sm"
-                      : "text-gray-700 hover:bg-gray-100 font-semibold"
-                      }`}
+                    className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                      activeTab === "announcement"
+                        ? "bg-[#ff3355] text-white shadow-sm"
+                        : "text-gray-700 hover:bg-gray-100 font-semibold"
+                    }`}
                   >
                     Announcement
                   </button>
@@ -2635,10 +2905,11 @@ export function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("hero")}
-                    className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "hero"
-                      ? "bg-[#ff3355] text-white shadow-sm"
-                      : "text-gray-700 hover:bg-gray-100 font-semibold"
-                      }`}
+                    className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                      activeTab === "hero"
+                        ? "bg-[#ff3355] text-white shadow-sm"
+                        : "text-gray-700 hover:bg-gray-100 font-semibold"
+                    }`}
                   >
                     Hero Section
                   </button>
@@ -2654,10 +2925,11 @@ export function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("themes")}
-                    className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${activeTab === "themes"
-                      ? "bg-[#ff3355] text-white font-bold"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
+                    className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                      activeTab === "themes"
+                        ? "bg-[#ff3355] text-white font-bold"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    }`}
                   >
                     Themes
                   </button>
@@ -2665,10 +2937,11 @@ export function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("newsletter")}
-                    className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${activeTab === "newsletter"
-                      ? "bg-[#ff3355] text-white font-bold"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
+                    className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                      activeTab === "newsletter"
+                        ? "bg-[#ff3355] text-white font-bold"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    }`}
                   >
                     Newsletter
                   </button>
@@ -2676,10 +2949,11 @@ export function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("faq")}
-                    className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${activeTab === "faq"
-                      ? "bg-[#ff3355] text-white font-bold"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
+                    className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                      activeTab === "faq"
+                        ? "bg-[#ff3355] text-white font-bold"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    }`}
                   >
                     FAQ
                   </button>
@@ -2687,10 +2961,11 @@ export function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("contact")}
-                    className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${activeTab === "contact"
-                      ? "bg-[#ff3355] text-white font-bold"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
+                    className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                      activeTab === "contact"
+                        ? "bg-[#ff3355] text-white font-bold"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    }`}
                   >
                     Contact Query
                   </button>
@@ -2698,10 +2973,11 @@ export function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("committee")}
-                    className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${activeTab === "committee"
-                      ? "bg-[#ff3355] text-white font-bold"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
+                    className={`w-full text-left px-3.5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                      activeTab === "committee"
+                        ? "bg-[#ff3355] text-white font-bold"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    }`}
                   >
                     Committee Members
                   </button>
@@ -2713,10 +2989,11 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("resources")}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "resources"
-                    ? "bg-[#ff3355] text-white shadow-sm"
-                    : "text-gray-700 hover:bg-gray-100 font-semibold"
-                    }`}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                    activeTab === "resources"
+                      ? "bg-[#ff3355] text-white shadow-sm"
+                      : "text-gray-700 hover:bg-gray-100 font-semibold"
+                  }`}
                 >
                   Gallery &amp; Images
                 </button>
@@ -2724,10 +3001,11 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("hero")}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "hero"
-                    ? "bg-[#ff3355] text-white shadow-sm"
-                    : "text-gray-700 hover:bg-gray-100 font-semibold"
-                    }`}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                    activeTab === "hero"
+                      ? "bg-[#ff3355] text-white shadow-sm"
+                      : "text-gray-700 hover:bg-gray-100 font-semibold"
+                  }`}
                 >
                   Hero Section
                 </button>
@@ -2735,10 +3013,11 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("themes")}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "themes"
-                    ? "bg-[#ff3355] text-white shadow-sm"
-                    : "text-gray-700 hover:bg-gray-100 font-semibold"
-                    }`}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                    activeTab === "themes"
+                      ? "bg-[#ff3355] text-white shadow-sm"
+                      : "text-gray-700 hover:bg-gray-100 font-semibold"
+                  }`}
                 >
                   Themes
                 </button>
@@ -2746,10 +3025,11 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("newsletter")}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "newsletter"
-                    ? "bg-[#ff3355] text-white shadow-sm"
-                    : "text-gray-700 hover:bg-gray-100 font-semibold"
-                    }`}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                    activeTab === "newsletter"
+                      ? "bg-[#ff3355] text-white shadow-sm"
+                      : "text-gray-700 hover:bg-gray-100 font-semibold"
+                  }`}
                 >
                   Newsletter
                 </button>
@@ -2757,10 +3037,11 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("faq")}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "faq"
-                    ? "bg-[#ff3355] text-white shadow-sm"
-                    : "text-gray-700 hover:bg-gray-100 font-semibold"
-                    }`}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                    activeTab === "faq"
+                      ? "bg-[#ff3355] text-white shadow-sm"
+                      : "text-gray-700 hover:bg-gray-100 font-semibold"
+                  }`}
                 >
                   FAQ
                 </button>
@@ -2768,10 +3049,11 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("committee")}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "committee"
-                    ? "bg-[#ff3355] text-white shadow-sm"
-                    : "text-gray-700 hover:bg-gray-100 font-semibold"
-                    }`}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                    activeTab === "committee"
+                      ? "bg-[#ff3355] text-white shadow-sm"
+                      : "text-gray-700 hover:bg-gray-100 font-semibold"
+                  }`}
                 >
                   Committee Members
                 </button>
@@ -2784,10 +3066,11 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("my-registration")}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "my-registration"
-                    ? "bg-[#ff3355] text-white shadow-sm"
-                    : "text-gray-700 hover:bg-gray-100 font-semibold"
-                    }`}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                    activeTab === "my-registration"
+                      ? "bg-[#ff3355] text-white shadow-sm"
+                      : "text-gray-700 hover:bg-gray-100 font-semibold"
+                  }`}
                 >
                   My Registration
                 </button>
@@ -2795,10 +3078,11 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("timeline")}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "timeline"
-                    ? "bg-[#ff3355] text-white shadow-sm"
-                    : "text-gray-700 hover:bg-gray-100 font-semibold"
-                    }`}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                    activeTab === "timeline"
+                      ? "bg-[#ff3355] text-white shadow-sm"
+                      : "text-gray-700 hover:bg-gray-100 font-semibold"
+                  }`}
                 >
                   Timeline &amp; Rounds
                 </button>
@@ -2806,10 +3090,11 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("evaluation")}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "evaluation"
-                    ? "bg-[#ff3355] text-white shadow-sm"
-                    : "text-gray-700 hover:bg-gray-100 font-semibold"
-                    }`}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                    activeTab === "evaluation"
+                      ? "bg-[#ff3355] text-white shadow-sm"
+                      : "text-gray-700 hover:bg-gray-100 font-semibold"
+                  }`}
                 >
                   Evaluation &amp; Results
                 </button>
@@ -2817,14 +3102,14 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("member-mail")}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === "member-mail"
-                    ? "bg-[#ff3355] text-white shadow-sm"
-                    : "text-gray-700 hover:bg-gray-100 font-semibold"
-                    }`}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                    activeTab === "member-mail"
+                      ? "bg-[#ff3355] text-white shadow-sm"
+                      : "text-gray-700 hover:bg-gray-100 font-semibold"
+                  }`}
                 >
                   Official Mail
                 </button>
-
               </nav>
             )}
               </>
@@ -2867,7 +3152,9 @@ export function DashboardPage() {
                 <div className="bg-white rounded-2xl p-5 border border-gray-200/80 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between">
                   <div className="flex items-start justify-between">
                     <div>
-                      <span className="text-xs font-semibold text-gray-500 block">Total Registration</span>
+                      <span className="text-xs font-semibold text-gray-500 block">
+                        Total Registration
+                      </span>
                       <span className="text-3xl font-black text-gray-900 mt-1 block">
                         {(statsData?.totalTeams ?? submissionsList.length).toLocaleString()}
                       </span>
@@ -2890,7 +3177,9 @@ export function DashboardPage() {
                 <div className="bg-white rounded-2xl p-5 border border-gray-200/80 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between">
                   <div className="flex items-start justify-between">
                     <div>
-                      <span className="text-xs font-semibold text-gray-500 block">Total Mail &amp; Query</span>
+                      <span className="text-xs font-semibold text-gray-500 block">
+                        Total Mail &amp; Query
+                      </span>
                       <span className="text-3xl font-black text-gray-900 mt-1 block">
                         {(statsData?.totalQueries ?? emails.length).toLocaleString()}
                       </span>
@@ -2900,9 +3189,7 @@ export function DashboardPage() {
                     </div>
                   </div>
                   <div className="mt-4 flex items-center gap-1.5 text-xs font-bold">
-                    <span className="inline-flex items-center gap-0.5 text-blue-600">
-                      ● Active
-                    </span>
+                    <span className="inline-flex items-center gap-0.5 text-blue-600">● Active</span>
                     <span className="text-gray-400 font-normal">
                       {statsData?.totalQueries ?? emails.length} inquiries received
                     </span>
@@ -2913,7 +3200,9 @@ export function DashboardPage() {
                 <div className="bg-white rounded-2xl p-5 border border-gray-200/80 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between">
                   <div className="flex items-start justify-between">
                     <div>
-                      <span className="text-xs font-semibold text-gray-500 block">Total Submissions Pending</span>
+                      <span className="text-xs font-semibold text-gray-500 block">
+                        Total Submissions Pending
+                      </span>
                       <span className="text-3xl font-black text-gray-900 mt-1 block">
                         {(statsData?.pendingSubmissions ?? 0).toLocaleString()}
                       </span>
@@ -2923,8 +3212,12 @@ export function DashboardPage() {
                     </div>
                   </div>
                   <div className="mt-4 flex items-center gap-1.5 text-xs font-bold">
-                    <span className={`inline-flex items-center gap-0.5 ${(statsData?.pendingSubmissions ?? 0) > 0 ? "text-[#f97316]" : "text-[#00c58e]"}`}>
-                      {(statsData?.pendingSubmissions ?? 0) > 0 ? "⏳ Pending Review" : "✓ All Evaluated"}
+                    <span
+                      className={`inline-flex items-center gap-0.5 ${(statsData?.pendingSubmissions ?? 0) > 0 ? "text-[#f97316]" : "text-[#00c58e]"}`}
+                    >
+                      {(statsData?.pendingSubmissions ?? 0) > 0
+                        ? "⏳ Pending Review"
+                        : "✓ All Evaluated"}
                     </span>
                     <span className="text-gray-400 font-normal">
                       {statsData?.pendingSubmissions ?? 0} awaiting jury
@@ -2953,18 +3246,20 @@ export function DashboardPage() {
                             : "Contact Grievances & Inquiry Inflow"}
                       </h2>
                       <span
-                        className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${graphMetric === "users"
-                          ? "bg-blue-50 text-blue-700 border-blue-200"
-                          : graphMetric === "teams"
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            : "bg-amber-50 text-amber-700 border-amber-200"
-                          }`}
+                        className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${
+                          graphMetric === "users"
+                            ? "bg-blue-50 text-blue-700 border-blue-200"
+                            : graphMetric === "teams"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : "bg-amber-50 text-amber-700 border-amber-200"
+                        }`}
                       >
                         Live Database Velocity
                       </span>
                     </div>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      Interactive real-time activity metrics tracked across recent periods from PostgreSQL
+                      Interactive real-time activity metrics tracked across recent periods from
+                      PostgreSQL
                     </p>
                   </div>
 
@@ -2975,10 +3270,11 @@ export function DashboardPage() {
                       <button
                         type="button"
                         onClick={() => setGraphMetric("users")}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${graphMetric === "users"
-                          ? "bg-white text-blue-600 shadow-xs"
-                          : "text-slate-600 hover:text-slate-900"
-                          }`}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                          graphMetric === "users"
+                            ? "bg-white text-blue-600 shadow-xs"
+                            : "text-slate-600 hover:text-slate-900"
+                        }`}
                       >
                         <Users size={13} />
                         <span>Users ({statsData?.totalUsers ?? userList.length})</span>
@@ -2986,10 +3282,11 @@ export function DashboardPage() {
                       <button
                         type="button"
                         onClick={() => setGraphMetric("teams")}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${graphMetric === "teams"
-                          ? "bg-white text-emerald-600 shadow-xs"
-                          : "text-slate-600 hover:text-slate-900"
-                          }`}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                          graphMetric === "teams"
+                            ? "bg-white text-emerald-600 shadow-xs"
+                            : "text-slate-600 hover:text-slate-900"
+                        }`}
                       >
                         <Award size={13} />
                         <span>Teams ({statsData?.totalTeams ?? submissionsList.length})</span>
@@ -2997,10 +3294,11 @@ export function DashboardPage() {
                       <button
                         type="button"
                         onClick={() => setGraphMetric("queries")}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${graphMetric === "queries"
-                          ? "bg-white text-amber-600 shadow-xs"
-                          : "text-slate-600 hover:text-slate-900"
-                          }`}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                          graphMetric === "queries"
+                            ? "bg-white text-amber-600 shadow-xs"
+                            : "text-slate-600 hover:text-slate-900"
+                        }`}
                       >
                         <MessageSquare size={13} />
                         <span>Inquiries ({statsData?.totalQueries ?? emails.length})</span>
@@ -3012,20 +3310,22 @@ export function DashboardPage() {
                       <button
                         type="button"
                         onClick={() => setGraphMode("monthly")}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${graphMode === "monthly"
-                          ? "bg-white text-slate-800 shadow-xs"
-                          : "text-slate-500 hover:text-slate-900"
-                          }`}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                          graphMode === "monthly"
+                            ? "bg-white text-slate-800 shadow-xs"
+                            : "text-slate-500 hover:text-slate-900"
+                        }`}
                       >
                         Monthly New
                       </button>
                       <button
                         type="button"
                         onClick={() => setGraphMode("cumulative")}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${graphMode === "cumulative"
-                          ? "bg-white text-slate-800 shadow-xs"
-                          : "text-slate-500 hover:text-slate-900"
-                          }`}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                          graphMode === "cumulative"
+                            ? "bg-white text-slate-800 shadow-xs"
+                            : "text-slate-500 hover:text-slate-900"
+                        }`}
                       >
                         Cumulative
                       </button>
@@ -3035,29 +3335,77 @@ export function DashboardPage() {
 
                 {(() => {
                   // Resolve active metric data
-                  const labels = statsData?.trafficData?.labels || ["Apr", "May", "Jun", "Jul", "Aug", "Sep"];
-                  const fullLabels =
-                    statsData?.trafficData?.fullLabels || [
-                      "Apr 2026",
-                      "May 2026",
-                      "Jun 2026",
-                      "Jul 2026",
-                      "Aug 2026",
-                      "Sep 2026",
-                    ];
+                  const labels = statsData?.trafficData?.labels || [
+                    "Apr",
+                    "May",
+                    "Jun",
+                    "Jul",
+                    "Aug",
+                    "Sep",
+                  ];
+                  const fullLabels = statsData?.trafficData?.fullLabels || [
+                    "Apr 2026",
+                    "May 2026",
+                    "Jun 2026",
+                    "Jul 2026",
+                    "Aug 2026",
+                    "Sep 2026",
+                  ];
 
                   const counts =
                     graphMetric === "users"
                       ? graphMode === "monthly"
-                        ? statsData?.trafficData?.userCounts || [0, 0, 0, 0, 0, statsData?.totalUsers ?? userList.length]
-                        : statsData?.trafficData?.cumulativeUserCounts || [0, 0, 0, 0, 0, statsData?.totalUsers ?? userList.length]
+                        ? statsData?.trafficData?.userCounts || [
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                            statsData?.totalUsers ?? userList.length,
+                          ]
+                        : statsData?.trafficData?.cumulativeUserCounts || [
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                            statsData?.totalUsers ?? userList.length,
+                          ]
                       : graphMetric === "teams"
                         ? graphMode === "monthly"
-                          ? statsData?.trafficData?.teamCounts || [0, 0, 0, 0, 0, statsData?.totalTeams ?? submissionsList.length]
-                          : statsData?.trafficData?.cumulativeTeamCounts || [0, 0, 0, 0, 0, statsData?.totalTeams ?? submissionsList.length]
+                          ? statsData?.trafficData?.teamCounts || [
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              statsData?.totalTeams ?? submissionsList.length,
+                            ]
+                          : statsData?.trafficData?.cumulativeTeamCounts || [
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              statsData?.totalTeams ?? submissionsList.length,
+                            ]
                         : graphMode === "monthly"
-                          ? statsData?.trafficData?.queryCounts || [0, 0, 0, 0, 0, statsData?.totalQueries ?? emails.length]
-                          : statsData?.trafficData?.cumulativeQueryCounts || [0, 0, 0, 0, 0, statsData?.totalQueries ?? emails.length];
+                          ? statsData?.trafficData?.queryCounts || [
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              statsData?.totalQueries ?? emails.length,
+                            ]
+                          : statsData?.trafficData?.cumulativeQueryCounts || [
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              statsData?.totalQueries ?? emails.length,
+                            ];
 
                   const rawMax = Math.max(...counts, 0);
 
@@ -3099,11 +3447,7 @@ export function DashboardPage() {
                         ? "#10b981"
                         : "#f59e0b";
                   const metricUnit =
-                    graphMetric === "users"
-                      ? "User"
-                      : graphMetric === "teams"
-                        ? "Team"
-                        : "Inquiry";
+                    graphMetric === "users" ? "User" : graphMetric === "teams" ? "Team" : "Inquiry";
 
                   // Layout Coordinates
                   const bottomY = 240;
@@ -3173,7 +3517,9 @@ export function DashboardPage() {
                               </span>
                             </div>
                             <div className="text-[10px] text-slate-400 font-medium flex items-center gap-2 mt-0.5">
-                              <span>{graphMode === "monthly" ? "New this month" : "Cumulative total"}</span>
+                              <span>
+                                {graphMode === "monthly" ? "New this month" : "Cumulative total"}
+                              </span>
                               <span className="text-emerald-400 font-bold">• Verified</span>
                             </div>
                           </div>
@@ -3324,8 +3670,12 @@ export function DashboardPage() {
               <div className="bg-white rounded-2xl p-6 border border-gray-200/80 shadow-xs">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h2 className="text-base font-bold text-gray-900">User Analytics &amp; Institutional Registrations</h2>
-                    <p className="text-xs text-gray-500 mt-0.5">Real institutional breakdown derived directly from registered teams</p>
+                    <h2 className="text-base font-bold text-gray-900">
+                      User Analytics &amp; Institutional Registrations
+                    </h2>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Real institutional breakdown derived directly from registered teams
+                    </p>
                   </div>
                   <div className="flex items-center gap-1 text-xs font-medium text-gray-500 border border-gray-200 rounded-lg px-2.5 py-1">
                     <span>{statsData?.analyticsRows?.length || 0} Institutions</span>
@@ -3345,12 +3695,17 @@ export function DashboardPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
-                      {(!statsData?.analyticsRows || statsData.analyticsRows.length === 0) ? (
+                      {!statsData?.analyticsRows || statsData.analyticsRows.length === 0 ? (
                         <tr>
                           <td colSpan={6} className="py-12 text-center text-gray-400">
                             <Building className="size-8 mx-auto text-gray-300 mb-2" />
-                            <p className="font-semibold text-gray-600">No institutional registrations in database yet</p>
-                            <p className="text-xs text-gray-400 mt-0.5">When student teams register with their colleges, real analytics will automatically populate here.</p>
+                            <p className="font-semibold text-gray-600">
+                              No institutional registrations in database yet
+                            </p>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                              When student teams register with their colleges, real analytics will
+                              automatically populate here.
+                            </p>
                           </td>
                         </tr>
                       ) : (
@@ -3358,17 +3713,22 @@ export function DashboardPage() {
                           <tr key={row.id} className="hover:bg-gray-50/80 transition-colors">
                             <td className="py-3.5 px-4 font-bold text-gray-900">{row.college}</td>
                             <td className="py-3.5 px-4 text-gray-500">{row.location}</td>
-                            <td className="py-3.5 px-4 font-semibold text-gray-800">{row.usersRegistered}</td>
+                            <td className="py-3.5 px-4 font-semibold text-gray-800">
+                              {row.usersRegistered}
+                            </td>
                             <td className="py-3.5 px-4">{row.state}</td>
-                            <td className="py-3.5 px-4 font-semibold text-gray-800">{row.participants}</td>
+                            <td className="py-3.5 px-4 font-semibold text-gray-800">
+                              {row.participants}
+                            </td>
                             <td className="py-3.5 px-4 text-center">
                               <span
-                                className={`inline-block px-3 py-1 rounded-full text-[11px] font-bold text-white shadow-2xs ${row.status === "Delivered"
-                                  ? "bg-[#00c58e]"
-                                  : row.status === "Pending"
-                                    ? "bg-[#f59e0b]"
-                                    : "bg-[#ef4444]"
-                                  }`}
+                                className={`inline-block px-3 py-1 rounded-full text-[11px] font-bold text-white shadow-2xs ${
+                                  row.status === "Delivered"
+                                    ? "bg-[#00c58e]"
+                                    : row.status === "Pending"
+                                      ? "bg-[#f59e0b]"
+                                      : "bg-[#ef4444]"
+                                }`}
                               >
                                 {row.status}
                               </span>
@@ -3422,8 +3782,8 @@ export function DashboardPage() {
                           count: Math.max(
                             0,
                             (statsData?.totalTeams ?? 0) -
-                            (statsData?.shortlistedTeams ?? 0) -
-                            (statsData?.pendingSubmissions ?? 0),
+                              (statsData?.shortlistedTeams ?? 0) -
+                              (statsData?.pendingSubmissions ?? 0),
                           ),
                           color: "bg-blue-500",
                           textColor: "text-blue-700",
@@ -3456,10 +3816,10 @@ export function DashboardPage() {
                     <span className="font-bold text-gray-900">
                       {(statsData?.totalTeams ?? 0) > 0
                         ? `${Math.round(
-                          (((statsData?.totalTeams ?? 0) - (statsData?.pendingSubmissions ?? 0)) /
-                            (statsData?.totalTeams || 1)) *
-                          100,
-                        )}% Evaluated`
+                            (((statsData?.totalTeams ?? 0) - (statsData?.pendingSubmissions ?? 0)) /
+                              (statsData?.totalTeams || 1)) *
+                              100,
+                          )}% Evaluated`
                         : "0% Evaluated"}
                     </span>
                   </div>
@@ -3475,11 +3835,11 @@ export function DashboardPage() {
                       </span>
                     </div>
                     <p className="text-xs text-gray-500 mb-4">
-                      Proposals categorized under active SEWA 2026 problem themes
+                      Proposals categorized under active SEVA 2026 problem themes
                     </p>
 
                     <div className="space-y-3">
-                      {(!statsData?.themeDistribution || statsData.themeDistribution.length === 0) ? (
+                      {!statsData?.themeDistribution || statsData.themeDistribution.length === 0 ? (
                         <p className="text-xs text-gray-400 py-4 text-center">
                           No team proposals categorized by theme yet.
                         </p>
@@ -3487,12 +3847,22 @@ export function DashboardPage() {
                         statsData.themeDistribution.map((t, idx) => {
                           const total = statsData?.totalTeams || 1;
                           const pct = Math.round((t.count / total) * 100);
-                          const colors = ["bg-indigo-500", "bg-rose-500", "bg-emerald-500", "bg-amber-500", "bg-cyan-500"];
+                          const colors = [
+                            "bg-indigo-500",
+                            "bg-rose-500",
+                            "bg-emerald-500",
+                            "bg-amber-500",
+                            "bg-cyan-500",
+                          ];
                           return (
                             <div key={idx} className="space-y-1">
                               <div className="flex justify-between text-xs font-semibold">
-                                <span className="text-gray-700 truncate max-w-[180px]">{t.theme}</span>
-                                <span className="text-gray-900 font-bold">{t.count} teams ({pct}%)</span>
+                                <span className="text-gray-700 truncate max-w-[180px]">
+                                  {t.theme}
+                                </span>
+                                <span className="text-gray-900 font-bold">
+                                  {t.count} teams ({pct}%)
+                                </span>
                               </div>
                               <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                                 <div
@@ -3545,7 +3915,9 @@ export function DashboardPage() {
                         <span className="text-2xl font-black text-amber-700 block">
                           {userList.filter((u) => u.role === "RESOURCE").length}
                         </span>
-                        <span className="text-[11px] font-bold text-amber-600">Media Resources</span>
+                        <span className="text-[11px] font-bold text-amber-600">
+                          Media Resources
+                        </span>
                       </div>
                       <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
                         <span className="text-2xl font-black text-slate-700 block">
@@ -3634,20 +4006,22 @@ export function DashboardPage() {
                             setSelectedMailFolder(folder.name as any);
                             setSelectedMailLabel(null);
                           }}
-                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${isCurrent
-                            ? "bg-rose-50 text-[#ff3355] font-bold"
-                            : "text-gray-600 hover:bg-gray-50"
-                            }`}
+                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                            isCurrent
+                              ? "bg-rose-50 text-[#ff3355] font-bold"
+                              : "text-gray-600 hover:bg-gray-50"
+                          }`}
                         >
                           <div className="flex items-center gap-2">
                             {folder.icon}
                             <span>{folder.name}</span>
                           </div>
                           <span
-                            className={`text-[11px] ${isCurrent
-                              ? "bg-[#ff3355] text-white px-2 py-0.5 rounded-full"
-                              : "text-gray-400"
-                              }`}
+                            className={`text-[11px] ${
+                              isCurrent
+                                ? "bg-[#ff3355] text-white px-2 py-0.5 rounded-full"
+                                : "text-gray-400"
+                            }`}
                           >
                             {folder.count}
                           </span>
@@ -3671,10 +4045,11 @@ export function DashboardPage() {
                         key={label.name}
                         type="button"
                         onClick={() => setSelectedMailLabel(label.name)}
-                        className={`w-full flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${selectedMailLabel === label.name
-                          ? "bg-gray-100 text-gray-900 font-bold"
-                          : "text-gray-600 hover:bg-gray-50"
-                          }`}
+                        className={`w-full flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                          selectedMailLabel === label.name
+                            ? "bg-gray-100 text-gray-900 font-bold"
+                            : "text-gray-600 hover:bg-gray-50"
+                        }`}
                       >
                         <span className={`size-2.5 rounded-xs ${label.color}`} />
                         <span>{label.name}</span>
@@ -3762,26 +4137,26 @@ export function DashboardPage() {
                           <button
                             type="button"
                             onClick={() => toggleEmailStar(item.id)}
-                            className={`cursor-pointer ${item.starred ? "text-amber-400" : "text-gray-300 hover:text-gray-400"
-                              }`}
+                            className={`cursor-pointer ${
+                              item.starred ? "text-amber-400" : "text-gray-300 hover:text-gray-400"
+                            }`}
                           >
                             <Star size={14} fill={item.starred ? "currentColor" : "none"} />
                           </button>
 
-                          <div className="w-32 font-bold text-gray-900 truncate">
-                            {item.sender}
-                          </div>
+                          <div className="w-32 font-bold text-gray-900 truncate">{item.sender}</div>
 
                           <div>
                             <span
-                              className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${item.tag === "Primary"
-                                ? "bg-teal-100 text-teal-700"
-                                : item.tag === "Work"
-                                  ? "bg-amber-100 text-amber-700"
-                                  : item.tag === "Friends"
-                                    ? "bg-purple-100 text-purple-700"
-                                    : "bg-cyan-100 text-cyan-700"
-                                }`}
+                              className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                item.tag === "Primary"
+                                  ? "bg-teal-100 text-teal-700"
+                                  : item.tag === "Work"
+                                    ? "bg-amber-100 text-amber-700"
+                                    : item.tag === "Friends"
+                                      ? "bg-purple-100 text-purple-700"
+                                      : "bg-cyan-100 text-cyan-700"
+                              }`}
                             >
                               {item.tag}
                             </span>
@@ -3815,7 +4190,8 @@ export function DashboardPage() {
                     <span>Project Submissions &amp; Evaluation</span>
                   </h2>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    Review submitted proposals, assign milestone scores, and manage progression status.
+                    Review submitted proposals, assign milestone scores, and manage progression
+                    status.
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -3857,34 +4233,45 @@ export function DashboardPage() {
                           <td className="py-3.5 px-4">
                             <div className="font-bold text-gray-900 text-sm">{team.teamName}</div>
                             <div className="text-gray-500 text-[11px]">{team.institution}</div>
-                            <div className="text-gray-400 text-[10px]">Leader: {team.leader.name} ({team.leader.email})</div>
+                            <div className="text-gray-400 text-[10px]">
+                              Leader: {team.leader.name} ({team.leader.email})
+                            </div>
                           </td>
                           <td className="py-3.5 px-4 max-w-xs">
-                            <div className="font-semibold text-gray-800 line-clamp-1">{team.theme}</div>
+                            <div className="font-semibold text-gray-800 line-clamp-1">
+                              {team.theme}
+                            </div>
                             <div className="text-gray-500 text-[11px] line-clamp-2 mt-0.5">
-                              <span className="font-bold text-[#ff3355] mr-1">[{team.problemStatementId}]</span>
+                              <span className="font-bold text-[#ff3355] mr-1">
+                                [{team.problemStatementId}]
+                              </span>
                               {team.problemStatement}
                             </div>
                           </td>
                           <td className="py-3.5 px-4">
                             <span
-                              className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${team.status === "shortlisted"
-                                ? "bg-emerald-100 text-emerald-700"
-                                : team.status === "rejected"
-                                  ? "bg-rose-100 text-rose-700"
-                                  : team.status === "under_review"
-                                    ? "bg-amber-100 text-amber-700"
-                                    : "bg-blue-100 text-blue-700"
-                                }`}
+                              className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                                team.status === "shortlisted"
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : team.status === "rejected"
+                                    ? "bg-rose-100 text-rose-700"
+                                    : team.status === "under_review"
+                                      ? "bg-amber-100 text-amber-700"
+                                      : "bg-blue-100 text-blue-700"
+                              }`}
                             >
                               {team.status.replace("_", " ")}
                             </span>
                           </td>
                           <td className="py-3.5 px-4 font-black text-gray-900 text-sm">
                             {team.score ? (
-                              <span className="text-emerald-600 font-extrabold">{team.score} / 100</span>
+                              <span className="text-emerald-600 font-extrabold">
+                                {team.score} / 100
+                              </span>
                             ) : (
-                              <span className="text-gray-400 font-normal italic text-xs">Pending</span>
+                              <span className="text-gray-400 font-normal italic text-xs">
+                                Pending
+                              </span>
                             )}
                           </td>
                           <td className="py-3.5 px-6 text-right">
@@ -3963,14 +4350,15 @@ export function DashboardPage() {
                         <td className="py-3.5 px-4 text-gray-600">{usr.email}</td>
                         <td className="py-3.5 px-4">
                           <span
-                            className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${usr.role === "SUPER_ADMIN"
-                              ? "bg-rose-100 text-[#ff3355]"
-                              : usr.role === "ADMIN"
-                                ? "bg-blue-100 text-blue-700"
-                                : usr.role === "RESOURCE"
-                                  ? "bg-purple-100 text-purple-700"
-                                  : "bg-gray-100 text-gray-700"
-                              }`}
+                            className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                              usr.role === "SUPER_ADMIN"
+                                ? "bg-rose-100 text-[#ff3355]"
+                                : usr.role === "ADMIN"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : usr.role === "RESOURCE"
+                                    ? "bg-purple-100 text-purple-700"
+                                    : "bg-gray-100 text-gray-700"
+                            }`}
                           >
                             {usr.role}
                           </span>
@@ -3978,17 +4366,19 @@ export function DashboardPage() {
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2">
                             <span
-                              className={`inline-flex items-center gap-1 text-[11px] font-semibold ${usr.status === "Active" ? "text-emerald-600" : "text-rose-600"
-                                }`}
+                              className={`inline-flex items-center gap-1 text-[11px] font-semibold ${
+                                usr.status === "Active" ? "text-emerald-600" : "text-rose-600"
+                              }`}
                             >
                               <span
-                                className={`size-1.5 rounded-full ${usr.status === "Active" ? "bg-emerald-500" : "bg-rose-500"
-                                  }`}
+                                className={`size-1.5 rounded-full ${
+                                  usr.status === "Active" ? "bg-emerald-500" : "bg-rose-500"
+                                }`}
                               />
                               {usr.status}
                             </span>
-                            {currentRole === "SUPER_ADMIN" && (
-                              usr.id === user?.id || usr.email === user?.email ? (
+                            {currentRole === "SUPER_ADMIN" &&
+                              (usr.id === user?.id || usr.email === user?.email ? (
                                 <span className="text-[10px] text-gray-400 font-medium italic">
                                   (You)
                                 </span>
@@ -4001,8 +4391,7 @@ export function DashboardPage() {
                                 >
                                   {usr.status === "Active" ? "Suspend" : "Activate"}
                                 </button>
-                              )
-                            )}
+                              ))}
                           </div>
                         </td>
                         <td className="py-3.5 px-6 text-right">
@@ -4089,7 +4478,8 @@ export function DashboardPage() {
                     <span>Resources &amp; Content Management Hub</span>
                   </h2>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    Centralized console for homepage banners, bulletins, announcements, FAQs, committee directory, and media gallery.
+                    Centralized console for homepage banners, bulletins, announcements, FAQs,
+                    committee directory, and media gallery.
                   </p>
                 </div>
 
@@ -4109,10 +4499,11 @@ export function DashboardPage() {
                         key={tab.id}
                         type="button"
                         onClick={() => setResourceSubTab(tab.id as any)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${isActive
-                          ? "bg-white text-[#ff3355] shadow-xs"
-                          : "text-gray-600 hover:text-gray-900"
-                          }`}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                          isActive
+                            ? "bg-white text-[#ff3355] shadow-xs"
+                            : "text-gray-600 hover:text-gray-900"
+                        }`}
                       >
                         <TabIcon size={14} />
                         <span>{tab.label}</span>
@@ -4153,7 +4544,9 @@ export function DashboardPage() {
                   <div className="max-w-md mx-auto">
                     <h3 className="text-lg font-bold text-gray-900">No Team Registered Yet</h3>
                     <p className="text-xs text-gray-500 mt-1">
-                      You have not registered a team for SEWA 2026 yet. Team leaders can register their team, choose an official problem statement, and upload their institutional verification.
+                      You have not registered a team for SEVA 2026 yet. Team leaders can register
+                      their team, choose an official problem statement, and upload their
+                      institutional verification.
                     </p>
                   </div>
                   <div>
@@ -4178,7 +4571,7 @@ export function DashboardPage() {
                           Welcome, {user?.firstName || "Innovator"} ({memberData.teamName})
                         </h2>
                         <p className="text-blue-100 text-sm mt-1">
-                          Tracking official dossier #{memberData.dossierId} for SEWA 2026.
+                          Tracking official dossier #{memberData.dossierId} for SEVA 2026.
                         </p>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
@@ -4207,11 +4600,15 @@ export function DashboardPage() {
 
                     <div className="grid md:grid-cols-2 gap-5 text-xs">
                       <div>
-                        <span className="text-gray-400 font-semibold block mb-0.5">National Theme</span>
+                        <span className="text-gray-400 font-semibold block mb-0.5">
+                          National Theme
+                        </span>
                         <p className="text-sm font-bold text-gray-900">{memberData.theme}</p>
                       </div>
                       <div>
-                        <span className="text-gray-400 font-semibold block mb-0.5">Affiliated Institute</span>
+                        <span className="text-gray-400 font-semibold block mb-0.5">
+                          Affiliated Institute
+                        </span>
                         <p className="text-sm font-bold text-gray-900">{memberData.institution}</p>
                       </div>
                       <div className="md:col-span-2">
@@ -4221,18 +4618,23 @@ export function DashboardPage() {
                         <p className="text-sm font-bold text-gray-900">{memberData.problemTitle}</p>
                       </div>
                       <div>
-                        <span className="text-gray-400 font-semibold block mb-0.5">Team Leader</span>
+                        <span className="text-gray-400 font-semibold block mb-0.5">
+                          Team Leader
+                        </span>
                         <p className="text-sm font-bold text-gray-900">{memberData.teamLead}</p>
                       </div>
                       <div>
-                        <span className="text-gray-400 font-semibold block mb-0.5">Team Status</span>
+                        <span className="text-gray-400 font-semibold block mb-0.5">
+                          Team Status
+                        </span>
                         <span
-                          className={`inline-flex items-center gap-1 font-bold ${memberData.round1Status === "Cleared"
-                            ? "text-emerald-600"
-                            : memberData.status === "rejected"
-                              ? "text-rose-600"
-                              : "text-amber-600"
-                            }`}
+                          className={`inline-flex items-center gap-1 font-bold ${
+                            memberData.round1Status === "Cleared"
+                              ? "text-emerald-600"
+                              : memberData.status === "rejected"
+                                ? "text-rose-600"
+                                : "text-amber-600"
+                          }`}
                         >
                           <CheckCircle2 size={13} />
                           {memberData.statusBadge}
@@ -4243,12 +4645,19 @@ export function DashboardPage() {
                     {/* Team Members Roster */}
                     {myTeam?.members && myTeam.members.length > 0 && (
                       <div className="pt-4 border-t border-gray-100">
-                        <h4 className="text-xs font-bold text-gray-700 mb-2">Team Roster ({myTeam.members.length} Members)</h4>
+                        <h4 className="text-xs font-bold text-gray-700 mb-2">
+                          Team Roster ({myTeam.members.length} Members)
+                        </h4>
                         <div className="grid sm:grid-cols-2 gap-2">
                           {myTeam.members.map((m: any) => (
-                            <div key={m.id} className="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+                            <div
+                              key={m.id}
+                              className="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between"
+                            >
                               <div>
-                                <span className="font-bold text-gray-900 block">{m.firstName} {m.lastName}</span>
+                                <span className="font-bold text-gray-900 block">
+                                  {m.firstName} {m.lastName}
+                                </span>
                                 <span className="text-[11px] text-gray-400">{m.email}</span>
                               </div>
                               <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-white text-gray-600 border border-gray-200">
@@ -4265,16 +4674,17 @@ export function DashboardPage() {
             </div>
           )}
 
-          {/* 2. Member: Timeline & 100-Day Milestones */}
+          {/* 2. Member: Timeline & Milestones */}
           {activeTab === "timeline" && (
             <div className="bg-white rounded-2xl p-6 border border-gray-200/80 shadow-xs space-y-6">
               <div>
                 <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                   <Calendar className="text-[#ff3355]" size={20} />
-                  <span>100-Day Innovation Challenge Timeline</span>
+                  <span>Innovation Challenge Timeline</span>
                 </h2>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  Follow your team&apos;s pathway from technical screening to the Grand Finale at DTU.
+                  Follow your team&apos;s pathway from technical screening to the Grand Finale at
+                  DTU.
                 </p>
               </div>
 
@@ -4282,12 +4692,14 @@ export function DashboardPage() {
                 {memberData.timelineMilestones.map((m, idx) => (
                   <div
                     key={idx}
-                    className={`flex items-start gap-4 p-4 rounded-xl border ${m.done ? "bg-emerald-50/60 border-emerald-200" : "bg-gray-50 border-gray-200"
-                      }`}
+                    className={`flex items-start gap-4 p-4 rounded-xl border ${
+                      m.done ? "bg-emerald-50/60 border-emerald-200" : "bg-gray-50 border-gray-200"
+                    }`}
                   >
                     <div
-                      className={`size-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${m.done ? "bg-emerald-500 text-white" : "bg-gray-200 text-gray-600"
-                        }`}
+                      className={`size-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${
+                        m.done ? "bg-emerald-500 text-white" : "bg-gray-200 text-gray-600"
+                      }`}
                     >
                       {m.done ? <Check size={14} /> : idx + 1}
                     </div>
@@ -4299,10 +4711,9 @@ export function DashboardPage() {
                       </div>
 
                       <span
-                        className={`text-[11px] font-bold px-3 py-1 rounded-full shrink-0 ${m.done
-                          ? "bg-emerald-100 text-emerald-800"
-                          : "bg-gray-200 text-gray-700"
-                          }`}
+                        className={`text-[11px] font-bold px-3 py-1 rounded-full shrink-0 ${
+                          m.done ? "bg-emerald-100 text-emerald-800" : "bg-gray-200 text-gray-700"
+                        }`}
                       >
                         {m.done ? "Completed" : "Upcoming"}
                       </span>
@@ -4321,7 +4732,8 @@ export function DashboardPage() {
                   <Award className="size-10 text-gray-300 mx-auto" />
                   <h3 className="text-base font-bold text-gray-900">No Evaluation Available</h3>
                   <p className="text-xs text-gray-500 max-w-sm mx-auto">
-                    Evaluation rubrics and jury scores will appear here once you register your team and submit your problem statement proposal.
+                    Evaluation rubrics and jury scores will appear here once you register your team
+                    and submit your problem statement proposal.
                   </p>
                 </div>
               ) : (
@@ -4332,12 +4744,13 @@ export function DashboardPage() {
                         Round 1 Screening
                       </span>
                       <span
-                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${memberData.round1Status === "Cleared"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : memberData.status === "rejected"
-                            ? "bg-rose-100 text-rose-700"
-                            : "bg-amber-100 text-amber-700"
-                          }`}
+                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${
+                          memberData.round1Status === "Cleared"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : memberData.status === "rejected"
+                              ? "bg-rose-100 text-rose-700"
+                              : "bg-amber-100 text-amber-700"
+                        }`}
                       >
                         <CheckCircle2 size={13} />
                         {memberData.round1Status}
@@ -4385,9 +4798,7 @@ export function DashboardPage() {
                       <div className="text-sm font-bold text-gray-900">
                         ₹10 Lakh Cash Prizes + Incubation
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        MoE Innovation Cell Mentorship
-                      </p>
+                      <p className="text-xs text-gray-500 mt-1">MoE Innovation Cell Mentorship</p>
                     </div>
                   </div>
                 </div>
@@ -4423,7 +4834,9 @@ export function DashboardPage() {
                   <div className="py-12 text-center text-xs text-gray-400">
                     <Mail className="size-8 mx-auto text-gray-300 mb-2" />
                     <p className="font-semibold text-gray-600">No official communications yet</p>
-                    <p className="text-gray-400 mt-0.5">Announcements and broadcast messages will appear here.</p>
+                    <p className="text-gray-400 mt-0.5">
+                      Announcements and broadcast messages will appear here.
+                    </p>
                   </div>
                 ) : (
                   memberData.memberEmails.map((item) => (
@@ -4439,14 +4852,15 @@ export function DashboardPage() {
                       <h4 className="text-xs sm:text-sm font-bold text-[#ff3355]">
                         {item.subject}
                       </h4>
-                      <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">{item.preview}</p>
+                      <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">
+                        {item.preview}
+                      </p>
                     </div>
                   ))
                 )}
               </div>
             </div>
           )}
-
         </main>
       </div>
 
@@ -4607,7 +5021,9 @@ export function DashboardPage() {
             <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs space-y-1">
               <div className="font-bold text-gray-900">Theme: {evaluatingTeam.theme}</div>
               <div className="text-gray-600">
-                <span className="font-bold text-[#ff3355] mr-1">[{evaluatingTeam.problemStatementId}]</span>
+                <span className="font-bold text-[#ff3355] mr-1">
+                  [{evaluatingTeam.problemStatementId}]
+                </span>
                 {evaluatingTeam.problemStatement}
               </div>
               <div className="text-gray-400 text-[11px] pt-1">
@@ -4687,7 +5103,9 @@ export function DashboardPage() {
             <div className="flex items-center justify-between border-b pb-3">
               <div className="flex items-center gap-2 text-[#ff3355]">
                 <UserPlus size={20} />
-                <h3 className="text-base font-bold text-gray-900">Provision User &amp; Assign Role</h3>
+                <h3 className="text-base font-bold text-gray-900">
+                  Provision User &amp; Assign Role
+                </h3>
               </div>
               <button
                 type="button"
@@ -4771,7 +5189,8 @@ export function DashboardPage() {
               </div>
 
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-[11px] text-amber-800">
-                User will be immediately provisioned with verified access and an audit log will be recorded.
+                User will be immediately provisioned with verified access and an audit log will be
+                recorded.
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-2">
@@ -4824,7 +5243,10 @@ export function DashboardPage() {
             </div>
 
             <div className="bg-[#f8fafc] p-4 rounded-xl border border-gray-200/80 text-xs text-gray-700 whitespace-pre-wrap leading-relaxed max-h-80 overflow-y-auto font-sans">
-              {readingMail.body || (readingMail as any).preview || (readingMail as any).snippet || "No content."}
+              {readingMail.body ||
+                (readingMail as any).preview ||
+                (readingMail as any).snippet ||
+                "No content."}
             </div>
 
             <div className="flex items-center justify-end pt-2">
@@ -4868,7 +5290,7 @@ export function DashboardPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. SEWA FIRST: National Youth Innovation Challenge 2026"
+                  placeholder="e.g. SEVA FIRST: National Youth Innovation Challenge 2026"
                   value={heroFormTitle}
                   onChange={(e) => setHeroFormTitle(e.target.value)}
                   className="w-full bg-[#f8fafc] border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-900 focus:outline-none focus:border-[#ff3355]"
@@ -5142,7 +5564,9 @@ export function DashboardPage() {
                   </label>
                   <div className="w-full h-[38px] bg-[#f1f5f9] border border-gray-200 rounded-xl px-3 flex items-center justify-between text-xs">
                     <span className="font-mono font-bold text-gray-800">
-                      {editingAnnouncement ? (editingAnnouncement.refNumber || "—") : nextGeneratedAnnouncementId}
+                      {editingAnnouncement
+                        ? editingAnnouncement.refNumber || "—"
+                        : nextGeneratedAnnouncementId}
                     </span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-50 text-[#ff3355] uppercase tracking-wider border border-rose-100">
                       {editingAnnouncement ? "Assigned" : "Auto-Generated"}
@@ -5201,8 +5625,14 @@ export function DashboardPage() {
                 </label>
                 <input
                   type="date"
-                  value={announcementFormPublishedAt ? announcementFormPublishedAt.split("T")[0] : ""}
-                  onChange={(e) => setAnnouncementFormPublishedAt(e.target.value ? new Date(e.target.value).toISOString() : "")}
+                  value={
+                    announcementFormPublishedAt ? announcementFormPublishedAt.split("T")[0] : ""
+                  }
+                  onChange={(e) =>
+                    setAnnouncementFormPublishedAt(
+                      e.target.value ? new Date(e.target.value).toISOString() : "",
+                    )
+                  }
                   className="w-full bg-[#f8fafc] border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-900 focus:outline-none focus:border-[#ff3355]"
                 />
               </div>
@@ -5297,7 +5727,11 @@ export function DashboardPage() {
                     onChange={(e) => {
                       const sub = e.target.value;
                       setCommitteeFormSubCategory(sub);
-                      const nextOrder = getNextDisplayOrder(committeeFormCategory, sub, editingCommittee?.id);
+                      const nextOrder = getNextDisplayOrder(
+                        committeeFormCategory,
+                        sub,
+                        editingCommittee?.id,
+                      );
                       setCommitteeFormOrder(nextOrder);
                     }}
                     className="w-full bg-[#f8fafc] border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-800 focus:outline-none focus:border-[#ff3355] cursor-pointer"
@@ -5440,13 +5874,11 @@ export function DashboardPage() {
       <footer className="mt-auto border-t border-gray-200/80 bg-white/95 relative overflow-hidden py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-8 md:grid-cols-12 items-start">
           <div className="md:col-span-5">
-            <h3 className="text-xl font-bold text-gray-900 tracking-tight mb-2">
-              DTU – SEWA 2026
-            </h3>
+            <h3 className="text-xl font-bold text-gray-900 tracking-tight mb-2">DTU – SEVA 2026</h3>
             <p className="text-xs text-gray-600 leading-relaxed max-w-sm">
               Young India&apos;s Knowledge &amp; Technology Initiative — Rashtriya Innovation
-              Challenge. Empowering youth to create sustainable, prototype-driven solutions for Viksit
-              Bharat.
+              Challenge. Empowering youth to create sustainable, prototype-driven solutions for
+              Viksit Bharat.
             </p>
 
             <div className="mt-4 flex items-center gap-2 text-[#ff3355]">
@@ -5504,7 +5936,7 @@ export function DashboardPage() {
               </div>
               <div>
                 <Link to="/events" className="hover:text-[#ff3355]">
-                  100-Day Timeline
+                  Innovation Timeline
                 </Link>
               </div>
               <div>

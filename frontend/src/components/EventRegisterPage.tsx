@@ -24,16 +24,13 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useAuth } from "../lib/auth";
-import {
-  ID_CARD_ACCEPT,
-  ID_CARD_ALLOWED_MIME,
-} from "../lib/problemCategories";
+import { ID_CARD_ACCEPT, ID_CARD_ALLOWED_MIME } from "../lib/problemCategories";
 import { Footer, Header } from "./SewaSite";
 
 // ─── ID Card limit: 500 KB ───────────────────────────────────────────────────
 const ID_CARD_MAX_SIZE_BYTES = 500 * 1024; // 500 KB
 
-// ─── Static option lists matching official SEWA Dossier ──────────────────────
+// ─── Static option lists matching official SEVA Dossier ──────────────────────
 
 const GENDER_OPTIONS = ["Male", "Female", "Other", "Prefer not to say"];
 const NATIONALITY_OPTIONS = ["Indian Citizen (Bharat)", "Other / Foreign National"];
@@ -81,9 +78,7 @@ const INDIA_STATE_OPTIONS = [
 
 export type ParticipationType = "Individual" | "Team / Group" | "Organisation";
 export type ParticipantCategory =
-  | "School & Vocational"
-  | "Diploma & Higher Education"
-  | "Industry & Government";
+  "School & Vocational" | "Diploma & Higher Education" | "Industry & Government";
 export type ParticipationLevel = "National Level" | "Local Community Level";
 
 const SCHOOL_INSTITUTION_TYPES = ["School", "ITI", "Vocational Institution", "Other"];
@@ -370,7 +365,9 @@ function DossierSelect({
                   }`}
                 >
                   <span className="truncate">{opt}</span>
-                  {isSelected && <CheckCircle2 size={15} className="text-[#ff4d4f] shrink-0 ml-2" />}
+                  {isSelected && (
+                    <CheckCircle2 size={15} className="text-[#ff4d4f] shrink-0 ml-2" />
+                  )}
                 </button>
               );
             })}
@@ -442,7 +439,7 @@ function DossierSidebar({
       <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
         REGISTRATION DOSSIER
       </p>
-      <h2 className="mt-1 mb-6 text-xl font-black tracking-tight text-gray-900">SEWA 2026</h2>
+      <h2 className="mt-1 mb-6 text-xl font-black tracking-tight text-gray-900">SEVA 2026</h2>
 
       <ol className="space-y-6">
         {WIZARD_STEPS.map((s) => {
@@ -575,7 +572,7 @@ function PrintableConfirmationSlip({
           ? `${personal.firstName}'s Innovation Entry`
           : participationType === "Individual"
             ? "Individual Innovation Entry"
-            : "SEWA Innovation Entry"),
+            : "SEVA Innovation Entry"),
     ],
     ["Team Size", `${members.length} participant(s)`],
     ...(mentor.name
@@ -595,7 +592,7 @@ function PrintableConfirmationSlip({
           className="text-center text-xs font-bold uppercase tracking-widest text-[#ff4d4f]"
           style={{ textAlign: "center" }}
         >
-          SEWA 2026 · RASHTRIYA YOUTH INNOVATION CHALLENGE
+          SEVA 2026 · RASHTRIYA YOUTH INNOVATION CHALLENGE
         </p>
         <h2
           className="mt-1 text-2xl font-black text-gray-900 text-center"
@@ -603,15 +600,14 @@ function PrintableConfirmationSlip({
         >
           Official Registration Confirmation Dossier
         </h2>
-        <p
-          className="mt-1 text-xs text-gray-500 text-center"
-          style={{ textAlign: "center" }}
-        >
+        <p className="mt-1 text-xs text-gray-500 text-center" style={{ textAlign: "center" }}>
           Delhi Technological University (DTU), Delhi
         </p>
         <div className="mt-3 inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50/60 px-4 py-2">
           <span className="text-xs text-gray-600 font-medium">Registration ID:</span>
-          <span className="font-mono text-sm font-black text-[#ff4d4f]">{regId || "SEWA26-CONFIRMED"}</span>
+          <span className="font-mono text-sm font-black text-[#ff4d4f]">
+            {regId || "SEVA26-CONFIRMED"}
+          </span>
           <span className="text-xs text-emerald-700 bg-emerald-100 font-semibold px-2 py-0.5 rounded-full ml-1">
             CONFIRMED
           </span>
@@ -642,7 +638,10 @@ function PrintableConfirmationSlip({
         </div>
         <div className="divide-y divide-gray-100">
           {members.map((m, i) => (
-            <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 gap-2">
+            <div
+              key={i}
+              className="flex flex-col sm:flex-row sm:items-center justify-between p-3 gap-2"
+            >
               <div className="flex items-center gap-3">
                 <div className="flex size-8 items-center justify-center rounded-full bg-red-100 text-xs font-bold text-[#ff4d4f]">
                   {(m.firstName || m.email || "M")[0]?.toUpperCase()}
@@ -671,7 +670,10 @@ function PrintableConfirmationSlip({
       </div>
 
       <div className="border-t border-gray-200 pt-4 text-center text-xs text-gray-400">
-        <p>This is a computer generated confirmation slip for SEWA 2026. No physical signature is required.</p>
+        <p>
+          This is a computer generated confirmation slip for SEVA 2026. No physical signature is
+          required.
+        </p>
       </div>
     </div>
   );
@@ -692,8 +694,9 @@ export function EventRegisterPage() {
 
   // Step 2 state
   const [participationType, setParticipationType] = useState<ParticipationType>("Team / Group");
-  const [participantCategory, setParticipantCategory] =
-    useState<ParticipantCategory>("Diploma & Higher Education");
+  const [participantCategory, setParticipantCategory] = useState<ParticipantCategory>(
+    "Diploma & Higher Education",
+  );
   const [participationLevel, setParticipationLevel] =
     useState<ParticipationLevel>("National Level");
   const [affiliation, setAffiliation] = useState<AffiliationDetails>(defaultAffiliation());
@@ -974,7 +977,10 @@ export function EventRegisterPage() {
         setError("Please enter the Applicant's Designation / Role in the organization.");
         return;
       }
-      if (!affiliation.officialOrgEmail.trim() || !EMAIL_RE.test(affiliation.officialOrgEmail.trim())) {
+      if (
+        !affiliation.officialOrgEmail.trim() ||
+        !EMAIL_RE.test(affiliation.officialOrgEmail.trim())
+      ) {
         setError("Please provide a valid Official Organization Email Address.");
         return;
       }
@@ -1038,7 +1044,7 @@ export function EventRegisterPage() {
 
     try {
       const randomCode = Math.floor(100000 + Math.random() * 900000);
-      const generatedId = `SEWA26-${randomCode}`;
+      const generatedId = `SEVA26-${randomCode}`;
       setRegId(generatedId);
 
       const payload = {
@@ -1055,7 +1061,7 @@ export function EventRegisterPage() {
             ? `${personal.firstName}'s Innovation Entry`
             : participationType === "Individual"
               ? "Individual Innovation Entry"
-              : "SEWA Innovation Entry"),
+              : "SEVA Innovation Entry"),
         members,
         mentor,
       };
@@ -1074,7 +1080,7 @@ export function EventRegisterPage() {
   const jumpToStep = (targetStep: WizardStep) => {
     setError("");
     if (targetStep === 5 && !regId) {
-      setRegId(`SEWA26-${Math.floor(100000 + Math.random() * 900000)}`);
+      setRegId(`SEVA26-${Math.floor(100000 + Math.random() * 900000)}`);
     }
     setStep(targetStep);
   };
@@ -1086,14 +1092,14 @@ export function EventRegisterPage() {
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
         <div className="no-print mb-8">
           <p className="text-xs font-bold uppercase tracking-widest text-[#ff4d4f]">
-            SEWA 2026 · RASHTRIYA YOUTH INNOVATION CHALLENGE
+            SEVA 2026 · RASHTRIYA YOUTH INNOVATION CHALLENGE
           </p>
           <h1 className="mt-1 text-3xl font-black tracking-tight text-gray-900 sm:text-4xl">
             Event Registration Dossier
           </h1>
           <p className="mt-2 text-sm text-gray-600 max-w-2xl">
-            Official registration dossier for SEWA 2026. Complete your personal identity, select your
-            participant category and institution affiliation, and configure your team roster.
+            Official registration dossier for SEVA 2026. Complete your personal identity, select
+            your participant category and institution affiliation, and configure your team roster.
           </p>
         </div>
 
@@ -1115,9 +1121,7 @@ export function EventRegisterPage() {
                       <input
                         className={inputClass}
                         value={personal.firstName}
-                        onChange={(e) =>
-                          setPersonal((p) => ({ ...p, firstName: e.target.value }))
-                        }
+                        onChange={(e) => setPersonal((p) => ({ ...p, firstName: e.target.value }))}
                         placeholder="Aarav"
                       />
                     </Field>
@@ -1125,9 +1129,7 @@ export function EventRegisterPage() {
                       <input
                         className={inputClass}
                         value={personal.middleName}
-                        onChange={(e) =>
-                          setPersonal((p) => ({ ...p, middleName: e.target.value }))
-                        }
+                        onChange={(e) => setPersonal((p) => ({ ...p, middleName: e.target.value }))}
                         placeholder="e.g. Kumar"
                       />
                     </Field>
@@ -1135,9 +1137,7 @@ export function EventRegisterPage() {
                       <input
                         className={inputClass}
                         value={personal.lastName}
-                        onChange={(e) =>
-                          setPersonal((p) => ({ ...p, lastName: e.target.value }))
-                        }
+                        onChange={(e) => setPersonal((p) => ({ ...p, lastName: e.target.value }))}
                         placeholder="Sharma"
                       />
                     </Field>
@@ -1306,9 +1306,7 @@ export function EventRegisterPage() {
                             type="tel"
                             className={`${inputClass} rounded-l-none pr-24`}
                             value={personal.phone}
-                            onChange={(e) =>
-                              setPersonal((p) => ({ ...p, phone: e.target.value }))
-                            }
+                            onChange={(e) => setPersonal((p) => ({ ...p, phone: e.target.value }))}
                             placeholder="98101 23456"
                           />
                           <div className="absolute right-2.5 flex items-center pointer-events-none">
@@ -1356,9 +1354,7 @@ export function EventRegisterPage() {
                             type="email"
                             className={`${inputClass} pl-9 pr-10`}
                             value={personal.email}
-                            onChange={(e) =>
-                              setPersonal((p) => ({ ...p, email: e.target.value }))
-                            }
+                            onChange={(e) => setPersonal((p) => ({ ...p, email: e.target.value }))}
                             placeholder="aarav_co23@dtu.ac.in"
                           />
                           {personal.email.includes("@") && (
@@ -1515,8 +1511,8 @@ export function EventRegisterPage() {
                         },
                         {
                           cat: "Industry & Government",
-                          title: "Industry & Government",
-                          desc: "Startups, MSMEs, Corporate innovators & Govt laboratories",
+                          title: "Industry & Government (Open Category)",
+                          desc: "Open category for Startups, MSMEs, Corporate innovators & Govt laboratories",
                           icon: Building,
                         },
                       ] as const
@@ -1671,9 +1667,7 @@ export function EventRegisterPage() {
                         <Field label="Class / Grade" required>
                           <DossierSelect
                             value={affiliation.classLevel}
-                            onChange={(val) =>
-                              setAffiliation((a) => ({ ...a, classLevel: val }))
-                            }
+                            onChange={(val) => setAffiliation((a) => ({ ...a, classLevel: val }))}
                             options={SCHOOL_CLASS_OPTIONS}
                             placeholder="Select Class / Grade"
                           />
@@ -1694,7 +1688,11 @@ export function EventRegisterPage() {
                       </div>
 
                       <div>
-                        <Field label="School PIN / Postal Code" required hint="6-digit Indian PIN code">
+                        <Field
+                          label="School PIN / Postal Code"
+                          required
+                          hint="6-digit Indian PIN code"
+                        >
                           <input
                             type="text"
                             inputMode="numeric"
@@ -1729,9 +1727,7 @@ export function EventRegisterPage() {
                         <Field label="State / UT" required>
                           <DossierSelect
                             value={affiliation.state}
-                            onChange={(val) =>
-                              setAffiliation((a) => ({ ...a, state: val }))
-                            }
+                            onChange={(val) => setAffiliation((a) => ({ ...a, state: val }))}
                             options={INDIA_STATE_OPTIONS}
                             placeholder="Select State / UT"
                           />
@@ -1827,9 +1823,7 @@ export function EventRegisterPage() {
                         <Field label="Year of Study" required>
                           <DossierSelect
                             value={affiliation.yearOfStudy}
-                            onChange={(val) =>
-                              setAffiliation((a) => ({ ...a, yearOfStudy: val }))
-                            }
+                            onChange={(val) => setAffiliation((a) => ({ ...a, yearOfStudy: val }))}
                             options={HIGHER_ED_YEARS}
                             placeholder="Select year of study"
                           />
@@ -1866,9 +1860,7 @@ export function EventRegisterPage() {
                         <Field label="State / UT" required>
                           <DossierSelect
                             value={affiliation.state}
-                            onChange={(val) =>
-                              setAffiliation((a) => ({ ...a, state: val }))
-                            }
+                            onChange={(val) => setAffiliation((a) => ({ ...a, state: val }))}
                             options={INDIA_STATE_OPTIONS}
                             placeholder="Select State / UT"
                           />
@@ -2043,9 +2035,7 @@ export function EventRegisterPage() {
                         <Field label="State / UT" required>
                           <DossierSelect
                             value={affiliation.state}
-                            onChange={(val) =>
-                              setAffiliation((a) => ({ ...a, state: val }))
-                            }
+                            onChange={(val) => setAffiliation((a) => ({ ...a, state: val }))}
                             options={INDIA_STATE_OPTIONS}
                             placeholder="Select State / UT"
                           />
@@ -2124,7 +2114,9 @@ export function EventRegisterPage() {
                     n={1}
                     icon={IdCard}
                     title={
-                      participationType === "Individual" ? "Innovation Entry Title" : "Team Identity"
+                      participationType === "Individual"
+                        ? "Innovation Entry Title"
+                        : "Team Identity"
                     }
                   />
                   <div>
@@ -2135,7 +2127,7 @@ export function EventRegisterPage() {
                           : "Team Name"
                       }
                       required={participationType !== "Individual"}
-                      hint="A unique identifier for your entry throughout the 100-Day challenge."
+                      hint="A unique identifier for your entry throughout the challenge."
                     >
                       <input
                         className={inputClass}
@@ -2209,10 +2201,12 @@ export function EventRegisterPage() {
                     <div className="space-y-5">
                       <div className="rounded-xl border border-red-100 bg-red-50/60 p-4 text-xs">
                         <p className="font-bold text-gray-900">
-                          Team Member 1 (Applicant / Team Leader) registers on behalf of all team members.
+                          Team Member 1 (Applicant / Team Leader) registers on behalf of all team
+                          members.
                         </p>
                         <p className="text-gray-600 mt-0.5">
-                          Please enter details and upload the Student ID card (max 500 KB) for each team member.
+                          Please enter details and upload the Student ID card (max 500 KB) for each
+                          team member.
                         </p>
                       </div>
 
@@ -2291,7 +2285,8 @@ export function EventRegisterPage() {
 
                                 <div>
                                   <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                    Official / Institutional Email <span className="text-[#ff4d4f]">*</span>
+                                    Official / Institutional Email{" "}
+                                    <span className="text-[#ff4d4f]">*</span>
                                   </label>
                                   <input
                                     type="email"
@@ -2325,7 +2320,8 @@ export function EventRegisterPage() {
                                   <span className="text-[#ff4d4f]">*</span>
                                 </label>
                                 <p className="text-[11px] text-gray-500 mb-2">
-                                  PDF, JPG, or PNG · max 500 KB. College ID, Student ID or Bonafide certificate.
+                                  PDF, JPG, or PNG · max 500 KB. College ID, Student ID or Bonafide
+                                  certificate.
                                 </p>
 
                                 <input
@@ -2388,9 +2384,7 @@ export function EventRegisterPage() {
                       <input
                         className={inputClass}
                         value={mentor.designation}
-                        onChange={(e) =>
-                          setMentor((m) => ({ ...m, designation: e.target.value }))
-                        }
+                        onChange={(e) => setMentor((m) => ({ ...m, designation: e.target.value }))}
                         placeholder="Designation / Department / Org"
                       />
                       <input
@@ -2467,9 +2461,12 @@ export function EventRegisterPage() {
                 <div className="border-b border-gray-100 pb-4">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900">Review Application Dossier</h2>
+                      <h2 className="text-xl font-bold text-gray-900">
+                        Review Application Dossier
+                      </h2>
                       <p className="text-xs text-gray-500 mt-1">
-                        Please verify your applicant profile, category, affiliation, and team roster before final submission.
+                        Please verify your applicant profile, category, affiliation, and team roster
+                        before final submission.
                       </p>
                     </div>
                     <span className="self-start sm:self-auto rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-[#ff4d4f] border border-red-200">
@@ -2499,12 +2496,16 @@ export function EventRegisterPage() {
                     <div>
                       <span className="text-gray-400 block">Full Name</span>
                       <span className="font-semibold text-gray-800">
-                        {[personal.firstName, personal.middleName, personal.lastName].filter(Boolean).join(" ") || "Not provided"}
+                        {[personal.firstName, personal.middleName, personal.lastName]
+                          .filter(Boolean)
+                          .join(" ") || "Not provided"}
                       </span>
                     </div>
                     <div>
                       <span className="text-gray-400 block">Nationality</span>
-                      <span className="font-semibold text-gray-800">{personal.nationality || "-"}</span>
+                      <span className="font-semibold text-gray-800">
+                        {personal.nationality || "-"}
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-400 block">Date of Birth &amp; Gender</span>
@@ -2515,7 +2516,9 @@ export function EventRegisterPage() {
                     <div>
                       <span className="text-gray-400 block">Aadhaar Number</span>
                       <span className="font-semibold text-gray-800 font-mono">
-                        {personal.aadhaarNumber ? `•••• •••• ${personal.aadhaarNumber.slice(-4)}` : "-"}
+                        {personal.aadhaarNumber
+                          ? `•••• •••• ${personal.aadhaarNumber.slice(-4)}`
+                          : "-"}
                       </span>
                     </div>
                     <div>
@@ -2531,7 +2534,16 @@ export function EventRegisterPage() {
                     <div className="sm:col-span-2 lg:col-span-3">
                       <span className="text-gray-400 block">Permanent Address</span>
                       <span className="font-semibold text-gray-800">
-                        {[personal.addressLine1, personal.addressLine2, personal.city, personal.state, personal.pinCode, personal.country].filter(Boolean).join(", ") || "-"}
+                        {[
+                          personal.addressLine1,
+                          personal.addressLine2,
+                          personal.city,
+                          personal.state,
+                          personal.pinCode,
+                          personal.country,
+                        ]
+                          .filter(Boolean)
+                          .join(", ") || "-"}
                       </span>
                     </div>
                   </div>
@@ -2576,13 +2588,21 @@ export function EventRegisterPage() {
                     <div>
                       <span className="text-gray-400 block">City, State &amp; PIN</span>
                       <span className="font-semibold text-gray-800">
-                        {[affiliation.city, affiliation.state, affiliation.pinCode ? `PIN: ${affiliation.pinCode}` : ""].filter(Boolean).join(", ") || "-"}
+                        {[
+                          affiliation.city,
+                          affiliation.state,
+                          affiliation.pinCode ? `PIN: ${affiliation.pinCode}` : "",
+                        ]
+                          .filter(Boolean)
+                          .join(", ") || "-"}
                       </span>
                     </div>
                     {participantCategory === "School & Vocational" && (
                       <div>
                         <span className="text-gray-400 block">Class / Grade</span>
-                        <span className="font-semibold text-gray-800">{affiliation.classLevel || "-"}</span>
+                        <span className="font-semibold text-gray-800">
+                          {affiliation.classLevel || "-"}
+                        </span>
                       </div>
                     )}
                     {participantCategory === "Diploma & Higher Education" && (
@@ -2595,12 +2615,16 @@ export function EventRegisterPage() {
                         </div>
                         <div>
                           <span className="text-gray-400 block">Year of Study</span>
-                          <span className="font-semibold text-gray-800">{affiliation.yearOfStudy}</span>
+                          <span className="font-semibold text-gray-800">
+                            {affiliation.yearOfStudy}
+                          </span>
                         </div>
                         {affiliation.coordinatorName && (
                           <div>
                             <span className="text-gray-400 block">Faculty Coordinator</span>
-                            <span className="font-semibold text-gray-800">{affiliation.coordinatorName}</span>
+                            <span className="font-semibold text-gray-800">
+                              {affiliation.coordinatorName}
+                            </span>
                           </div>
                         )}
                       </>
@@ -2610,12 +2634,15 @@ export function EventRegisterPage() {
                         <div>
                           <span className="text-gray-400 block">Applicant Role</span>
                           <span className="font-semibold text-gray-800">
-                            {affiliation.designationRole} ({affiliation.departmentDivision || "Division"})
+                            {affiliation.designationRole} (
+                            {affiliation.departmentDivision || "Division"})
                           </span>
                         </div>
                         <div>
                           <span className="text-gray-400 block">Official Org Email</span>
-                          <span className="font-semibold text-gray-800">{affiliation.officialOrgEmail || "-"}</span>
+                          <span className="font-semibold text-gray-800">
+                            {affiliation.officialOrgEmail || "-"}
+                          </span>
                         </div>
                       </>
                     )}
@@ -2644,22 +2671,34 @@ export function EventRegisterPage() {
                       <div>
                         <span className="text-gray-400">Team / Project Title: </span>
                         <span className="font-bold text-gray-800">
-                          {teamName || (participationType === "Individual" ? `${personal.firstName || "Applicant"}'s Individual Entry` : "Innovation Project")}
+                          {teamName ||
+                            (participationType === "Individual"
+                              ? `${personal.firstName || "Applicant"}'s Individual Entry`
+                              : "Innovation Project")}
                         </span>
                       </div>
-                      <span className="text-gray-500 font-semibold">{members.length} Member(s)</span>
+                      <span className="text-gray-500 font-semibold">
+                        {members.length} Member(s)
+                      </span>
                     </div>
 
                     <div className="space-y-2">
                       {members.map((m, idx) => (
-                        <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between rounded-lg bg-gray-50 p-3 text-xs gap-2">
+                        <div
+                          key={idx}
+                          className="flex flex-col sm:flex-row sm:items-center justify-between rounded-lg bg-gray-50 p-3 text-xs gap-2"
+                        >
                           <div>
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-gray-800">
                                 {`${m.firstName} ${m.lastName}`.trim() || `Member ${idx + 1}`}
                               </span>
                               <span className="rounded bg-gray-200/80 px-2 py-0.5 text-[10px] font-bold text-gray-700">
-                                {idx === 0 ? (participationType === "Individual" ? "Applicant" : "Team Leader") : m.role || `Member ${idx + 1}`}
+                                {idx === 0
+                                  ? participationType === "Individual"
+                                    ? "Applicant"
+                                    : "Team Leader"
+                                  : m.role || `Member ${idx + 1}`}
                               </span>
                             </div>
                             <p className="text-[11px] text-gray-500 mt-0.5">
@@ -2685,7 +2724,8 @@ export function EventRegisterPage() {
                       <div className="pt-2 border-t border-gray-100 text-xs">
                         <span className="text-gray-400">Mentor / Guide: </span>
                         <span className="font-semibold text-gray-800">
-                          {mentor.name} {mentor.designation ? `(${mentor.designation})` : ""} {mentor.email ? `· ${mentor.email}` : ""}
+                          {mentor.name} {mentor.designation ? `(${mentor.designation})` : ""}{" "}
+                          {mentor.email ? `· ${mentor.email}` : ""}
                         </span>
                       </div>
                     )}
@@ -2698,10 +2738,12 @@ export function EventRegisterPage() {
                     Official Event Undertaking &amp; Terms:
                   </p>
                   <p className="text-gray-600 leading-relaxed font-medium">
-                    • All decisions with respect to conduct and evaluation of the event will be final and binding.
+                    • All decisions with respect to conduct and evaluation of the event will be
+                    final and binding.
                   </p>
                   <p className="text-gray-600 leading-relaxed font-medium">
-                    • DTU Delhi reserves the rights to change, modify, or create guidelines, schedules, rules, and evaluation criteria.
+                    • DTU Delhi reserves the rights to change, modify, or create guidelines,
+                    schedules, rules, and evaluation criteria.
                   </p>
                 </div>
 
@@ -2714,7 +2756,10 @@ export function EventRegisterPage() {
                   />
                   <span className="text-xs leading-relaxed text-gray-600">
                     I hereby confirm that the information and identification documents provided for
-                    myself and all team members are accurate and complete. I agree that all decisions with respect to conduct and evaluation of the event will be final and binding, and DTU Delhi reserves the rights to change, modify, or create guidelines, rules, and evaluation criteria as required.
+                    myself and all team members are accurate and complete. I agree that all
+                    decisions with respect to conduct and evaluation of the event will be final and
+                    binding, and DTU Delhi reserves the rights to change, modify, or create
+                    guidelines, rules, and evaluation criteria as required.
                   </span>
                 </label>
 
@@ -2755,7 +2800,9 @@ export function EventRegisterPage() {
                       ) : (
                         <CheckCircle2 size={16} />
                       )}
-                      <span>{submitting ? "Submitting Dossier…" : "Submit Event Registration"}</span>
+                      <span>
+                        {submitting ? "Submitting Dossier…" : "Submit Event Registration"}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -2788,9 +2835,9 @@ export function EventRegisterPage() {
                           ? `${personal.firstName}'s Innovation Entry`
                           : participationType === "Individual"
                             ? "Individual Innovation Entry"
-                            : "SEWA Innovation Entry")}
+                            : "SEVA Innovation Entry")}
                     </span>{" "}
-                    has been recorded for the SEWA 2026 Innovation Challenge.
+                    has been recorded for the SEVA 2026 Innovation Challenge.
                   </p>
                 </div>
 

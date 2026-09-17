@@ -16,10 +16,8 @@ function Pagination({
   const btnBase =
     "t-content-sm font-semibold! inline-flex items-center justify-center h-9 min-w-[36px] rounded-xl border transition-colors select-none cursor-pointer";
   const activeCls = `${btnBase} bg-[#2368B2] border-[#2368B2] text-white shadow-[0px_2px_6px_rgba(35,104,178,0.3)]`;
-  const inactiveCls =
-    `${btnBase} bg-white border-[rgba(226,232,240,0.9)] text-[#374151] hover:bg-[#F1F5F9]`;
-  const navCls =
-    `${btnBase} px-4 gap-1.5 bg-white border-[rgba(226,232,240,0.9)] text-[#374151] hover:bg-[#F1F5F9]`;
+  const inactiveCls = `${btnBase} bg-white border-[rgba(226,232,240,0.9)] text-[#374151] hover:bg-[#F1F5F9]`;
+  const navCls = `${btnBase} px-4 gap-1.5 bg-white border-[rgba(226,232,240,0.9)] text-[#374151] hover:bg-[#F1F5F9]`;
 
   const pages = Array.from({ length: total }, (_, index) => index + 1);
 
@@ -34,9 +32,16 @@ function Pagination({
         disabled={current === 1}
         onClick={() => onChange(current - 1)}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
-          strokeLinejoin="round">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <polyline points="15 18 9 12 15 6" />
         </svg>
         Previous
@@ -63,9 +68,16 @@ function Pagination({
         onClick={() => onChange(current + 1)}
       >
         Next
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
-          strokeLinejoin="round">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <polyline points="9 18 15 12 9 6" />
         </svg>
       </button>
@@ -149,16 +161,66 @@ export const NATIONAL_CATEGORIES: NationalCategory[] = [
  * column since there is nothing to show in it.
  */
 export const COMMUNITY_CATEGORIES: Category[] = [
-  { label: "Village & Panchayat Development, Agriculture & Rural Economy", idNumber: "REG-001-OP", badgeBg: "#FDE8E8", badgeText: "#E03137" },
-  { label: "Education & Skill Development", idNumber: "REG-002-OP", badgeBg: "#DBEAFE", badgeText: "#0284C7" },
-  { label: "Healthcare & Community Well-being", idNumber: "REG-003-OP", badgeBg: "#DCFCE7", badgeText: "#16A34A" },
-  { label: "City & Urban Problems", idNumber: "REG-004-OP", badgeBg: "#FEF3C7", badgeText: "#D97706" },
-  { label: "Environment & Natural Resources", idNumber: "REG-005-OP", badgeBg: "#EDE9FE", badgeText: "#7C3AED" },
-  { label: "Sports (Khelo India)", idNumber: "REG-006-OP", badgeBg: "#FDE8E8", badgeText: "#E03137" },
-  { label: "Employment & Livelihood", idNumber: "REG-007-OP", badgeBg: "#DBEAFE", badgeText: "#0284C7" },
-  { label: "Women & Child Safety and Development", idNumber: "REG-008-OP", badgeBg: "#DCFCE7", badgeText: "#16A34A" },
-  { label: "Safety & Disaster Management", idNumber: "REG-009-OP", badgeBg: "#FEF3C7", badgeText: "#D97706" },
-  { label: "Transport, Energy & Tourism", idNumber: "REG-010-OP", badgeBg: "#EDE9FE", badgeText: "#7C3AED" },
+  {
+    label: "Village & Panchayat Development, Agriculture & Rural Economy",
+    idNumber: "REG-001-OP",
+    badgeBg: "#FDE8E8",
+    badgeText: "#E03137",
+  },
+  {
+    label: "Education & Skill Development",
+    idNumber: "REG-002-OP",
+    badgeBg: "#DBEAFE",
+    badgeText: "#0284C7",
+  },
+  {
+    label: "Healthcare & Community Well-being",
+    idNumber: "REG-003-OP",
+    badgeBg: "#DCFCE7",
+    badgeText: "#16A34A",
+  },
+  {
+    label: "City & Urban Problems",
+    idNumber: "REG-004-OP",
+    badgeBg: "#FEF3C7",
+    badgeText: "#D97706",
+  },
+  {
+    label: "Environment & Natural Resources",
+    idNumber: "REG-005-OP",
+    badgeBg: "#EDE9FE",
+    badgeText: "#7C3AED",
+  },
+  {
+    label: "Sports (Khelo India)",
+    idNumber: "REG-006-OP",
+    badgeBg: "#FDE8E8",
+    badgeText: "#E03137",
+  },
+  {
+    label: "Employment & Livelihood",
+    idNumber: "REG-007-OP",
+    badgeBg: "#DBEAFE",
+    badgeText: "#0284C7",
+  },
+  {
+    label: "Women & Child Safety and Development",
+    idNumber: "REG-008-OP",
+    badgeBg: "#DCFCE7",
+    badgeText: "#16A34A",
+  },
+  {
+    label: "Safety & Disaster Management",
+    idNumber: "REG-009-OP",
+    badgeBg: "#FEF3C7",
+    badgeText: "#D97706",
+  },
+  {
+    label: "Transport, Energy & Tourism",
+    idNumber: "REG-010-OP",
+    badgeBg: "#EDE9FE",
+    badgeText: "#7C3AED",
+  },
   { label: "Miscellaneous", idNumber: "REG-011-OP", badgeBg: "#FDE8E8", badgeText: "#E03137" },
 ];
 
@@ -287,15 +349,9 @@ function TableCard({
       });
   }, [categories, search, sortBy]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredCategories.length / pageSize),
-  );
+  const totalPages = Math.max(1, Math.ceil(filteredCategories.length / pageSize));
 
-  const visibleCategories = filteredCategories.slice(
-    (page - 1) * pageSize,
-    page * pageSize,
-  );
+  const visibleCategories = filteredCategories.slice((page - 1) * pageSize, page * pageSize);
 
   useEffect(() => {
     setPage(1);
@@ -332,9 +388,7 @@ function TableCard({
           Sort by
           <select
             value={sortBy}
-            onChange={(event) =>
-              setSortBy(event.target.value as "category" | "id")
-            }
+            onChange={(event) => setSortBy(event.target.value as "category" | "id")}
             className="h-10 cursor-pointer rounded-lg border border-[#DCE6F0] bg-white px-3 text-sm font-semibold text-[#263A56] outline-none focus:border-[#2368B2]"
           >
             <option value="category">Category</option>
@@ -348,9 +402,7 @@ function TableCard({
         {visibleCategories.map((row, i) => {
           const national = row as Partial<NationalCategory>;
           const hasTwoOptions =
-            showPsColumn &&
-            national.psId !== undefined &&
-            national.openId !== undefined;
+            showPsColumn && national.psId !== undefined && national.openId !== undefined;
 
           return (
             <article
@@ -423,9 +475,7 @@ function TableCard({
                         </span>
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-red-600 shrink-0">
-                      View →
-                    </span>
+                    <span className="text-xs font-bold text-red-600 shrink-0">View →</span>
                   </button>
 
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#ECFDF5]/70 border border-[#BBE3D0]/70">
@@ -456,9 +506,7 @@ function TableCard({
                 </div>
               ) : (
                 <div className="pt-2 border-t border-[#F1F5F9] flex items-center justify-between">
-                  <span className="text-xs font-medium text-gray-500">
-                    Open Innovation Track
-                  </span>
+                  <span className="text-xs font-medium text-gray-500">Open Innovation Track</span>
                   <button
                     type="button"
                     onClick={() => setSelectedRow(row)}
@@ -478,16 +526,13 @@ function TableCard({
       <div className="hidden md:block w-full rounded-[24px] border border-[rgba(226,232,240,0.8)] bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="overflow-x-auto">
           <table
-            className={`w-full border-collapse ${
-              showPsColumn ? "min-w-[780px]" : "min-w-[560px]"
-            }`}
+            className={`w-full border-collapse ${showPsColumn ? "min-w-[780px]" : "min-w-[560px]"}`}
           >
             <thead>
               <tr
                 className="border-b border-[#E2E9F2]"
                 style={{
-                  background:
-                    "linear-gradient(180deg,#EDF2F7 0%,#E8EEF6 100%)",
+                  background: "linear-gradient(180deg,#EDF2F7 0%,#E8EEF6 100%)",
                 }}
               >
                 <th className="w-[84px] px-6 py-4 text-center">
@@ -496,30 +541,21 @@ function TableCard({
                   </span>
                 </th>
 
-                <th
-                  className="px-6 py-4 text-left"
-                  style={{ width: categoryWidth }}
-                >
+                <th className="px-6 py-4 text-left" style={{ width: categoryWidth }}>
                   <span className="t-content-sm font-bold! tracking-[0.65px] uppercase text-[#60718B]">
                     Category
                   </span>
                 </th>
 
                 {showPsColumn && (
-                  <th
-                    className="px-6 py-4 text-left"
-                    style={{ width: "31%" }}
-                  >
+                  <th className="px-6 py-4 text-left" style={{ width: "31%" }}>
                     <span className="t-content-sm font-bold! tracking-[0.65px] uppercase text-[#60718B]">
                       Problem Statement
                     </span>
                   </th>
                 )}
 
-                <th
-                  className="px-6 py-4 text-center"
-                  style={{ width: idWidth }}
-                >
+                <th className="px-6 py-4 text-center" style={{ width: idWidth }}>
                   <span className="t-content-sm font-bold! tracking-[0.65px] uppercase text-[#60718B]">
                     ID Number
                   </span>
@@ -531,9 +567,7 @@ function TableCard({
               {visibleCategories.map((row, i) => {
                 const national = row as Partial<NationalCategory>;
                 const hasTwoOptions =
-                  showPsColumn &&
-                  national.psId !== undefined &&
-                  national.openId !== undefined;
+                  showPsColumn && national.psId !== undefined && national.openId !== undefined;
 
                 return (
                   <tr
@@ -554,20 +588,14 @@ function TableCard({
                       </span>
                     </td>
 
-                    <td
-                      className="px-6 py-[27.5px]"
-                      style={{ width: categoryWidth }}
-                    >
+                    <td className="px-6 py-[27.5px]" style={{ width: categoryWidth }}>
                       <span className="t-content-sm font-bold! tracking-[-0.375px] text-[#142340]">
                         {row.label}
                       </span>
                     </td>
 
                     {showPsColumn && (
-                      <td
-                        className="px-6 py-[22.5px]"
-                        style={{ width: "31%" }}
-                      >
+                      <td className="px-6 py-[22.5px]" style={{ width: "31%" }}>
                         {hasTwoOptions ? (
                           <div className="flex flex-col gap-2.5">
                             <button
@@ -623,19 +651,14 @@ function TableCard({
                                 </svg>
                               </span>
 
-                              <span className="t-content-sm font-bold! text-[#16A34A]">
-                                OPEN
-                              </span>
+                              <span className="t-content-sm font-bold! text-[#16A34A]">OPEN</span>
                             </div>
                           </div>
                         ) : null}
                       </td>
                     )}
 
-                    <td
-                      className="px-6 py-[24.5px] text-center"
-                      style={{ width: idWidth }}
-                    >
+                    <td className="px-6 py-[24.5px] text-center" style={{ width: idWidth }}>
                       {hasTwoOptions ? (
                         <div className="flex flex-col gap-2.5">
                           <button
@@ -677,10 +700,7 @@ function TableCard({
       <Pagination total={totalPages} current={page} onChange={setPage} />
 
       {selectedRow ? (
-        <ProblemModal
-          title={selectedRow.label}
-          onClose={() => setSelectedRow(null)}
-        >
+        <ProblemModal title={selectedRow.label} onClose={() => setSelectedRow(null)}>
           {(() => {
             const national = selectedRow as Partial<NationalCategory>;
 
@@ -688,17 +708,13 @@ function TableCard({
               <div className="space-y-4">
                 {showPsColumn && national.psTitle ? (
                   <div>
-                    <p className="font-semibold text-[#263A56]">
-                      Problem Statement
-                    </p>
+                    <p className="font-semibold text-[#263A56]">Problem Statement</p>
                     <p className="mt-1">{national.psTitle}</p>
                   </div>
                 ) : (
                   <div>
                     <p className="font-semibold text-[#263A56]">Track</p>
-                    <p className="mt-1">
-                      Open innovation proposal within this category.
-                    </p>
+                    <p className="mt-1">Open innovation proposal within this category.</p>
                   </div>
                 )}
 
@@ -714,12 +730,8 @@ function TableCard({
 
                 {showPsColumn && national.psId && national.openId ? (
                   <div>
-                    <p className="font-semibold text-[#263A56]">
-                      Registration IDs
-                    </p>
-                    <p className="mt-1">
-                      Official PS: {national.psId}
-                    </p>
+                    <p className="font-semibold text-[#263A56]">Registration IDs</p>
+                    <p className="mt-1">Official PS: {national.psId}</p>
                     <p>Open proposal: {national.openId}</p>
                   </div>
                 ) : null}
@@ -732,10 +744,10 @@ function TableCard({
   );
 }
 
-
 /* ── Page ────────────────────────────────────────────────────────────── */
 export function ProblemStatementsPage() {
-  const [nationalCategories, setNationalCategories] = useState<NationalCategory[]>(NATIONAL_CATEGORIES);
+  const [nationalCategories, setNationalCategories] =
+    useState<NationalCategory[]>(NATIONAL_CATEGORIES);
   const [communityCategories, setCommunityCategories] = useState<Category[]>(COMMUNITY_CATEGORIES);
   const [loading, setLoading] = useState(true);
 
@@ -745,7 +757,8 @@ export function ProblemStatementsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    resourceApi.getThemes(false)
+    resourceApi
+      .getThemes(false)
       .then(({ items }) => {
         if (cancelled) return;
         const national: NationalCategory[] = [];
@@ -782,7 +795,9 @@ export function ProblemStatementsPage() {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -795,26 +810,24 @@ export function ProblemStatementsPage() {
             <h1 className="t-main-heading uppercase">Problem Statements</h1>
 
             <div className="t-section-stack mt-10 sm:mt-14 space-y-10 sm:space-y-14">
-
               {/* ── Theme 1 ── */}
               <section
                 id="national"
                 aria-labelledby="national-heading"
                 className="scroll-mt-28 rounded-2xl sm:rounded-[28px] border border-[#eaecf0] bg-white p-4 sm:p-8 lg:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.05)]"
               >
-                <h2
-                  id="national-heading"
-                  className="t-subheading-2 text-[#112347] uppercase"
-                >
+                <h2 id="national-heading" className="t-subheading-2 text-[#112347] uppercase">
                   Theme 1: National Level Innovation
                 </h2>
                 <p className="t-content mt-5 text-[#334155] sm:text-justify">
                   Participants will work on identified challenges and problem statements of national
                   significance, developing innovative, sustainable and scalable solutions with the
-                  potential for adoption across India. Innovations should have a starting TRL of
-                  4–6 and are expected to progress towards TRL 7–9 by the end of the Challenge,
-                  demonstrating a clear pathway from validated technology to an operational,
-                  deployable solution.
+                  potential for adoption across India.
+                </p>
+                <p className="t-content mt-3 text-[#334155] sm:text-justify">
+                  Innovations should have a starting TRL of 4–6 and are expected to progress towards
+                  TRL 7–9 by the end of the Challenge, demonstrating a clear pathway from validated
+                  technology to an operational, deployable solution.
                 </p>
 
                 <p className="t-content mt-4 text-[#334155]">
@@ -837,20 +850,18 @@ export function ProblemStatementsPage() {
                 aria-labelledby="community-heading"
                 className="scroll-mt-28 rounded-2xl sm:rounded-[28px] border border-[#eaecf0] bg-white p-4 sm:p-8 lg:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.05)]"
               >
-                <h2
-                  id="community-heading"
-                  className="t-subheading-2 text-[#112347] uppercase"
-                >
-                  Theme 2: Local Community Level Innovations –{" "}
-                  Village / District / State
+                <h2 id="community-heading" className="t-subheading-2 text-[#112347] uppercase">
+                  Theme 2: Local Community Level Innovations – Village / District / State
                 </h2>
                 <p className="t-content mt-5 text-[#334155] sm:text-justify">
                   Participants will identify real problems and unmet needs within their own
                   villages, districts or states and develop locally relevant, affordable,
                   sustainable and implementable solutions that directly benefit the community and
-                  have the potential to be replicated or scaled in other regions. Innovations
-                  should have a starting TRL of 1–3 and are expected to progress towards TRL 6–7
-                  by the end of the Challenge, demonstrating a clear journey from an initial
+                  have the potential to be replicated or scaled in other regions.
+                </p>
+                <p className="t-content mt-3 text-[#334155] sm:text-justify">
+                  Innovations should have a starting TRL of 1–3 and are expected to progress towards
+                  TRL 6–7 by the end of the Challenge, demonstrating a clear journey from an initial
                   concept or proof of concept to a validated and demonstrable solution.
                 </p>
 
@@ -867,7 +878,6 @@ export function ProblemStatementsPage() {
                   )}
                 </div>
               </section>
-
             </div>
           </div>
         </main>

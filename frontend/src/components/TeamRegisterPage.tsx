@@ -32,7 +32,14 @@ import {
   type TeamMember,
 } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import { PROBLEM_CATEGORIES, findProblemCategory, themeLabel, ID_CARD_ACCEPT } from "../lib/problemCategories";
+import {
+  PROBLEM_CATEGORIES,
+  findProblemCategory,
+  themeLabel,
+  ID_CARD_ACCEPT,
+  ID_CARD_ALLOWED_MIME,
+  ID_CARD_MAX_SIZE_BYTES,
+} from "../lib/problemCategories";
 import { Footer, Header } from "./SewaSite";
 
 // ─── Static option lists ────────────────────────────────────────────────────
@@ -522,7 +529,7 @@ function DossierSidebar({ step }: { step: WizardStep }) {
   return (
     <aside className="no-print w-full shrink-0 rounded-2xl border border-red-200/90 bg-white p-6 shadow-xs lg:w-72">
       <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">REGISTRATION DOSSIER</p>
-      <h2 className="mb-6 mt-1 text-xl font-black tracking-tight text-gray-900">SEWA 2026</h2>
+      <h2 className="mb-6 mt-1 text-xl font-black tracking-tight text-gray-900">SEVA 2026</h2>
 
       <ol className="space-y-6">
         {WIZARD_STEPS.map((s) => {
@@ -708,7 +715,7 @@ function ConfirmationSummary({
     <div className="print-area space-y-6 text-sm text-gray-700">
       <div className="text-center">
         <p className="text-xs font-bold uppercase tracking-widest text-primary">
-          SEWA 2026 · Registration Confirmation
+          SEVA 2026 · Registration Confirmation
         </p>
         <h2 className="mt-1 text-xl font-extrabold text-gray-900">{teamName || "Untitled Entry"}</h2>
         <p className="mt-1 text-xs text-gray-400">{institute}</p>
@@ -1201,7 +1208,9 @@ export function TeamRegisterPage() {
     // Mirrors the backend's own rules (team.schema.ts) so a team never
     // discovers these problems only after a round trip to the server.
     if (!problemCategoryCode || !problemOptionType) {
-      setError("Choose a category and whether you're taking the official problem statement or proposing your own.");
+      setError(
+        "Choose a category and whether you're taking the official problem statement or proposing your own.",
+      );
       setStep(2);
       return;
     }
@@ -1392,11 +1401,11 @@ export function TeamRegisterPage() {
       },
       under_review: {
         title: "Your registration is under review",
-        body: "Your registration is being reviewed by the SEWA 2026 jury. Wait for further rounds - we'll notify you by email.",
+        body: "Your registration is being reviewed by the SEVA 2026 jury. Wait for further rounds - we'll notify you by email.",
       },
       shortlisted: {
         title: "Congratulations - you're shortlisted!",
-        body: "Your registration has been shortlisted for the next round of SEWA 2026. Watch your email for next steps.",
+        body: "Your registration has been shortlisted for the next round of SEVA 2026. Watch your email for next steps.",
       },
       rejected: {
         title: "Thank you for participating",
@@ -1497,13 +1506,13 @@ export function TeamRegisterPage() {
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
         <div className="no-print mb-8">
           <p className="text-xs font-bold uppercase tracking-widest text-[#ff4d4f]">
-            SEWA 2026 · RASHTRIYA YOUTH INNOVATION CHALLENGE
+            SEVA 2026 · RASHTRIYA YOUTH INNOVATION CHALLENGE
           </p>
           <h1 className="mt-1 text-3xl font-black tracking-tight text-gray-900 sm:text-4xl">
             Registration Dossier
           </h1>
           <p className="mt-2 max-w-3xl text-sm text-gray-600">
-            Complete your personal identity, problem category, participation details, entry information, and final confirmation to register for SEWA 2026.
+            Complete your personal identity, problem category, participation details, entry information, and final confirmation to register for SEVA 2026.
           </p>
         </div>
 
@@ -2391,7 +2400,12 @@ export function TeamRegisterPage() {
                     className="mt-0.5 accent-primary"
                   />
                   <span className="text-xs leading-relaxed text-gray-500">
-                    I hereby confirm that the information and identification documents provided for myself and all team members are accurate and complete to the best of my knowledge. I accept full responsibility for any discrepancies or inaccuracies and understand that the committee reserves the right to reject or disqualify our participation if any information or documents are found to be false, misleading, or inconsistent.
+                    I hereby confirm that the information and identification documents provided for
+                    myself and all team members are accurate and complete to the best of my
+                    knowledge. I accept full responsibility for any discrepancies or inaccuracies
+                    and understand that the committee reserves the right to reject or disqualify our
+                    participation if any information or documents are found to be false, misleading,
+                    or inconsistent.
                   </span>
                 </label>
 
@@ -2421,7 +2435,7 @@ export function TeamRegisterPage() {
                   <h2 className="mt-3 text-xl font-extrabold text-gray-900">Registration Recorded!</h2>
                   <p className="mx-auto mt-1 max-w-sm text-sm text-gray-500">
                     <span className="font-semibold text-gray-800">{teamName || `${personal.firstName || "Participant"}'s Innovation Entry`}</span> has been
-                    successfully registered for SEWA 2026. Wait for further rounds - we'll notify
+                    successfully registered for SEVA 2026. Wait for further rounds - we'll notify
                     every team member by email.
                   </p>
                 </div>

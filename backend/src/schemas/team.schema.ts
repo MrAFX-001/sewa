@@ -2,7 +2,7 @@ import { z } from "zod";
 import { findProblemCategory } from "../config/problemCategories.js";
 import { phoneSchema } from "./phone.js";
 
-// Team / Organisation use 2-6 roster members. Individual entries use exactly 1.  
+// Adjust MIN/MAX to SEVA 2026's actual team-size rules: Team / Organisation use 2-6 roster members. Individual entries use exactly 1.
 export const TEAM_MIN_MEMBERS = 2; // leader + at least 1 other
 export const TEAM_MAX_MEMBERS = 6;
 

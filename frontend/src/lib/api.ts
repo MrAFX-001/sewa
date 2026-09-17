@@ -1,5 +1,5 @@
 /**
- * Single entry point for every call to the SEWA backend.
+ * Single entry point for every call to the SEVA backend.
  *
  * Two things every request here depends on:
  *  - `credentials: "include"` - the session is an httpOnly cookie, so it is
@@ -45,7 +45,9 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
         // an explicit Content-Type: the browser sets one itself, including
         // the multipart boundary, and setting it manually breaks parsing on
         // the server. JSON bodies still get it as before.
-        ...(init.body && !(init.body instanceof FormData) ? { "Content-Type": "application/json" } : {}),
+        ...(init.body && !(init.body instanceof FormData)
+          ? { "Content-Type": "application/json" }
+          : {}),
         ...init.headers,
       },
     });
@@ -390,8 +392,7 @@ export interface ContactMessageInput {
 }
 
 export const contactApi = {
-  submit: (input: ContactMessageInput) =>
-    post<{ message: string }>("/api/contact", input),
+  submit: (input: ContactMessageInput) => post<{ message: string }>("/api/contact", input),
 };
 
 // ─── Announcements ───────────────────────────────────────────────────────────
@@ -688,7 +689,8 @@ export const resourceApi = {
       method: "DELETE",
     }),
   getCommittee: () => request<{ members: CommitteeMemberItem[] }>("/api/resources/committee"),
-  getCommitteeMembers: () => request<{ members: CommitteeMemberItem[] }>("/api/resources/committee"),
+  getCommitteeMembers: () =>
+    request<{ members: CommitteeMemberItem[] }>("/api/resources/committee"),
   createCommitteeMember: (data: Partial<CommitteeMemberItem>) =>
     request<{ member: CommitteeMemberItem }>("/api/resources/committee", {
       method: "POST",
@@ -704,7 +706,12 @@ export const resourceApi = {
       method: "DELETE",
     }),
   updateCommitteeLayout: (
-    updates: Array<{ id: string; rowNumber: number; displayOrder: number; rowTitle?: string | null }>,
+    updates: Array<{
+      id: string;
+      rowNumber: number;
+      displayOrder: number;
+      rowTitle?: string | null;
+    }>,
   ) =>
     request<{ success: boolean }>("/api/resources/committee/layout", {
       method: "PUT",
