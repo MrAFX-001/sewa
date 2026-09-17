@@ -55,6 +55,7 @@ model User {
   emailVerified   Boolean  @default(false) @map("email_verified")
   role            UserRole @default(MEMBER)
   status          UserStatus @default(pending)
+  tokenVersion Int @default(0) @map("token_version")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
@@ -176,8 +177,8 @@ model Team {
   idCardPath         String  @map("id_card_path") @db.VarChar(500)
   idCardMimeType     String  @map("id_card_mime_type") @db.VarChar(100)
   idCardOriginalName String? @map("id_card_original_name") @db.VarChar(255)
-  leaderUserId     String  @map("leader_user_id")
-  leader       User       @relation("TeamLeader", fields: [leaderUserId], references: [id])
+  leaderUserId String @unique @map("leader_user_id")
+  leader       User   @relation("TeamLeader", fields: [leaderUserId], references: [id])
   status       TeamStatus @default(draft)
   submittedAt  DateTime?  @map("submitted_at")
   score        Int?

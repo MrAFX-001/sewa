@@ -12,6 +12,15 @@ const transporter = nodemailer.createTransport({
   socketTimeout: 4000,
 });
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 type OtpEmailPurpose = "email_verify" | "password_reset";
 
 const COPY: Record<OtpEmailPurpose, { subject: string; lead: string }> = {
@@ -32,8 +41,9 @@ export async function sendOtpEmail(
 ): Promise<void> {
   const { subject, lead } = COPY[purpose];
 
-  // In development, immediately print OTP to terminal so signup/testing is instant
-  if (env.NODE_ENV !== "production") {
+  // Local development only (DEV_PRINT_OTP=true, refused in production):
+  // print the OTP so signup can be tested without SMTP.
+  if (env.DEV_PRINT_OTP) {
     // eslint-disable-next-line no-console
     console.log(`\n==============================================\n🔑 [DEV MODE] OTP for ${to}: ${code}\n==============================================\n`);
   }
@@ -49,7 +59,7 @@ export async function sendOtpEmail(
     });
     logger.info({ to, purpose }, "otp_email_sent");
   } catch (err) {
-    if (env.NODE_ENV === "development") {
+    if (env.DEV_PRINT_OTP) {
       logger.warn({ err: (err as Error).message, to }, "SMTP delivery failed/timed out in development. Use terminal OTP above.");
     } else {
       throw err;
@@ -251,6 +261,11 @@ export async function sendTeamMemberAddedEmail(
   leaderName: string,
 ): Promise<void> {
   const subject = `SEWA 2026: You've been added to Team ${team.name}`;
+  const safeMemberFirstName = escapeHtml(member.firstName);
+  const safeLeaderName = escapeHtml(leaderName);
+  const safeTeamName = escapeHtml(team.name);
+  const safeInstitute = escapeHtml(team.institute);
+  const safeTheme = escapeHtml(team.theme);
 
   const textBody = `
 Dear ${member.firstName} ${member.lastName},
@@ -269,45 +284,11 @@ SEWA 2026 Organizing Committee
 DTU Youth Innovation Challenge
 `.trim();
 
-  const htmlBody = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb; margin: 0; padding: 20px; }
-    .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
-    .header { background: #1e3a8a; color: #ffffff; padding: 24px; text-align: center; }
-    .content { padding: 24px; color: #374151; font-size: 15px; line-height: 1.6; }
-    .card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0; font-size: 14px; }
-    .footer { text-align: center; padding: 16px; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h2 style="margin: 0; font-size: 20px;">SEWA 2026</h2>
-      <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9;">DTU Youth Innovation Challenge</p>
-    </div>
-    <div class="content">
-      <p>Dear <strong>${member.firstName}</strong>,</p>
-      <p><strong>${leaderName}</strong> has added you as a team member to <strong>${team.name}</strong> for SEWA 2026.</p>
-      
-      <div class="card">
-        <p style="margin: 0 0 6px 0;"><strong>Team:</strong> ${team.name}</p>
-        <p style="margin: 0 0 6px 0;"><strong>Institution:</strong> ${team.institute}</p>
-        <p style="margin: 0;"><strong>Theme:</strong> ${team.theme}</p>
-      </div>
-
-      <p style="font-size: 14px; color: #6b7280;">When your team leader completes the team submission, you will receive full confirmation and schedule updates.</p>
-    </div>
-    <div class="footer">
-      <p style="margin: 0;">SEWA 2026 Organizing Committee</p>
-    </div>
-  </div>
-</body>
-</html>
-`.trim();
+  const htmlBody = renderTeamMemberAddedHtml(
+  member,
+  team,
+  leaderName,
+);
 
   try {
     await transporter.sendMail({
@@ -341,6 +322,9 @@ export async function sendContactReceiptEmail(
   message: ContactMessagePayload,
 ): Promise<void> {
   const subject = `SEWA 2026: We've received your message - ${message.subject}`;
+  const safeFullName = escapeHtml(message.fullName);
+  const safeCategory = escapeHtml(message.category);
+  const safeSubject = escapeHtml(message.subject);
 
   const textBody = `
 Dear ${message.fullName},
@@ -359,7 +343,62 @@ SEWA 2026 Organizing Committee
 DTU Youth Innovation Challenge
 `.trim();
 
-  const htmlBody = `
+  const htmlBody = renderContactReceiptHtml(message);
+
+  try {
+    await transporter.sendMail({
+      from: env.SMTP_FROM,
+      to,
+      subject,
+      text: textBody,
+      html: htmlBody,
+    });
+    logger.info({ to }, "contact_receipt_email_sent");
+  } catch (error) {
+    logger.error({ err: error, to }, "failed_to_send_contact_receipt_email");
+  }
+}
+
+export function renderContactReceiptHtml(message: ContactMessagePayload): string {
+  const safeFullName = escapeHtml(message.fullName);
+  const safeCategory = escapeHtml(message.category);
+  const safeSubject = escapeHtml(message.subject);
+
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+  <div class="container">
+    <div class="content">
+      <p>Dear <strong>${safeFullName}</strong>,</p>
+      <p>This confirms we've received your message to SEWA 2026.</p>
+
+      <div class="card">
+        <p><strong>Category:</strong> ${safeCategory}</p>
+        <p><strong>Subject:</strong> ${safeSubject}</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+`.trim();
+}
+
+export function renderTeamMemberAddedHtml(
+  member: { firstName: string; lastName: string },
+  team: { name: string; institute: string; theme: string },
+  leaderName: string,
+): string {
+  const safeMemberFirstName = escapeHtml(member.firstName);
+  const safeLeaderName = escapeHtml(leaderName);
+  const safeTeamName = escapeHtml(team.name);
+  const safeInstitute = escapeHtml(team.institute);
+  const safeTheme = escapeHtml(team.theme);
+
+  return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -380,15 +419,16 @@ DTU Youth Innovation Challenge
       <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9;">DTU Youth Innovation Challenge</p>
     </div>
     <div class="content">
-      <p>Dear <strong>${message.fullName}</strong>,</p>
-      <p>This confirms we've received your message to SEWA 2026.</p>
+      <p>Dear <strong>${safeMemberFirstName}</strong>,</p>
+      <p><strong>${safeLeaderName}</strong> has added you as a team member to <strong>${safeTeamName}</strong> for SEWA 2026.</p>
 
       <div class="card">
-        <p style="margin: 0 0 6px 0;"><strong>Category:</strong> ${message.category}</p>
-        <p style="margin: 0;"><strong>Subject:</strong> ${message.subject}</p>
+        <p style="margin: 0 0 6px 0;"><strong>Team:</strong> ${safeTeamName}</p>
+        <p style="margin: 0 0 6px 0;"><strong>Institution:</strong> ${safeInstitute}</p>
+        <p style="margin: 0;"><strong>Theme:</strong> ${safeTheme}</p>
       </div>
 
-      <p style="font-size: 14px; color: #6b7280;">Our team reviews every submission within 24\u201348 hours. If your query is urgent, call the Northern Region Coordinator Helpdesk at +91 11 27871018 (Ext: 442) or +91 11 27871020.</p>
+      <p style="font-size: 14px; color: #6b7280;">When your team leader completes the team submission, you will receive full confirmation and schedule updates.</p>
     </div>
     <div class="footer">
       <p style="margin: 0;">SEWA 2026 Organizing Committee</p>
@@ -397,19 +437,6 @@ DTU Youth Innovation Challenge
 </body>
 </html>
 `.trim();
-
-  try {
-    await transporter.sendMail({
-      from: env.SMTP_FROM,
-      to,
-      subject,
-      text: textBody,
-      html: htmlBody,
-    });
-    logger.info({ to }, "contact_receipt_email_sent");
-  } catch (error) {
-    logger.error({ err: error, to }, "failed_to_send_contact_receipt_email");
-  }
 }
 
 export interface AdminBroadcastEmailOptions {
@@ -532,4 +559,3 @@ export async function sendAdminBroadcastEmail({
     errors,
   };
 }
-

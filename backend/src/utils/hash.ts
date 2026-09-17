@@ -6,8 +6,14 @@ const PASSWORD_SALT_ROUNDS = 12;
 // (rate limiting + attempt caps do the heavy lifting for OTPs).
 const OTP_SALT_ROUNDS = 10;
 
+const DUMMY_OTP_HASH = "$2b$10$pDE.eJquMpIY628tEVFRsel6P7MSLaMkBNnXqHEFFTRgG6ehv/EZu"
+
 export async function hashPassword(plain: string): Promise<string> {
   return bcrypt.hash(plain, PASSWORD_SALT_ROUNDS);
+}
+
+export async function verifyOtpAgainstDummy(code: string): Promise<void> {
+  await bcrypt.compare(code, DUMMY_OTP_HASH);
 }
 
 export async function verifyPassword(plain: string, hash: string): Promise<boolean> {

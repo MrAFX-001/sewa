@@ -5,9 +5,9 @@ import { uploadIdCard } from "../middleware/upload.middleware.js";
 import { requireAuth, requireVerifiedEmail } from "../middleware/auth.middleware.js";
 import { createTeamSchema, updateTeamSchema, addMemberSchema } from "../schemas/team.schema.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-
+import { cleanupRejectedUpload } from "../middleware/uploadCleanup.middleware.js";
 export const teamRouter = Router();
-
+import { teamMemberAddLimiter } from "../middleware/rateLimiter.js";
 // Every route here requires a signed-in, email-verified user - team
 // registration is only reachable after signup + OTP verification + signin.
 teamRouter.use(requireAuth, requireVerifiedEmail);
@@ -19,6 +19,7 @@ teamRouter.use(requireAuth, requireVerifiedEmail);
 teamRouter.post(
   "/",
   uploadIdCard,
+  cleanupRejectedUpload,
   validateBody(createTeamSchema),
   asyncHandler(teamController.createTeam),
 );
@@ -27,11 +28,13 @@ teamRouter.get("/me", asyncHandler(teamController.getMyTeam));
 teamRouter.patch(
   "/:teamId",
   uploadIdCard,
+  cleanupRejectedUpload,
   validateBody(updateTeamSchema),
   asyncHandler(teamController.updateTeam),
 );
 teamRouter.post(
   "/:teamId/members",
+  teamMemberAddLimiter,
   validateBody(addMemberSchema),
   asyncHandler(teamController.addMember),
 );

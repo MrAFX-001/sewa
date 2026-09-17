@@ -92,7 +92,7 @@ export const addMemberSchema = z
   .object({
     firstName: z.string().trim().min(1).max(100),
     lastName: z.string().trim().min(1).max(100),
-    email: z.string().trim().toLowerCase().email(),
+    email: z.string().trim().toLowerCase().email().max(254, "Email address must be 254 characters or fewer"),
     phone: phoneSchema.optional(),
   })
   .strict();

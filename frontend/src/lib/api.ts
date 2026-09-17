@@ -200,8 +200,12 @@ export const authApi = {
   resendOtp: (email: string) => post<{ message: string }>("/api/auth/otp/send", { email }),
 
   /** On success the backend sets the session cookie - the user is signed in. */
-  verifyOtp: (email: string, code: string) =>
-    post<{ message: string; user: User }>("/api/auth/otp/verify", { email, code }),
+  verifyOtp: (email: string, code: string, password: string) =>
+    post<{ message: string; user: User }>("/api/auth/otp/verify", {
+      email,
+      code,
+      password,
+    }),
 
   signin: (email: string, password: string) =>
     post<{ user: User }>("/api/auth/signin", { email, password }),

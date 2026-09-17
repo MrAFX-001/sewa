@@ -33,7 +33,13 @@ function normalizedEmail(req: Request): string | null {
   return email.length > 0 && email.length <= 320 ? email : null;
 }
 
+// Auth limiters fail CLOSED: if Redis is unreachable the request errors (500)
+// instead of silently skipping the limit, which would re-open brute force on
+// sign-in / OTP / password reset. Non-auth limiters (contact) fail open.
+const AUTH_LIMITERS = new Set(["signup", "otp-send", "otp-verify", "signin", "pw-reset-req", "pw-reset-confirm"]);
+
 function makeLimiter(name: string, opts: Partial<Options>): RequestHandler {
+  const baseName = name.split(":")[0]!;
   return rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
@@ -44,8 +50,7 @@ function makeLimiter(name: string, opts: Partial<Options>): RequestHandler {
             prefix: `rl:${name}:`,
             sendCommand: (...args: string[]) => redis!.sendCommand(args) as Promise<never>,
           }),
-          // Redis down => allow requests (and log) rather than take the portal offline.
-          passOnStoreError: true,
+          passOnStoreError: !AUTH_LIMITERS.has(baseName),
         }
       : {}),
     handler: (req, res, _next, options) => {
@@ -71,6 +76,23 @@ function emailLimiter(name: string, windowMs: number, max: number, message: stri
     // validateBody rejects the request right after.
     skip: (req) => normalizedEmail(req) === null,
     keyGenerator: (req) => normalizedEmail(req)!,
+    message: { error: message },
+  });
+}
+
+function userLimiter(
+  name: string,
+  windowMs: number,
+  max: number,
+  message: string,
+): RequestHandler {
+  return makeLimiter(`${name}:user`, {
+    windowMs,
+    max,
+    keyGenerator: (req) => {
+      if (req.user?.id) return req.user.id;
+      return req.ip ?? "unknown";
+    },
     message: { error: message },
   });
 }
@@ -109,3 +131,10 @@ export const passwordResetConfirmLimiter = limit("pw-reset-confirm", QUARTER_HOU
 
 export const contactLimiter = limit("contact", HOUR, 3, 20,
   "Too many messages sent. Please try again later.");
+
+export const teamMemberAddLimiter = userLimiter(
+  "team-member-add",
+  HOUR,
+  10,
+  "Too many team member additions. Please try again later.",
+);
