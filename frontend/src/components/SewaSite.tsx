@@ -1700,8 +1700,12 @@ export function StatisticsSection() {
         <div className="mt-14 sm:mt-18 rounded-2xl p-4 sm:p-6 lg:p-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
             {/* Card 1: Entries by Level */}
-            <div className="rounded-2xl bg-white p-5 sm:p-6 border border-gray-200/90 shadow-2xs flex flex-col justify-between">
-              <h3 className="t-subheading-2 text-gray-800">Entries by Level</h3>
+            <div className="rounded-2xl bg-white p-5 sm:p-6 border border-gray-200/90 shadow-2xs flex flex-col justify-between relative">
+              <span className="absolute top-5 right-5 sm:top-6 sm:right-6 flex size-2.5" title="Live updates">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff3366] opacity-75" />
+                <span className="relative inline-flex rounded-full size-2.5 bg-[#ff3366]" />
+              </span>
+              <h3 className="t-subheading-2 text-gray-800 pr-6">Entries by Level</h3>
               <div className="py-4 flex flex-col items-center justify-center">
                 <div className="relative size-44 sm:size-48 flex items-center justify-center">
                   <svg viewBox="0 0 160 160" className="size-full">
@@ -1741,8 +1745,12 @@ export function StatisticsSection() {
             </div>
 
             {/* Card 2: Entries by Participant Category */}
-            <div className="rounded-2xl bg-white p-5 sm:p-6 border border-gray-200/90 shadow-2xs flex flex-col justify-between">
-              <h3 className="t-subheading-2 text-gray-800">Entries by Participant Category</h3>
+            <div className="rounded-2xl bg-white p-5 sm:p-6 border border-gray-200/90 shadow-2xs flex flex-col justify-between relative">
+              <span className="absolute top-5 right-5 sm:top-6 sm:right-6 flex size-2.5" title="Live updates">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff3366] opacity-75" />
+                <span className="relative inline-flex rounded-full size-2.5 bg-[#ff3366]" />
+              </span>
+              <h3 className="t-subheading-2 text-gray-800 pr-6">Entries by Participant Category</h3>
               <div className="py-4">
                 <svg viewBox="0 0 320 200" className="w-full h-auto">
                   {/* Grid lines and Y axis labels */}
@@ -1818,8 +1826,12 @@ export function StatisticsSection() {
             </div>
 
             {/* Card 3: Cumulative Entries */}
-            <div className="rounded-2xl bg-white p-5 sm:p-6 border border-gray-200/90 shadow-2xs flex flex-col justify-between">
-              <h3 className="t-subheading-2 text-gray-800">Cumulative Entries</h3>
+            <div className="rounded-2xl bg-white p-5 sm:p-6 border border-gray-200/90 shadow-2xs flex flex-col justify-between relative">
+              <span className="absolute top-5 right-5 sm:top-6 sm:right-6 flex size-2.5" title="Live updates">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff3366] opacity-75" />
+                <span className="relative inline-flex rounded-full size-2.5 bg-[#ff3366]" />
+              </span>
+              <h3 className="t-subheading-2 text-gray-800 pr-6">Cumulative Entries</h3>
               <div className="py-4">
                 <svg viewBox="0 0 320 200" className="w-full h-auto">
                   <defs>
@@ -1966,14 +1978,6 @@ export function StatisticsSection() {
                   </text>
                 </svg>
               </div>
-            </div>
-          </div>
-
-          {/* Bottom live portal badge */}
-          <div className="mt-6 sm:mt-8 flex justify-center">
-            <div className="t-content inline-flex items-center px-4 py-2 rounded-lg bg-white border border-gray-200/90 text-gray-500 shadow-2xs text-center">
-              Numbers are live portal fields; charts update automatically as entries and stage
-              results are received.
             </div>
           </div>
         </div>
