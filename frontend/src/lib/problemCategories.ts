@@ -25,14 +25,43 @@ export interface ProblemCategory {
 
 export const PROBLEM_CATEGORIES: ProblemCategory[] = [
   // ── National Level ──────────────────────────────────────────────────
-  { code: "NAT-001", theme: "NATIONAL", label: "Defence, Intelligence, Space & National Security", psTitle: "PS1 TITLE" },
-  { code: "NAT-002", theme: "NATIONAL", label: "Disaster Management & Resilience", psTitle: "PS2 TITLE" },
-  { code: "NAT-003", theme: "NATIONAL", label: "Manufacturing & Electronics, AI, Robotics & Autonomous Systems", psTitle: "PS3 TITLE" },
-  { code: "NAT-004", theme: "NATIONAL", label: "Energy & Sustainable Technology & Environment", psTitle: "PS4 TITLE" },
-  { code: "NAT-005", theme: "NATIONAL", label: "Advanced Engineering, Infrastructure, Future Mobility & Transportation", psTitle: "PS5 TITLE" },
+  {
+    code: "NAT-001",
+    theme: "NATIONAL",
+    label: "Defence, Intelligence, Space & National Security",
+    psTitle: "PS1 TITLE",
+  },
+  {
+    code: "NAT-002",
+    theme: "NATIONAL",
+    label: "Disaster Management & Resilience",
+    psTitle: "PS2 TITLE",
+  },
+  {
+    code: "NAT-003",
+    theme: "NATIONAL",
+    label: "Manufacturing & Electronics, AI, Robotics & Autonomous Systems",
+    psTitle: "PS3 TITLE",
+  },
+  {
+    code: "NAT-004",
+    theme: "NATIONAL",
+    label: "Energy & Sustainable Technology & Environment",
+    psTitle: "PS4 TITLE",
+  },
+  {
+    code: "NAT-005",
+    theme: "NATIONAL",
+    label: "Advanced Engineering, Infrastructure, Future Mobility & Transportation",
+    psTitle: "PS5 TITLE",
+  },
 
   // ── Regional / Local Community Level ─────────────────────────────────
-  { code: "REG-001", theme: "REGIONAL", label: "Village & Panchayat Development, Agriculture & Rural Economy" },
+  {
+    code: "REG-001",
+    theme: "REGIONAL",
+    label: "Village & Panchayat Development, Agriculture & Rural Economy",
+  },
   { code: "REG-002", theme: "REGIONAL", label: "Education & Skill Development" },
   { code: "REG-003", theme: "REGIONAL", label: "Healthcare & Community Well-being" },
   { code: "REG-004", theme: "REGIONAL", label: "City & Urban Problems" },

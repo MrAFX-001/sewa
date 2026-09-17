@@ -22,7 +22,8 @@ import {
  * three counts underneath) because six columns do not fit in 360px.
  */
 
-export type StatKey = "entries" | "shortlisted" | "mentored" | "prototypes" | "tested" | "validated";
+export type StatKey =
+  "entries" | "shortlisted" | "mentored" | "prototypes" | "tested" | "validated";
 
 type Counts = { schools: number; colleges: number; industries: number };
 
@@ -40,7 +41,8 @@ const STATES: { state: string; note?: string }[] = [
   { state: "Jammu & Kashmir" },
 ];
 
-const zeroRows = (): StateRow[] => STATES.map((s) => ({ ...s, schools: 0, colleges: 0, industries: 0 }));
+const zeroRows = (): StateRow[] =>
+  STATES.map((s) => ({ ...s, schools: 0, colleges: 0, industries: 0 }));
 
 /**
  * State-wise figures per metric. All zero until the portal has real data —
@@ -57,7 +59,12 @@ export const STAT_SUMMARY_DATA: Record<StatKey, StateRow[]> = {
 
 export const STAT_META: Record<
   StatKey,
-  { label: string; icon: ComponentType<{ size?: number; strokeWidth?: number }>; bg: string; fg: string }
+  {
+    label: string;
+    icon: ComponentType<{ size?: number; strokeWidth?: number }>;
+    bg: string;
+    fg: string;
+  }
 > = {
   entries: { label: "Entries", icon: Users, bg: "#E6EEFF", fg: "#2F6BEA" },
   shortlisted: { label: "Shortlisted", icon: Trophy, bg: "#FFF1D6", fg: "#D98A06" },
@@ -140,7 +147,10 @@ export function StatSummaryModal({ stat, onClose }: { stat: StatKey; onClose: ()
         className="relative max-h-[92dvh] w-full max-w-3xl overflow-y-auto rounded-t-[20px] border border-[#E3EAF2] bg-white shadow-[0_24px_80px_rgba(15,35,65,0.25)] sm:max-h-[calc(100vh-3rem)] sm:rounded-[20px]"
       >
         {/* Phone: grab handle so it reads as a bottom sheet */}
-        <div aria-hidden="true" className="mx-auto mt-2.5 h-1.5 w-10 rounded-full bg-[#DCE6F0] sm:hidden" />
+        <div
+          aria-hidden="true"
+          className="mx-auto mt-2.5 h-1.5 w-10 rounded-full bg-[#DCE6F0] sm:hidden"
+        />
 
         <button
           type="button"
@@ -161,9 +171,14 @@ export function StatSummaryModal({ stat, onClose }: { stat: StatKey; onClose: ()
               <Icon size={20} strokeWidth={2.2} />
             </span>
             {/* Phone: label over subtitle. sm+: one line "Label | State-wise Summary". */}
-            <h2 id={titleId} className="flex min-w-0 flex-col font-bold leading-tight text-[#142340] sm:block sm:text-2xl">
+            <h2
+              id={titleId}
+              className="flex min-w-0 flex-col font-bold leading-tight text-[#142340] sm:block sm:text-2xl"
+            >
               <span className="text-lg sm:text-2xl">{meta.label}</span>
-              <span aria-hidden="true" className="mx-2 hidden font-normal text-[#B6C2D1] sm:inline">|</span>
+              <span aria-hidden="true" className="mx-2 hidden font-normal text-[#B6C2D1] sm:inline">
+                |
+              </span>
               <span className="text-sm font-semibold text-[#60718B] sm:text-2xl sm:font-bold sm:text-[#142340]">
                 State-wise Summary
               </span>
@@ -175,12 +190,24 @@ export function StatSummaryModal({ stat, onClose }: { stat: StatKey; onClose: ()
             <table className="w-full border-collapse text-left">
               <thead>
                 <tr className="bg-[#EEF3F8] text-[11px] font-semibold uppercase tracking-wider text-[#60718B]">
-                  <th scope="col" className="w-12 py-2.5 pl-4 text-center">#</th>
-                  <th scope="col" className="py-2.5 pl-2">State / UT</th>
-                  <th scope="col" className="py-2.5 text-center">Schools</th>
-                  <th scope="col" className="py-2.5 text-center">Colleges</th>
-                  <th scope="col" className="py-2.5 text-center">Industries</th>
-                  <th scope="col" className="py-2.5 pr-4 text-center">Total</th>
+                  <th scope="col" className="w-12 py-2.5 pl-4 text-center">
+                    #
+                  </th>
+                  <th scope="col" className="py-2.5 pl-2">
+                    State / UT
+                  </th>
+                  <th scope="col" className="py-2.5 text-center">
+                    Schools
+                  </th>
+                  <th scope="col" className="py-2.5 text-center">
+                    Colleges
+                  </th>
+                  <th scope="col" className="py-2.5 text-center">
+                    Industries
+                  </th>
+                  <th scope="col" className="py-2.5 pr-4 text-center">
+                    Total
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -191,11 +218,19 @@ export function StatSummaryModal({ stat, onClose }: { stat: StatKey; onClose: ()
                     </td>
                     <th scope="row" className="py-2.5 pl-2 pr-2 text-sm font-medium text-[#142340]">
                       {row.state}
-                      {row.note && <span className="ml-1 text-xs font-normal text-[#8193A9]">{row.note}</span>}
+                      {row.note && (
+                        <span className="ml-1 text-xs font-normal text-[#8193A9]">{row.note}</span>
+                      )}
                     </th>
-                    <td className="py-2.5 text-center"><Pill value={row.schools} /></td>
-                    <td className="py-2.5 text-center"><Pill value={row.colleges} /></td>
-                    <td className="py-2.5 text-center"><Pill value={row.industries} /></td>
+                    <td className="py-2.5 text-center">
+                      <Pill value={row.schools} />
+                    </td>
+                    <td className="py-2.5 text-center">
+                      <Pill value={row.colleges} />
+                    </td>
+                    <td className="py-2.5 text-center">
+                      <Pill value={row.industries} />
+                    </td>
                     <td className="py-2.5 pr-4 text-center">
                       <Pill value={row.schools + row.colleges + row.industries} strong />
                     </td>
@@ -213,9 +248,13 @@ export function StatSummaryModal({ stat, onClose }: { stat: StatKey; onClose: ()
                   <RowBadge index={i} />
                   <p className="min-w-0 flex-1 pr-1 text-sm font-semibold leading-snug text-[#142340]">
                     {row.state}
-                    {row.note && <span className="block text-xs font-normal text-[#8193A9]">{row.note}</span>}
+                    {row.note && (
+                      <span className="block text-xs font-normal text-[#8193A9]">{row.note}</span>
+                    )}
                   </p>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[#60718B]">Total</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[#60718B]">
+                    Total
+                  </span>
                   <Pill value={row.schools + row.colleges + row.industries} strong />
                 </div>
                 <dl className="mt-2.5 grid grid-cols-3 gap-2 text-center">
@@ -227,8 +266,12 @@ export function StatSummaryModal({ stat, onClose }: { stat: StatKey; onClose: ()
                     ] as const
                   ).map(([label, value]) => (
                     <div key={label} className="rounded-lg bg-white px-1 py-1.5">
-                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-[#60718B]">{label}</dt>
-                      <dd className="text-sm font-semibold tabular-nums text-[#1E3554]">{fmt(value)}</dd>
+                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-[#60718B]">
+                        {label}
+                      </dt>
+                      <dd className="text-sm font-semibold tabular-nums text-[#1E3554]">
+                        {fmt(value)}
+                      </dd>
                     </div>
                   ))}
                 </dl>
@@ -240,8 +283,8 @@ export function StatSummaryModal({ stat, onClose }: { stat: StatKey; onClose: ()
           <p className="mt-5 flex items-start gap-2 rounded-xl bg-[#FDECEC] px-4 py-3 text-xs leading-relaxed text-[#C8323A] sm:text-[13px]">
             <CircleAlert size={16} className="mt-px shrink-0" />
             <span>
-              <strong className="font-semibold">Important:</strong> Chandigarh is a separate entry. Punjab and Haryana
-              exclude Chandigarh.
+              <strong className="font-semibold">Important:</strong> Chandigarh is a separate entry.
+              Punjab and Haryana exclude Chandigarh.
             </span>
           </p>
 

@@ -625,8 +625,8 @@ const FAQ_DATA = [
   },
   {
     "id": "0c134044-a536-4458-a94b-c9fb2f864512",
-    "question": "What is SEWA FIRST – Rashtriya Youth Innovation Challenge 2026?",
-    "answer": "SEWA FIRST is a national youth innovation initiative that encourages young minds to identify real-world challenges and develop affordable, sustainable and implementable solutions for society and the nation.",
+    "question": "What is SEVA FIRST – Rashtriya Youth Innovation Challenge 2026?",
+    "answer": "SEVA FIRST is a national youth innovation initiative that encourages young minds to identify real-world challenges and develop affordable, sustainable and implementable solutions for society and the nation.",
     "category": "general",
     "displayOrder": 1,
     "active": false
@@ -682,7 +682,7 @@ const FAQ_DATA = [
   {
     "id": "3a0b2387-1b0d-4ca3-b1fb-9b6cb212cb92",
     "question": "How will I be notified about various updates?",
-    "answer": "Registered participants will receive important updates through their registered email address and official SEWA FIRST communication channels. Participants are advised to regularly check the official website and their email for announcements, deadlines and other updates.",
+    "answer": "Registered participants will receive important updates through their registered email address and official SEVA FIRST communication channels. Participants are advised to regularly check the official website and their email for announcements, deadlines and other updates.",
     "category": "support",
     "displayOrder": 12,
     "active": true
@@ -690,7 +690,7 @@ const FAQ_DATA = [
   {
     "id": "2db9c573-ce10-41c8-b5d8-00b4c5486e87",
     "question": "How can I register for the Challenge?",
-    "answer": "Participants can register through the SEWA FIRST registration portal during the specified registration period. Applicants should provide the required participant, team and innovation details and complete the submission process.",
+    "answer": "Participants can register through the SEVA FIRST registration portal during the specified registration period. Applicants should provide the required participant, team and innovation details and complete the submission process.",
     "category": "registration",
     "displayOrder": 11,
     "active": false
@@ -708,7 +708,7 @@ const FAQ_DATA = [
 const ANNOUNCEMENTS_DATA = [
   {
     "id": "eef5a614-c8ed-4fc7-90ec-1aa0463a6e21",
-    "refNumber": "SEWA-CIR-04",
+    "refNumber": "SEVA-CIR-04",
     "category": "Mentorship",
     "title": "Technical Webinar on Patent Filing & IP Protection for Innovators",
     "summary": "Join leading patent attorneys and incubator directors for a practical masterclass on protecting your innovation prior to public exhibitions.",
@@ -716,7 +716,7 @@ const ANNOUNCEMENTS_DATA = [
   },
   {
     "id": "26dc7848-eec0-4563-8e9b-0bb9463a10f3",
-    "refNumber": "SEWA-CIR-05",
+    "refNumber": "SEVA-CIR-05",
     "category": "Evaluation",
     "title": "Regional Hub Screening Criteria & UDAN Milestone 1 Deliverables",
     "summary": "Screening committees across five regional hubs will evaluate entries on technical novelty, feasibility, and grassroots deployment impact.",
@@ -724,7 +724,7 @@ const ANNOUNCEMENTS_DATA = [
   },
   {
     "id": "b773da6c-8d32-4557-ae57-38521bdb66a6",
-    "refNumber": "SEWA-CIR-06",
+    "refNumber": "SEVA-CIR-06",
     "category": "Announcements",
     "title": "Seed Grant Allocation & Incubation Fast-Track for Top Finalists",
     "summary": "Top 25 validated prototypes receive direct equity-free prototype grants and incubation opportunities at DTU IIF.",
@@ -732,7 +732,7 @@ const ANNOUNCEMENTS_DATA = [
   },
   {
     "id": "248bcac9-f38b-4e0f-954a-310f6dfd1ccc",
-    "refNumber": "DTU/SEWA/2026/CIR-07",
+    "refNumber": "DTU/SEVA/2026/CIR-07",
     "category": "newsletter",
     "title": "Official Guidelines for Prototype Demonstration Released",
     "summary": "All shortlisted regional teams are invited to review the prototype validation rubrics ahead of Stage 2.",
@@ -740,7 +740,7 @@ const ANNOUNCEMENTS_DATA = [
   },
   {
     "id": "2310a3ed-bf6b-4a4c-87c0-dc500ec5e344",
-    "refNumber": "SEWA-CIR-01",
+    "refNumber": "SEVA-CIR-01",
     "category": "Problem Statements",
     "title": "Release of UDAN Phase 1 Problem Statements & Evaluation Rubrics",
     "summary": "Detailed problem statements across five national themes are now available. Registered teams should review the official submission template and evaluation rubrics.",
@@ -748,7 +748,7 @@ const ANNOUNCEMENTS_DATA = [
   },
   {
     "id": "28482ba7-7441-4e7e-a3a9-599f02a5c1d4",
-    "refNumber": "SEWA-CIR-02",
+    "refNumber": "SEVA-CIR-02",
     "category": "Mentorship",
     "title": "DTU Central Innovation Labs & Prototyping Workshop Schedule",
     "summary": "Shortlisted teams receive access to prototyping machinery, testing facilities and dedicated faculty mentors across engineering departments.",
@@ -756,7 +756,7 @@ const ANNOUNCEMENTS_DATA = [
   },
   {
     "id": "71f1ba1c-f58d-46fd-a72d-8d5f0b9b4e10",
-    "refNumber": "SEWA-CIR-03",
+    "refNumber": "SEVA-CIR-03",
     "category": "Guidelines",
     "title": "Inter-Disciplinary Team Registration & Eligibility Norms",
     "summary": "Teams may comprise two to five members from accredited universities, polytechnics or eligible early-stage student startups.",

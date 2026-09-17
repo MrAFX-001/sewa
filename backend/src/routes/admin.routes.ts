@@ -528,7 +528,7 @@ adminRouter.get(
 
     const formattedMails = mails.map((m) => ({
       id: m.id,
-      sender: m.sender ? `${m.sender.firstName} ${m.sender.lastName}`.trim() : "SEWA Secretariat",
+      sender: m.sender ? `${m.sender.firstName} ${m.sender.lastName}`.trim() : "SEVA Secretariat",
       email: m.sender?.email || "sewa2026@dtu.ac.in",
       title: m.subject,
       snippet: m.content.slice(0, 90) + (m.content.length > 90 ? "..." : ""),
@@ -626,8 +626,8 @@ adminRouter.post(
       : null;
 
     const senderName = senderUser
-      ? `${senderUser.firstName || ""} ${senderUser.lastName || ""}`.trim() || "SEWA 2026 Admin"
-      : "SEWA 2026 Organizing Committee";
+      ? `${senderUser.firstName || ""} ${senderUser.lastName || ""}`.trim() || "SEVA 2026 Admin"
+      : "SEVA 2026 Organizing Committee";
 
     // 1. Dispatch real SMTP emails to all resolved recipients
     let delivery = { total: 0, sent: 0, failed: 0, errors: [] as string[] };

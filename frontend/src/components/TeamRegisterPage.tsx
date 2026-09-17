@@ -23,7 +23,14 @@ import {
   type TeamMember,
 } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import { PROBLEM_CATEGORIES, findProblemCategory, themeLabel, ID_CARD_ACCEPT, ID_CARD_ALLOWED_MIME, ID_CARD_MAX_SIZE_BYTES } from "../lib/problemCategories";
+import {
+  PROBLEM_CATEGORIES,
+  findProblemCategory,
+  themeLabel,
+  ID_CARD_ACCEPT,
+  ID_CARD_ALLOWED_MIME,
+  ID_CARD_MAX_SIZE_BYTES,
+} from "../lib/problemCategories";
 import { Footer, Header } from "./SewaSite";
 
 // ─── Static option lists ────────────────────────────────────────────────────
@@ -287,7 +294,7 @@ function StepFooter({
 function DossierSidebar({ step }: { step: WizardStep }) {
   return (
     <aside className="no-print w-full shrink-0 border-b border-gray-100 px-5 py-6 sm:w-[230px] sm:border-b-0 sm:border-r">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">SEWA 2026</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">SEVA 2026</p>
       <h2 className="mb-6 text-sm font-extrabold text-gray-900">Registration Dossier</h2>
 
       <ol className="space-y-5">
@@ -399,7 +406,7 @@ function ConfirmationSummary({
     <div className="print-area space-y-6 text-sm text-gray-700">
       <div className="text-center">
         <p className="text-xs font-bold uppercase tracking-widest text-primary">
-          SEWA 2026 · Registration Confirmation
+          SEVA 2026 · Registration Confirmation
         </p>
         <h2 className="mt-1 text-xl font-extrabold text-gray-900">{teamName || "Untitled Team"}</h2>
         <p className="mt-1 text-xs text-gray-400">{institute}</p>
@@ -744,7 +751,9 @@ export function TeamRegisterPage() {
     // Mirrors the backend's own rules (team.schema.ts) so a team never
     // discovers these problems only after a round trip to the server.
     if (!problemCategoryCode || !problemOptionType) {
-      setError("Choose a category and whether you're taking the official problem statement or proposing your own.");
+      setError(
+        "Choose a category and whether you're taking the official problem statement or proposing your own.",
+      );
       setStep(2);
       return;
     }
@@ -864,11 +873,11 @@ export function TeamRegisterPage() {
       },
       under_review: {
         title: "Your team is under review",
-        body: "Your registration is being reviewed by the SEWA 2026 jury. Wait for further rounds - we'll notify you by email.",
+        body: "Your registration is being reviewed by the SEVA 2026 jury. Wait for further rounds - we'll notify you by email.",
       },
       shortlisted: {
         title: "Congratulations - you're shortlisted!",
-        body: "Your team has been shortlisted for the next round of SEWA 2026. Watch your email for next steps.",
+        body: "Your team has been shortlisted for the next round of SEVA 2026. Watch your email for next steps.",
       },
       rejected: {
         title: "Thank you for participating",
@@ -945,13 +954,13 @@ export function TeamRegisterPage() {
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
         <div className="no-print mb-6">
           <p className="mb-1 text-xs font-bold uppercase tracking-widest text-primary">
-            SEWA 2026 · DTU Youth Innovation Challenge
+            SEVA 2026 · DTU Youth Innovation Challenge
           </p>
           <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
             Team Registration
           </h1>
           <p className="mt-2 text-sm text-gray-500">
-            Complete every step of the dossier to register your team for SEWA 2026.
+            Complete every step of the dossier to register your team for SEVA 2026.
           </p>
         </div>
 
@@ -1246,8 +1255,8 @@ export function TeamRegisterPage() {
                     // there is no PS/OPEN choice to make here, only the
                     // proposal text itself.
                     <p className="text-xs text-gray-500">
-                      This category has no official problem statement - describe the problem
-                      you're proposing to solve below.
+                      This category has no official problem statement - describe the problem you're
+                      proposing to solve below.
                     </p>
                   ) : (
                     <Field label="How do you want to participate?" required>
@@ -1510,7 +1519,12 @@ export function TeamRegisterPage() {
                     className="mt-0.5 accent-primary"
                   />
                   <span className="text-xs leading-relaxed text-gray-500">
-                    I hereby confirm that the information and identification documents provided for myself and all team members are accurate and complete to the best of my knowledge. I accept full responsibility for any discrepancies or inaccuracies and understand that the committee reserves the right to reject or disqualify our participation if any information or documents are found to be false, misleading, or inconsistent.
+                    I hereby confirm that the information and identification documents provided for
+                    myself and all team members are accurate and complete to the best of my
+                    knowledge. I accept full responsibility for any discrepancies or inaccuracies
+                    and understand that the committee reserves the right to reject or disqualify our
+                    participation if any information or documents are found to be false, misleading,
+                    or inconsistent.
                   </span>
                 </label>
 
@@ -1540,7 +1554,7 @@ export function TeamRegisterPage() {
                   <h2 className="mt-3 text-xl font-extrabold text-gray-900">Team Registered!</h2>
                   <p className="mx-auto mt-1 max-w-sm text-sm text-gray-500">
                     <span className="font-semibold text-gray-800">{teamName}</span> has been
-                    successfully registered for SEWA 2026. Wait for further rounds - we'll notify
+                    successfully registered for SEVA 2026. Wait for further rounds - we'll notify
                     every team member by email.
                   </p>
                 </div>

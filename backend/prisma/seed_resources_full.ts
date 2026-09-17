@@ -45,8 +45,8 @@ async function main() {
   await prisma.faqItem.createMany({
     data: [
       {
-        question: "What is SEWA FIRST – Rashtriya Youth Innovation Challenge 2026?",
-        answer: "SEWA FIRST is a national youth innovation initiative that encourages young minds to identify real-world challenges and develop affordable, sustainable and implementable solutions for society and the nation.",
+        question: "What is SEVA FIRST – Rashtriya Youth Innovation Challenge 2026?",
+        answer: "SEVA FIRST is a national youth innovation initiative that encourages young minds to identify real-world challenges and develop affordable, sustainable and implementable solutions for society and the nation.",
         category: "general",
         displayOrder: 1,
         active: true,
@@ -108,24 +108,31 @@ async function main() {
         active: true,
       },
       {
-        question: "How can teams submit complaints or technical grievances regarding evaluation?",
-        answer: "Teams can submit their complaints or technical grievances through the 'Contact Us' form on the official Challenge website or by emailing the designated grievance email address. All grievances should include the team details, issue description and relevant supporting information.",
-        category: "support",
+        question: "Can I participate in more than one challenge?",
+        answer: "Yes, the participants are welcome to submit proposals in various challenges.",
+        category: "eligibility",
         displayOrder: 10,
         active: true,
       },
       {
-        question: "How can I register for the Challenge?",
-        answer: "Participants can register through the SEWA FIRST registration portal during the specified registration period. Applicants should provide the required participant, team and innovation details and complete the submission process.",
-        category: "registration",
+        question: "How can teams submit complaints or technical grievances regarding evaluation?",
+        answer: "Teams can submit their complaints or technical grievances through the 'Contact Us' form on the official Challenge website or by emailing the designated grievance email address. All grievances should include the team details, issue description and relevant supporting information.",
+        category: "support",
         displayOrder: 11,
         active: true,
       },
       {
-        question: "How will I be notified about various updates?",
-        answer: "Registered participants will receive important updates through their registered email address and official SEWA FIRST communication channels. Participants are advised to regularly check the official website and their email for announcements, deadlines and other updates.",
-        category: "support",
+        question: "How can I register for the Challenge?",
+        answer: "Participants can register through the SEVA FIRST registration portal during the specified registration period. Applicants should provide the required participant, team and innovation details and complete the submission process.",
+        category: "registration",
         displayOrder: 12,
+        active: true,
+      },
+      {
+        question: "How will I be notified about various updates?",
+        answer: "Registered participants will receive important updates through their registered email address and official SEVA FIRST communication channels. Participants are advised to regularly check the official website and their email for announcements, deadlines and other updates.",
+        category: "support",
+        displayOrder: 13,
         active: true,
       },
     ],
@@ -356,7 +363,15 @@ async function main() {
   await prisma.announcement.createMany({
     data: [
       {
-        refNumber: "SEWA-CIR-01",
+        refNumber: "DTU/SEVA/2026/CIR-08",
+        category: "Announcements",
+        title: "The portal launch event to be graced by Hon'ble Chief Minister of Delhi Smt. Rekha Gupta on 19th Sept",
+        summary: "The official portal launch event of SEVA FIRST 2026 will be graced by the Hon'ble Chief Minister of Delhi, Smt. Rekha Gupta, on 19th September 2026.",
+        detail: "The launch event marks the official unveiling of the problem statements, opening of registrations, and introduction of the innovation roadmap.",
+        publishedAt: new Date("2026-09-17T12:00:00.000Z"),
+      },
+      {
+        refNumber: "SEVA-CIR-01",
         category: "Problem Statements",
         title: "Release of UDAN Phase 1 Problem Statements & Evaluation Rubrics",
         summary: "Detailed problem statements across five national themes are now available. Registered teams should review the official submission template and evaluation rubrics.",
@@ -364,7 +379,7 @@ async function main() {
         publishedAt: new Date("2026-09-14T05:00:13.988Z"),
       },
       {
-        refNumber: "SEWA-CIR-02",
+        refNumber: "SEVA-CIR-02",
         category: "Mentorship",
         title: "DTU Central Innovation Labs & Prototyping Workshop Schedule",
         summary: "Shortlisted teams receive access to prototyping machinery, testing facilities and dedicated faculty mentors across engineering departments.",
@@ -372,7 +387,7 @@ async function main() {
         publishedAt: new Date("2026-09-14T05:00:13.998Z"),
       },
       {
-        refNumber: "SEWA-CIR-03",
+        refNumber: "SEVA-CIR-03",
         category: "Guidelines",
         title: "Inter-Disciplinary Team Registration & Eligibility Norms",
         summary: "Teams may comprise two to five members from accredited universities, polytechnics or eligible early-stage student startups.",
@@ -380,7 +395,7 @@ async function main() {
         publishedAt: new Date("2026-09-14T05:00:14.001Z"),
       },
       {
-        refNumber: "SEWA-CIR-04",
+        refNumber: "SEVA-CIR-04",
         category: "Mentorship",
         title: "Technical Webinar on Patent Filing & IP Protection for Innovators",
         summary: "Join leading patent attorneys and incubator directors for a practical masterclass on protecting your innovation prior to public exhibitions.",
@@ -388,7 +403,7 @@ async function main() {
         publishedAt: new Date("2026-09-14T05:00:14.005Z"),
       },
       {
-        refNumber: "SEWA-CIR-05",
+        refNumber: "SEVA-CIR-05",
         category: "Evaluation",
         title: "Regional Hub Screening Criteria & UDAN Milestone 1 Deliverables",
         summary: "Screening committees across five regional hubs will evaluate entries on technical novelty, feasibility, and grassroots deployment impact.",
@@ -396,7 +411,7 @@ async function main() {
         publishedAt: new Date("2026-09-14T05:00:14.008Z"),
       },
       {
-        refNumber: "SEWA-CIR-06",
+        refNumber: "SEVA-CIR-06",
         category: "Announcements",
         title: "Seed Grant Allocation & Incubation Fast-Track for Top Finalists",
         summary: "Top 25 validated prototypes receive direct equity-free prototype grants and incubation opportunities at DTU IIF.",
@@ -404,7 +419,7 @@ async function main() {
         publishedAt: new Date("2026-09-14T05:00:14.012Z"),
       },
       {
-        refNumber: "DTU/SEWA/2026/CIR-07",
+        refNumber: "DTU/SEVA/2026/CIR-07",
         category: "circular",
         title: "Official Guidelines for Prototype Demonstration Released",
         summary: "All shortlisted regional teams are invited to review the prototype validation rubrics ahead of Stage 2.",

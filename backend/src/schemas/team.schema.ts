@@ -2,7 +2,7 @@ import { z } from "zod";
 import { findProblemCategory } from "../config/problemCategories.js";
 import { phoneSchema } from "./phone.js";
 
-// Adjust MIN/MAX to SEWA 2026's actual team-size rules.
+// Adjust MIN/MAX to SEVA 2026's actual team-size rules.
 export const TEAM_MIN_MEMBERS = 2; // leader + at least 1 other
 export const TEAM_MAX_MEMBERS = 6;
 

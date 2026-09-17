@@ -37,7 +37,11 @@ export function ScrollToTopButton() {
           : "opacity-0 scale-75 translate-y-4 pointer-events-none"
       }`}
     >
-      <ChevronUp size={22} strokeWidth={2.6} className="transition-transform duration-200 group-hover:-translate-y-0.5" />
+      <ChevronUp
+        size={22}
+        strokeWidth={2.6}
+        className="transition-transform duration-200 group-hover:-translate-y-0.5"
+      />
     </button>
   );
 }

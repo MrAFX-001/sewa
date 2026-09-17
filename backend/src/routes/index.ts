@@ -30,7 +30,7 @@ apiRouter.get("/health", async (_req, res) => {
     await prisma.$queryRaw`SELECT 1`;
     res.status(200).json({
       status: "OK",
-      message: "SEWA 2026 backend and database are connected!",
+      message: "SEVA 2026 backend and database are connected!",
     });
   } catch (err) {
     logger.error({ err }, "health_check_failed");
