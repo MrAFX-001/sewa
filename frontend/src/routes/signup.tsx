@@ -19,3 +19,6 @@ export const Route = createFileRoute("/signup")({
   }),
   component: () => <AuthPage mode="register" />,
 });
+
+
+

@@ -31,3 +31,6 @@ export async function bootstrapDatabaseIfEmpty() {
     logger.warn({ err }, "Database bootstrap check skipped");
   }
 }
+
+
+

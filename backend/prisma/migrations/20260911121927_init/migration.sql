@@ -110,3 +110,6 @@ ALTER TABLE "team_members" ADD CONSTRAINT "team_members_user_id_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+
+

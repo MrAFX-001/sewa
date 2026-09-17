@@ -32,3 +32,6 @@ COPY package.json ./
 # from /home/sewa/sewa/backend/uploads, so paths stored in the DB stay valid.
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["node", "dist/server.js"]
+
+
+

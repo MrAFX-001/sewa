@@ -73,3 +73,6 @@ export function handleSummary(data) {
   return createSummaryOutput(data, 'scale-10k');
 }
 
+
+
+

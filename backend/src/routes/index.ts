@@ -4,6 +4,7 @@ import { teamRouter } from "./team.routes.js";
 import { profileRouter } from "./profile.routes.js";
 import { contactRouter } from "./contact.routes.js";
 import { announcementsRouter } from "./announcements.routes.js";
+import { publicRouter } from "./public.routes.js";
 import { adminRouter, resourceRouter } from "./admin.routes.js";
 import { prisma } from "../config/prisma.js";
 import { logger } from "../config/logger.js";
@@ -15,6 +16,7 @@ apiRouter.use("/register", teamRouter);
 apiRouter.use("/profile", profileRouter);
 apiRouter.use("/contact", contactRouter);
 apiRouter.use("/announcements", announcementsRouter);
+apiRouter.use("/public", publicRouter);
 apiRouter.use("/admin", adminRouter);
 apiRouter.use("/resources", resourceRouter);
 
@@ -37,3 +39,6 @@ apiRouter.get("/health", async (_req, res) => {
     res.status(503).json({ status: "ERROR", message: "Database connection failed" });
   }
 });
+
+
+

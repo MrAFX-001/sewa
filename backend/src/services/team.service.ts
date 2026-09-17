@@ -24,7 +24,7 @@ export async function createTeam(leaderUserId: string, input: CreateTeamInput, i
     // so the now-orphaned file is cleaned up rather than left behind for
     // every rejected duplicate-registration attempt.
     await deleteUploadedFile(idCard.path);
-    throw new AppError(409, "You have already registered a team.");
+    throw new AppError(409, "You have already registered an entry.");
   }
 
   const leader = await prisma.user.findUniqueOrThrow({ where: { id: leaderUserId } });
@@ -43,6 +43,30 @@ export async function createTeam(leaderUserId: string, input: CreateTeamInput, i
           name: input.name,
           institute: input.institute,
           institutionAddress: input.institutionAddress,
+          participationType: input.participationType,
+          participantCategory: input.participantCategory,
+          participationLevel: input.participationLevel,
+          institutionType: input.institutionType ?? null,
+          affiliationPinCode: input.affiliationPinCode ?? null,
+          affiliationCity: input.affiliationCity ?? null,
+          affiliationState: input.affiliationState ?? null,
+          institutionEmail: input.institutionEmail ?? null,
+          institutionPhone: input.institutionPhone ?? null,
+          classLevel: input.classLevel ?? null,
+          degreeProgramme: input.degreeProgramme ?? null,
+          departmentBranch: input.departmentBranch ?? null,
+          yearOfStudy: input.yearOfStudy ?? null,
+          coordinatorName: input.coordinatorName ?? null,
+          coordinatorEmail: input.coordinatorEmail ?? null,
+          coordinatorPhone: input.coordinatorPhone ?? null,
+          designationRole: input.designationRole ?? null,
+          departmentDivision: input.departmentDivision ?? null,
+          officialOrgEmail: input.officialOrgEmail ?? null,
+          orgContactPhone: input.orgContactPhone ?? null,
+          mentorName: input.mentorName ?? null,
+          mentorDesignation: input.mentorDesignation ?? null,
+          mentorEmail: input.mentorEmail ?? null,
+          mentorPhone: input.mentorPhone ?? null,
           theme,
           problemStatement,
           problemCategoryCode: input.problemCategoryCode,
@@ -64,6 +88,9 @@ export async function createTeam(leaderUserId: string, input: CreateTeamInput, i
           lastName: leader.lastName,
           email: leader.email,
           phone: leader.phone,
+          idCardPath: idCard.path,
+          idCardMimeType: idCard.mimetype,
+          idCardOriginalName: idCard.originalname,
           role: "leader",
         },
       });
@@ -77,7 +104,7 @@ export async function createTeam(leaderUserId: string, input: CreateTeamInput, i
       err instanceof Prisma.PrismaClientKnownRequestError &&
       err.code === "P2002"
     ) {
-      throw new AppError(409, "You have already registered a team.");
+      throw new AppError(409, "You have already registered an entry.");
     }
 
     throw err;
@@ -92,6 +119,7 @@ export async function updateTeam(
 ) {
   const existingTeam = await getOwnedTeamOrThrow(teamId, leaderUserId); // also enforces draft-only via its status check
   const previousIdCardPath = existingTeam.idCardPath;
+  const previousLeaderIdCardPath = existingTeam.members.find((member: TeamMember) => member.role === "leader")?.idCardPath ?? null;
   const MAX_RETRIES = 3;
 
   let updated: Awaited<ReturnType<typeof prisma.team.findUniqueOrThrow>>;
@@ -114,6 +142,30 @@ export async function updateTeam(
                 name: input.name,
                 institute: input.institute,
                 institutionAddress: input.institutionAddress,
+                participationType: input.participationType,
+                participantCategory: input.participantCategory,
+                participationLevel: input.participationLevel,
+                institutionType: input.institutionType ?? null,
+                affiliationPinCode: input.affiliationPinCode ?? null,
+                affiliationCity: input.affiliationCity ?? null,
+                affiliationState: input.affiliationState ?? null,
+                institutionEmail: input.institutionEmail ?? null,
+                institutionPhone: input.institutionPhone ?? null,
+                classLevel: input.classLevel ?? null,
+                degreeProgramme: input.degreeProgramme ?? null,
+                departmentBranch: input.departmentBranch ?? null,
+                yearOfStudy: input.yearOfStudy ?? null,
+                coordinatorName: input.coordinatorName ?? null,
+                coordinatorEmail: input.coordinatorEmail ?? null,
+                coordinatorPhone: input.coordinatorPhone ?? null,
+                designationRole: input.designationRole ?? null,
+                departmentDivision: input.departmentDivision ?? null,
+                officialOrgEmail: input.officialOrgEmail ?? null,
+                orgContactPhone: input.orgContactPhone ?? null,
+                mentorName: input.mentorName ?? null,
+                mentorDesignation: input.mentorDesignation ?? null,
+                mentorEmail: input.mentorEmail ?? null,
+                mentorPhone: input.mentorPhone ?? null,
                 theme,
                 problemStatement,
                 problemCategoryCode: input.problemCategoryCode,
@@ -131,10 +183,21 @@ export async function updateTeam(
               },
             });
 
+            if (idCard) {
+              await tx.teamMember.updateMany({
+                where: { teamId, role: "leader" },
+                data: {
+                  idCardPath: idCard.path,
+                  idCardMimeType: idCard.mimetype,
+                  idCardOriginalName: idCard.originalname,
+                },
+              });
+            }
+
             if (result.count !== 1) {
               throw new AppError(
                 409,
-                "Team has already been submitted and can no longer be edited.",
+                "Registration has already been submitted and can no longer be edited.",
               );
             }
 
@@ -174,11 +237,15 @@ export async function updateTeam(
 
   // Update committed. Only now, on the success path, is the PREVIOUS card
   // actually superseded and safe to remove.
-  if (idCard && previousIdCardPath && previousIdCardPath !== idCard.path) {
-    await deleteUploadedFile(previousIdCardPath).catch(() => {
-      // Best-effort: an orphaned old file is a disk-space nuisance, not a
-      // correctness problem, so this must never fail the request itself.
-    });
+  if (idCard) {
+    const oldPaths = new Set([previousIdCardPath, previousLeaderIdCardPath].filter(Boolean) as string[]);
+    for (const oldPath of oldPaths) {
+      if (oldPath !== idCard.path) {
+        await deleteUploadedFile(oldPath).catch(() => {
+          // Best-effort cleanup; never fail a committed update because of disk cleanup.
+        });
+      }
+    }
   }
 
   return updated;
@@ -198,7 +265,7 @@ async function getOwnedTeamOrThrow(teamId: string, leaderUserId: string) {
 
   if (!team) throw new AppError(404, "Team not found.");
   if (team.leaderUserId !== leaderUserId) throw new AppError(403, "Not authorized for this team.");
-  if (team.status !== "draft") throw new AppError(409, "Team has already been submitted and can no longer be edited.");
+  if (team.status !== "draft") throw new AppError(409, "Registration has already been submitted and can no longer be edited.");
 
   return team;
 }
@@ -207,6 +274,7 @@ export async function addTeamMember(
   teamId: string,
   leaderUserId: string,
   input: AddMemberInput,
+  idCard: UploadedIdCard,
 ) {
   const MAX_RETRIES = 3;
 
@@ -228,14 +296,18 @@ export async function addTeamMember(
           if (team.status !== "draft") {
             throw new AppError(
               409,
-              "Team has already been submitted and can no longer be edited.",
+              "Registration has already been submitted and can no longer be edited.",
             );
+          }
+
+          if (team.participationType === "Individual" && team.members.length >= 1) {
+            throw new AppError(409, "An Individual registration can have only one participant.");
           }
 
           if (team.members.length >= TEAM_MAX_MEMBERS) {
             throw new AppError(
               409,
-              `A team can have at most ${TEAM_MAX_MEMBERS} members.`,
+              `${team.participationType === "Individual" ? "An individual entry" : "A team"} can have at most ${TEAM_MAX_MEMBERS} members.`,
             );
           }
 
@@ -243,16 +315,24 @@ export async function addTeamMember(
             throw new AppError(409, "This email is already part of the team.");
           }
 
-          return tx.teamMember.create({
-            data: {
-              teamId,
-              firstName: input.firstName,
-              lastName: input.lastName,
-              email: input.email,
-              phone: input.phone,
-              role: "member",
-            },
-          });
+          try {
+            return await tx.teamMember.create({
+              data: {
+                teamId,
+                firstName: input.firstName,
+                lastName: input.lastName,
+                email: input.email,
+                phone: input.phone,
+                idCardPath: idCard.path,
+                idCardMimeType: idCard.mimetype,
+                idCardOriginalName: idCard.originalname,
+                role: "member",
+              },
+            });
+          } catch (err) {
+            await deleteUploadedFile(idCard.path);
+            throw err;
+          }
         },
         {
           isolationLevel: "Serializable",
@@ -269,11 +349,13 @@ export async function addTeamMember(
         continue;
       }
 
+      await deleteUploadedFile(idCard.path);
       throw err;
     }
   }
 
   if (!newMember) {
+    await deleteUploadedFile(idCard.path);
     throw new AppError(500, "Could not add team member.");
   }
 
@@ -309,12 +391,58 @@ export async function addTeamMember(
   return newMember;
 }
 
+export async function updateTeamMember(
+  teamId: string,
+  leaderUserId: string,
+  memberId: string,
+  input: AddMemberInput,
+  idCard: UploadedIdCard | undefined,
+) {
+  const team = await getOwnedTeamOrThrow(teamId, leaderUserId);
+  const member = team.members.find((candidate: TeamMember) => candidate.id === memberId);
+
+  if (!member) throw new AppError(404, "Member not found.");
+  if (member.role === "leader") throw new AppError(400, "The team leader is managed through the main registration form.");
+
+  if (team.members.some((candidate: TeamMember) => candidate.id !== memberId && candidate.email.toLowerCase() === input.email.toLowerCase())) {
+    if (idCard) await deleteUploadedFile(idCard.path);
+    throw new AppError(409, "This email is already part of the team.");
+  }
+
+  try {
+    const updated = await prisma.teamMember.update({
+      where: { id: memberId },
+      data: {
+        firstName: input.firstName,
+        lastName: input.lastName,
+        email: input.email,
+        phone: input.phone ?? null,
+        ...(idCard && {
+          idCardPath: idCard.path,
+          idCardMimeType: idCard.mimetype,
+          idCardOriginalName: idCard.originalname,
+        }),
+      },
+    });
+
+    if (idCard && member.idCardPath && member.idCardPath !== idCard.path) {
+      await deleteUploadedFile(member.idCardPath);
+    }
+
+    return updated;
+  } catch (err) {
+    if (idCard) await deleteUploadedFile(idCard.path);
+    throw err;
+  }
+}
+
 export async function removeTeamMember(
   teamId: string,
   leaderUserId: string,
   memberId: string,
 ) {
   const MAX_RETRIES = 3;
+  let removedCardPath: string | null = null;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
@@ -336,7 +464,7 @@ export async function removeTeamMember(
           if (team.status !== "draft") {
             throw new AppError(
               409,
-              "Team has already been submitted and can no longer be edited.",
+              "Registration has already been submitted and can no longer be edited.",
             );
           }
 
@@ -352,6 +480,8 @@ export async function removeTeamMember(
             throw new AppError(400, "The team leader cannot be removed.");
           }
 
+          removedCardPath = member.idCardPath ?? null;
+
           const result = await tx.teamMember.deleteMany({
             where: {
               id: memberId,
@@ -366,7 +496,7 @@ export async function removeTeamMember(
           if (result.count !== 1) {
             throw new AppError(
               409,
-              "Team has already been submitted and can no longer be edited.",
+              "Registration has already been submitted and can no longer be edited.",
             );
           }
         },
@@ -375,6 +505,9 @@ export async function removeTeamMember(
         },
       );
 
+      if (removedCardPath) {
+        await deleteUploadedFile(removedCardPath);
+      }
       return;
     } catch (err) {
       if (
@@ -415,14 +548,28 @@ export async function submitTeam(teamId: string, leaderUserId: string) {
           if (team.status !== "draft") {
             throw new AppError(
               409,
-              "Team has already been submitted and can no longer be edited.",
+              "Registration has already been submitted and can no longer be edited.",
             );
           }
 
-          if (team.members.length < TEAM_MIN_MEMBERS) {
+          const minMembers = team.participationType === "Individual" ? 1 : TEAM_MIN_MEMBERS;
+          const maxMembers = TEAM_MAX_MEMBERS;
+
+          if (team.members.length < minMembers || team.members.length > maxMembers) {
+            const noun = team.participationType === "Individual" ? "individual entry" : "team";
             throw new AppError(
               400,
-              `A team needs at least ${TEAM_MIN_MEMBERS} members to submit.`,
+              team.members.length < minMembers
+                ? `${noun} needs at least ${minMembers} member${minMembers === 1 ? "" : "s"} to submit.`
+                : `${noun} can have at most ${maxMembers} members.`,
+            );
+          }
+
+          const missingDocument = team.members.find((member) => !member.idCardPath);
+          if (missingDocument) {
+            throw new AppError(
+              400,
+              `Every participant must have a Student / Institution ID Card. Missing document for ${missingDocument.firstName} ${missingDocument.lastName}.`,
             );
           }
 
@@ -441,7 +588,7 @@ export async function submitTeam(teamId: string, leaderUserId: string) {
           if (result.count !== 1) {
             throw new AppError(
               409,
-              "Team has already been submitted and can no longer be edited.",
+              "Registration has already been submitted and can no longer be edited.",
             );
           }
 
@@ -486,3 +633,5 @@ export async function getMyTeam(leaderUserId: string) {
     include: { members: true },
   });
 }
+
+

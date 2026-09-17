@@ -2,7 +2,7 @@ import { z } from "zod";
 import { findProblemCategory } from "../config/problemCategories.js";
 import { phoneSchema } from "./phone.js";
 
-// Adjust MIN/MAX to SEWA 2026's actual team-size rules.
+// Team / Organisation use 2-6 roster members. Individual entries use exactly 1.  
 export const TEAM_MIN_MEMBERS = 2; // leader + at least 1 other
 export const TEAM_MAX_MEMBERS = 6;
 
@@ -22,6 +22,34 @@ const baseTeamFields = {
   name: z.string().trim().min(3).max(150),
   institute: z.string().trim().min(2).max(200),
   institutionAddress: z.string().trim().min(5).max(300),
+  participationType: z.enum(["Individual", "Team / Group", "Organisation"]).default("Team / Group"),
+  participantCategory: z.enum([
+    "School & Vocational",
+    "Diploma & Higher Education",
+    "Industry & Government",
+  ]),
+  participationLevel: z.enum(["National Level", "Local Community Level"]),
+  institutionType: z.string().trim().max(80).optional(),
+  affiliationPinCode: z.string().trim().regex(/^\d{6}$/, "Affiliation PIN code must be exactly 6 digits").optional(),
+  affiliationCity: z.string().trim().max(100).optional(),
+  affiliationState: z.string().trim().max(100).optional(),
+  institutionEmail: z.string().trim().toLowerCase().email().max(255).optional(),
+  institutionPhone: phoneSchema.optional(),
+  classLevel: z.string().trim().max(50).optional(),
+  degreeProgramme: z.string().trim().max(150).optional(),
+  departmentBranch: z.string().trim().max(150).optional(),
+  yearOfStudy: z.string().trim().max(60).optional(),
+  coordinatorName: z.string().trim().max(150).optional(),
+  coordinatorEmail: z.string().trim().toLowerCase().email().max(255).optional(),
+  coordinatorPhone: phoneSchema.optional(),
+  designationRole: z.string().trim().max(150).optional(),
+  departmentDivision: z.string().trim().max(150).optional(),
+  officialOrgEmail: z.string().trim().toLowerCase().email().max(255).optional(),
+  orgContactPhone: phoneSchema.optional(),
+  mentorName: z.string().trim().max(150).optional(),
+  mentorDesignation: z.string().trim().max(150).optional(),
+  mentorEmail: z.string().trim().toLowerCase().email().max(255).optional(),
+  mentorPhone: phoneSchema.optional(),
   problemCategoryCode: z.string().trim().min(1).max(20),
   problemOptionType: z.enum(["ps", "open"]),
   // Required only when problemOptionType is "open" - enforced below via
@@ -36,11 +64,81 @@ type ProblemSelectionFields = {
   proposedProblemStatement?: string;
 };
 
+type RegistrationDossierFields = {
+  participantCategory: "School & Vocational" | "Diploma & Higher Education" | "Industry & Government";
+  participationLevel: "National Level" | "Local Community Level";
+  institutionType?: string;
+  affiliationPinCode?: string;
+  affiliationCity?: string;
+  affiliationState?: string;
+  institutionEmail?: string;
+  institutionPhone?: string;
+  classLevel?: string;
+  degreeProgramme?: string;
+  departmentBranch?: string;
+  yearOfStudy?: string;
+  coordinatorName?: string;
+  coordinatorEmail?: string;
+  coordinatorPhone?: string;
+  designationRole?: string;
+  departmentDivision?: string;
+  officialOrgEmail?: string;
+  orgContactPhone?: string;
+  mentorName?: string;
+  mentorEmail?: string;
+  mentorPhone?: string;
+};
+
 function refineProblemSelection<T extends z.AnyZodObject>(
   schema: T,
 ): z.ZodEffects<T, z.output<T>, z.input<T>> {
   return schema.superRefine((raw, ctx) => {
-    const data = raw as ProblemSelectionFields;
+    const data = raw as ProblemSelectionFields & RegistrationDossierFields;
+
+    if (!data.institutionType) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["institutionType"], message: "Institution type is required." });
+    }
+    if (data.participantCategory === "School & Vocational" && !data.affiliationPinCode) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["affiliationPinCode"], message: "School PIN / postal code is required." });
+    }
+    if (!data.affiliationCity) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["affiliationCity"], message: "Institution city or district is required." });
+    }
+    if (!data.affiliationState) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["affiliationState"], message: "Institution state or UT is required." });
+    }
+
+    if (data.participantCategory === "School & Vocational" && !data.classLevel) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["classLevel"], message: "Class / level is required for school and vocational participants." });
+    }
+
+    if (data.participantCategory === "Diploma & Higher Education") {
+      if (!data.degreeProgramme) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["degreeProgramme"], message: "Degree / programme is required." });
+      if (!data.departmentBranch) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["departmentBranch"], message: "Department / branch is required." });
+      if (!data.yearOfStudy) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["yearOfStudy"], message: "Year of study is required." });
+      // The Event Registration handler treats coordinator name, email, and phone
+      // as independently optional. Keep that same behavior here; each field is
+      // format-validated only when supplied by the participant.
+    }
+
+    if (data.participantCategory === "Industry & Government") {
+      if (!data.designationRole) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["designationRole"], message: "Applicant designation / role is required." });
+      if (!data.officialOrgEmail) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["officialOrgEmail"], message: "Official organization email is required." });
+    }
+
+    if (data.mentorName) {
+      if (data.mentorEmail === undefined || data.mentorEmail === "") {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["mentorEmail"], message: "Mentor email is required when mentor details are provided." });
+      }
+      if (data.mentorPhone === undefined || data.mentorPhone === "") {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["mentorPhone"], message: "Mentor phone is required when mentor details are provided." });
+      }
+    }
+
+    // Participation type is persisted on the registration record and is used
+    // by the client/backend roster flow to distinguish an individual entry
+    // from a 2-6 person team or organisation-sponsored team.
+
     const category = findProblemCategory(data.problemCategoryCode);
 
     if (!category) {
@@ -100,3 +198,6 @@ export const addMemberSchema = z
 export type CreateTeamInput = z.infer<typeof createTeamSchema>;
 export type UpdateTeamInput = z.infer<typeof updateTeamSchema>;
 export type AddMemberInput = z.infer<typeof addMemberSchema>;
+export type UpdateMemberInput = AddMemberInput;
+
+

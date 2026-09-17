@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as teamController from "../controllers/team.controller.js";
 import { validateBody } from "../middleware/validate.middleware.js";
-import { uploadIdCard } from "../middleware/upload.middleware.js";
+import { uploadIdCard, uploadMemberIdCard } from "../middleware/upload.middleware.js";
 import { requireAuth, requireVerifiedEmail } from "../middleware/auth.middleware.js";
 import { createTeamSchema, updateTeamSchema, addMemberSchema } from "../schemas/team.schema.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -35,8 +35,20 @@ teamRouter.patch(
 teamRouter.post(
   "/:teamId/members",
   teamMemberAddLimiter,
+  uploadMemberIdCard,
+  cleanupRejectedUpload,
   validateBody(addMemberSchema),
   asyncHandler(teamController.addMember),
 );
+teamRouter.patch(
+  "/:teamId/members/:memberId",
+  uploadMemberIdCard,
+  cleanupRejectedUpload,
+  validateBody(addMemberSchema),
+  asyncHandler(teamController.updateMember),
+);
 teamRouter.delete("/:teamId/members/:memberId", asyncHandler(teamController.removeMember));
 teamRouter.post("/:teamId/submit", asyncHandler(teamController.submitTeam));
+
+
+

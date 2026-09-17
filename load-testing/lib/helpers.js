@@ -364,9 +364,7 @@ export function createSummaryOutput(data, scenarioName) {
   const checkPassPct = totalChecks > 0 ? ((checksPassed / totalChecks) * 100).toFixed(2) : '100.00';
 
   const textReport = `
-================================================================================
   SEWA 2026 LOAD TEST SUMMARY: ${scenarioName.toUpperCase()}
-================================================================================
   Execution Time     : ${new Date().toISOString()}
   Target Host        : ${config.baseUrl}
   Total Requests     : ${totalReqs} (${reqRate} reqs/sec)
@@ -374,7 +372,6 @@ export function createSummaryOutput(data, scenarioName) {
   HTTP Failures      : ${failureRate}%
   5xx Server Errors  : ${error5xxRate}%
   Checks Passed      : ${checksPassed}/${totalChecks} (${checkPassPct}%)
-================================================================================
 `;
 
   const outputs = {
@@ -390,5 +387,8 @@ export function createSummaryOutput(data, scenarioName) {
 
   return outputs;
 }
+
+
+
 
 

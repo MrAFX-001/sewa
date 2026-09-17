@@ -16,7 +16,8 @@ import {
  * rounded card, round close button, footer "Close") mirrors ProblemModal on
  * the Problem Statements page so every popup on the site feels the same.
  *
- * Laptop / tablet (sm+): a table — #, State/UT, Schools, Colleges,
+ * Data is fetched from the public statistics endpoint; the modal only renders
+ * the backend-provided state/category rows. Laptop / tablet (sm+): a table — #, State/UT, Schools, Colleges,
  * Industries, Total — with the numbers in pills.
  * Phone (< sm): the same rows as compact cards (state + total on top, the
  * three counts underneath) because six columns do not fit in 360px.
@@ -28,32 +29,7 @@ type Counts = { schools: number; colleges: number; industries: number };
 
 type StateRow = { state: string; note?: string } & Counts;
 
-/** Region order and names shown in every popup. */
-const STATES: { state: string; note?: string }[] = [
-  { state: "Delhi" },
-  { state: "Haryana", note: "(without Chandigarh)" },
-  { state: "Punjab", note: "(without Chandigarh)" },
-  { state: "Chandigarh" },
-  { state: "Himachal Pradesh" },
-  { state: "Uttarakhand" },
-  { state: "Ladakh" },
-  { state: "Jammu & Kashmir" },
-];
-
-const zeroRows = (): StateRow[] => STATES.map((s) => ({ ...s, schools: 0, colleges: 0, industries: 0 }));
-
-/**
- * State-wise figures per metric. All zero until the portal has real data —
- * fill in schools / colleges / industries per row; Total is calculated.
- */
-export const STAT_SUMMARY_DATA: Record<StatKey, StateRow[]> = {
-  entries: zeroRows(),
-  shortlisted: zeroRows(),
-  mentored: zeroRows(),
-  prototypes: zeroRows(),
-  tested: zeroRows(),
-  validated: zeroRows(),
-};
+export type StatSummaryRow = StateRow;
 
 export const STAT_META: Record<
   StatKey,
@@ -106,9 +82,16 @@ function RowBadge({ index }: { index: number }) {
   );
 }
 
-export function StatSummaryModal({ stat, onClose }: { stat: StatKey; onClose: () => void }) {
+export function StatSummaryModal({
+  stat,
+  rows,
+  onClose,
+}: {
+  stat: StatKey;
+  rows: StateRow[];
+  onClose: () => void;
+}) {
   const meta = STAT_META[stat];
-  const rows = STAT_SUMMARY_DATA[stat];
   const Icon = meta.icon;
 
   useEffect(() => {
@@ -259,3 +242,6 @@ export function StatSummaryModal({ stat, onClose }: { stat: StatKey; onClose: ()
     </div>
   );
 }
+
+
+

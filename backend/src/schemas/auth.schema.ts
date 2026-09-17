@@ -61,3 +61,5 @@ export type OtpVerifyInput = z.infer<typeof otpVerifySchema>;
 export type SigninInput = z.infer<typeof signinSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+

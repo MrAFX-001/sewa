@@ -57,3 +57,5 @@ authRouter.post(
 authRouter.post("/signout", requireAuth, asyncHandler(authController.signout));
 
 authRouter.get("/me", requireAuth, asyncHandler(authController.me));
+
+

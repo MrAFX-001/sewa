@@ -19,3 +19,6 @@ export async function createContactMessage(req: Request, res: Response) {
     message: "Message received. You'll get an email confirmation shortly.",
   });
 }
+
+
+

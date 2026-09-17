@@ -22,3 +22,6 @@ export const Route = createFileRoute("/about")({
   }),
   component: AboutPage,
 });
+
+
+

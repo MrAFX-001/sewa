@@ -9,7 +9,7 @@ export async function createTeam(req: Request, res: Response) {
   // req.file - required on create, since every team needs an ID card on
   // file from the start.
   if (!req.file) {
-    throw new AppError(400, "An organisation/institution ID card (PDF, JPG, or PNG) is required.");
+    throw new AppError(400, "An identity / affiliation ID card (PDF, JPG, or PNG) is required.");
   }
 
   const input = req.body as CreateTeamInput;
@@ -41,8 +41,16 @@ export async function updateTeam(req: Request, res: Response) {
 }
 
 export async function addMember(req: Request, res: Response) {
+  if (!req.file) {
+    throw new AppError(400, "A Student / Institution ID Card (PDF, JPG, or PNG, max 500 KB) is required for every participant.");
+  }
+
   const input = req.body as AddMemberInput;
-  const member = await teamService.addTeamMember(req.params.teamId!, req.user!.id, input);
+  const member = await teamService.addTeamMember(req.params.teamId!, req.user!.id, input, {
+    path: req.file.filename,
+    mimetype: req.file.mimetype,
+    originalname: req.file.originalname,
+  });
   await writeAuditLog({
     req,
     userId: req.user!.id,
@@ -50,6 +58,28 @@ export async function addMember(req: Request, res: Response) {
     metadata: { teamId: req.params.teamId, memberEmail: member.email },
   });
   res.status(201).json({ member });
+}
+
+
+export async function updateMember(req: Request, res: Response) {
+  const input = req.body as AddMemberInput;
+  const idCard = req.file
+    ? { path: req.file.filename, mimetype: req.file.mimetype, originalname: req.file.originalname }
+    : undefined;
+  const member = await teamService.updateTeamMember(
+    req.params.teamId!,
+    req.user!.id,
+    req.params.memberId!,
+    input,
+    idCard,
+  );
+  await writeAuditLog({
+    req,
+    userId: req.user!.id,
+    action: "team_member_update",
+    metadata: { teamId: req.params.teamId, memberId: req.params.memberId },
+  });
+  res.status(200).json({ member });
 }
 
 export async function removeMember(req: Request, res: Response) {
@@ -68,3 +98,6 @@ export async function submitTeam(req: Request, res: Response) {
   await writeAuditLog({ req, userId: req.user!.id, action: "team_submit", metadata: { teamId: team.id } });
   res.status(200).json({ team });
 }
+
+
+

@@ -72,3 +72,6 @@ export const defaultThresholds = {
   http_req_duration: ['p(95)<1000', 'p(99)<2000'],
 };
 
+
+
+

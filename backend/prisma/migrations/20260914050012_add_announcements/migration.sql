@@ -16,3 +16,6 @@ CREATE UNIQUE INDEX "announcements_title_key" ON "announcements"("title");
 
 -- CreateIndex
 CREATE INDEX "announcements_published_at_idx" ON "announcements"("published_at" DESC);
+
+
+

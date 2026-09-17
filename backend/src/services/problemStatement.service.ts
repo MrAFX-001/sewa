@@ -120,3 +120,6 @@ async function nextSequence(tx: Prisma.TransactionClient, categoryCode: string):
   });
   return counter.lastSeq;
 }
+
+
+

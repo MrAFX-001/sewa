@@ -17,3 +17,6 @@ if (env.REDIS_URL) {
   await redis.connect();
   logger.info("redis_connected");
 }
+
+
+

@@ -27,3 +27,6 @@ CREATE UNIQUE INDEX "candidate_profiles_user_id_key" ON "candidate_profiles"("us
 
 -- AddForeignKey
 ALTER TABLE "candidate_profiles" ADD CONSTRAINT "candidate_profiles_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+
+

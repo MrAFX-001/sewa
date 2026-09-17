@@ -451,6 +451,9 @@ adminRouter.get(
         name: `${m.firstName} ${m.lastName}`.trim(),
         email: m.email,
         role: m.role,
+        idCardOriginalName: m.idCardOriginalName,
+        idCardPath: m.idCardPath,
+        idCardMimeType: m.idCardMimeType,
       })),
       idCardPath: t.idCardPath,
       idCardOriginalName: t.idCardOriginalName,
@@ -1631,4 +1634,7 @@ resourceRouter.delete(
     res.status(200).json({ success: true });
   }),
 );
+
+
+
 

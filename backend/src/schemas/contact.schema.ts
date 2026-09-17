@@ -31,3 +31,6 @@ export const createContactMessageSchema = z
   .strict();
 
 export type CreateContactMessageInput = z.infer<typeof createContactMessageSchema>;
+
+
+

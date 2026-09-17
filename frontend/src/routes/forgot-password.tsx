@@ -12,3 +12,6 @@ export const Route = createFileRoute("/forgot-password")({
   }),
   component: () => <ForgotPasswordPage />,
 });
+
+
+
