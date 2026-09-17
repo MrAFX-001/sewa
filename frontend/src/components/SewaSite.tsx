@@ -2450,34 +2450,40 @@ export function HomePage() {
           className="relative pt-16 sm:pt-20 lg:pt-24 pb-16 sm:pb-24 lg:pb-32 scroll-mt-20 overflow-hidden bg-white"
         >
           <ConstellationBackground color="#313131" />
-          <div className="site-shell relative z-10 grid grid-cols-1 lg:grid-cols-4 gap-10 lg:gap-16 items-start">
-            {/* Heading */}
-            <h2 className="t-subheading-1 uppercase">
-              What
-              <br />
-              <span className="text-primary">is SEVA FIRST</span>
-              <br />
-              <span className="t-subheading-2 text-muted-foreground block mt-1 uppercase">
-                Rashtriya Youth Innovation Challenge 2026?
-              </span>
-            </h2>
+          <div className="site-shell relative z-10" data-no-constellation>
+            <div
+              className="rounded-2xl sm:rounded-3xl bg-white/95 sm:bg-white/90 backdrop-blur-md border border-gray-200/80 shadow-sm p-6 sm:p-10 lg:p-12 grid grid-cols-1 lg:grid-cols-4 gap-10 lg:gap-16 items-start"
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseMove={(e) => e.stopPropagation()}
+            >
+              {/* Heading */}
+              <h2 className="t-subheading-1 uppercase select-text">
+                What
+                <br />
+                <span className="text-primary">is SEVA FIRST</span>
+                <br />
+                <span className="t-subheading-2 text-muted-foreground block mt-1 uppercase">
+                  Rashtriya Youth Innovation Challenge 2026?
+                </span>
+              </h2>
 
-            {/* Description spans remaining 3 columns */}
-            <div className="lg:col-span-3">
-              <p className="t-content text-gray-700 font-medium!">
-                <strong className="font-bold text-gray-900">
-                  SEVA FIRST – Rashtriya Youth Innovation Challenge (RYIC) 2026
-                </strong>{" "}
-                is a national platform that empowers India's youth to identify real problems in
-                their own surroundings and transform them into sustainable, affordable and
-                implementable solutions. Launched at Delhi Technological University on 19 September
-                2026, the Challenge brings together students, researchers, educational institutions,
-                industry, government and mentors to take innovations from problem identification and
-                ideation to design, prototyping, validation and implementation. Rooted in the spirit
-                of Seva First, RYIC seeks to nurture innovation, leadership and entrepreneurship
-                while creating solutions that deliver meaningful impact for communities and the
-                nation.
-              </p>
+              {/* Description spans remaining 3 columns */}
+              <div className="lg:col-span-3">
+                <p className="t-content text-gray-700 font-medium! select-text">
+                  <strong className="font-bold text-gray-900">
+                    SEVA FIRST – Rashtriya Youth Innovation Challenge (RYIC) 2026
+                  </strong>{" "}
+                  is a national platform that empowers India's youth to identify real problems in
+                  their own surroundings and transform them into sustainable, affordable and
+                  implementable solutions. Launched at Delhi Technological University on 19 September
+                  2026, the Challenge brings together students, researchers, educational institutions,
+                  industry, government and mentors to take innovations from problem identification and
+                  ideation to design, prototyping, validation and implementation. Rooted in the spirit
+                  of Seva First, RYIC seeks to nurture innovation, leadership and entrepreneurship
+                  while creating solutions that deliver meaningful impact for communities and the
+                  nation.
+                </p>
+              </div>
             </div>
           </div>
 

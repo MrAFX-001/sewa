@@ -257,7 +257,17 @@ export function ConstellationBackground({
       mouse.y = clientY - r.top;
     };
 
+    const isExcluded = (target: EventTarget | null) => {
+      if (!target || !(target instanceof Element)) return false;
+      return !!target.closest("a, button, input, textarea, [data-no-constellation], .no-constellation");
+    };
+
     const handleMouseMove = (e: MouseEvent) => {
+      if (isExcluded(e.target)) {
+        mouse.x = null;
+        mouse.y = null;
+        return;
+      }
       updateMousePos(e.clientX, e.clientY);
     };
 
@@ -267,8 +277,7 @@ export function ConstellationBackground({
     };
 
     const handleMouseDown = (e: MouseEvent) => {
-      // Don't spawn if clicking interactive inputs or buttons
-      if ((e.target as HTMLElement)?.closest("a, button, input, textarea")) {
+      if (isExcluded(e.target)) {
         return;
       }
       const r = canvas.getBoundingClientRect();
@@ -276,12 +285,20 @@ export function ConstellationBackground({
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      if (isExcluded(e.target)) {
+        mouse.x = null;
+        mouse.y = null;
+        return;
+      }
       if (e.touches.length > 0) {
         updateMousePos(e.touches[0].clientX, e.touches[0].clientY);
       }
     };
 
     const handleTouchStart = (e: TouchEvent) => {
+      if (isExcluded(e.target)) {
+        return;
+      }
       if (e.touches.length > 0) {
         const r = canvas.getBoundingClientRect();
         handleClick(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top);
