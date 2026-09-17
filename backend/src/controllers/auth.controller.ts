@@ -68,7 +68,7 @@ export async function verifyOtpHandler(req: Request, res: Response) {
     setSessionCookie(res, user.id, user.email);
     res.status(200).json({
       message: "Email verified successfully.",
-      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName },
+      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: (user as any).role || "MEMBER" },
     });
   } catch (err) {
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -85,7 +85,7 @@ export async function signin(req: Request, res: Response) {
     await writeAuditLog({ req, userId: user.id, action: "signin_success" });
     setSessionCookie(res, user.id, user.email);
     res.status(200).json({
-      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName },
+      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: (user as any).role || "MEMBER" },
     });
   } catch (err) {
     await writeAuditLog({ req, action: "signin_failure", metadata: { email: input.email } });
@@ -133,7 +133,7 @@ export async function me(req: Request, res: Response) {
   if (!req.user) throw new AppError(401, "Not authenticated");
   const user = await prisma.user.findUnique({
     where: { id: req.user.id },
-    select: { id: true, firstName: true, lastName: true, email: true, phone: true, emailVerified: true },
+    select: { id: true, firstName: true, lastName: true, email: true, phone: true, emailVerified: true, role: true },
   });
   res.status(200).json({ user });
 }

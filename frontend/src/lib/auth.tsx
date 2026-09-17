@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import { ApiError, authApi, type User } from "./api";
+import { ApiError, authApi, teamApi, type User, type Team } from "./api";
 
 export const meQueryKey = ["auth", "me"] as const;
+export const myTeamQueryKey = ["team", "mine"] as const;
 
 /**
  * Current session state.
@@ -33,19 +34,51 @@ export function useAuth() {
     staleTime: 30_000,
   });
 
+  const teamQuery = useQuery({
+    queryKey: [...myTeamQueryKey, query.data?.id],
+    queryFn: async (): Promise<Team | null> => {
+      if (!query.data) return null;
+      try {
+        const res = await teamApi.getMine();
+        return res?.team ?? null;
+      } catch {
+        return null;
+      }
+    },
+    enabled: typeof window !== "undefined" && !!query.data,
+    staleTime: 30_000,
+  });
+
   const signOut = useMutation({
     mutationFn: () => authApi.signout(),
     // Clear local session state even if the call failed - the user asked to
     // leave, and a stale "signed in" UI is worse than an orphaned cookie.
-    onSettled: () => queryClient.setQueryData(meQueryKey, null),
+    onSettled: () => {
+      queryClient.setQueryData(meQueryKey, null);
+      queryClient.setQueryData(myTeamQueryKey, null);
+    },
   });
+
+  const hasTeam = Boolean(teamQuery.data);
+  const isAdmin =
+    query.data?.role === "SUPER_ADMIN" ||
+    query.data?.role === "ADMIN" ||
+    query.data?.role === "RESOURCE";
+  const hasRegisteredTeamOrAdmin = hasTeam || isAdmin;
 
   return {
     user: query.data ?? null,
+    myTeam: teamQuery.data ?? null,
+    hasTeam,
+    isAdmin,
+    hasRegisteredTeamOrAdmin,
     isLoading: query.isLoading,
     isSignedIn: !!query.data,
     /** Re-read the session - call after signin/OTP verify sets the cookie. */
-    refresh: () => queryClient.invalidateQueries({ queryKey: meQueryKey }),
+    refresh: () => {
+      queryClient.invalidateQueries({ queryKey: meQueryKey });
+      queryClient.invalidateQueries({ queryKey: myTeamQueryKey });
+    },
     setUser: (user: User | null) => queryClient.setQueryData(meQueryKey, user),
     signOut: signOut.mutateAsync,
   };

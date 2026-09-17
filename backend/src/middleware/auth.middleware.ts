@@ -7,7 +7,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
-      user?: { id: string; email: string; emailVerified: boolean; status: string };
+      user?: { id: string; email: string; emailVerified: boolean; status: string; role?: string };
     }
   }
 }
@@ -25,7 +25,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     // not just after the token expires.
     const user = await prisma.user.findUnique({
       where: { id: payload.sub },
-      select: { id: true, email: true, emailVerified: true, status: true },
+      select: { id: true, email: true, emailVerified: true, status: true, role: true },
     });
 
     if (!user || user.status === "suspended") {

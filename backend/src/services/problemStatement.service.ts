@@ -29,7 +29,25 @@ export async function resolveProblemSelection(
   problemStatement: string;
   problemStatementId: string;
 }> {
-  const category = findProblemCategory(input.problemCategoryCode);
+  let category: ProblemCategoryDef | null = null;
+  const dbCat = await tx.problemCategory.findUnique({
+    where: { code: input.problemCategoryCode },
+  });
+
+  if (dbCat && dbCat.active) {
+    category = {
+      code: dbCat.code,
+      theme: dbCat.theme as "NATIONAL" | "REGIONAL",
+      label: dbCat.label,
+      psTitle: dbCat.psTitle || undefined,
+      psUrl: dbCat.psUrl || undefined,
+      psId: dbCat.psId || undefined,
+      openId: dbCat.openId || undefined,
+    };
+  } else if (!dbCat) {
+    category = findProblemCategory(input.problemCategoryCode) || null;
+  }
+
   if (!category) {
     throw new AppError(400, `Unknown problem category "${input.problemCategoryCode}".`);
   }
