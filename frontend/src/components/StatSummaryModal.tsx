@@ -36,7 +36,6 @@ const STATES: { state: string; note?: string }[] = [
   { state: "Chandigarh" },
   { state: "Himachal Pradesh" },
   { state: "Uttarakhand" },
-  { state: "Uttar Pradesh" },
   { state: "Ladakh" },
   { state: "Jammu & Kashmir" },
 ];

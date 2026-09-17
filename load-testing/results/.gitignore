@@ -1,0 +1,10 @@
+# Ignore generated test output and metric artifacts
+*.json
+*.csv
+*.html
+*.txt
+*.log
+
+# Always keep directory marker
+!.gitkeep
+
