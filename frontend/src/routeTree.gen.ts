@@ -12,11 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as EventRegisterRouteImport } from './routes/event-register'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as GuidelinesRouteImport } from './routes/guidelines'
 import { Route as ProblemStatementsRouteImport } from './routes/problem-statements'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SignupRouteImport } from './routes/signup'
@@ -35,6 +37,11 @@ const AboutRoute = AboutRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventRegisterRoute = EventRegisterRouteImport.update({
+  id: '/event-register',
+  path: '/event-register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventsRoute = EventsRouteImport.update({
@@ -62,6 +69,11 @@ const ProblemStatementsRoute = ProblemStatementsRouteImport.update({
   path: '/problem-statements',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResourcesRoute = ResourcesRouteImport.update({
   id: '/resources',
   path: '/resources',
@@ -87,11 +99,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/event-register': typeof EventRegisterRoute
   '/events': typeof EventsRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/guidelines': typeof GuidelinesRoute
   '/problem-statements': typeof ProblemStatementsRoute
+  '/register': typeof RegisterRoute
   '/resources': typeof ResourcesRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
@@ -101,11 +115,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/event-register': typeof EventRegisterRoute
   '/events': typeof EventsRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/guidelines': typeof GuidelinesRoute
   '/problem-statements': typeof ProblemStatementsRoute
+  '/register': typeof RegisterRoute
   '/resources': typeof ResourcesRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
@@ -116,11 +132,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/event-register': typeof EventRegisterRoute
   '/events': typeof EventsRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/guidelines': typeof GuidelinesRoute
   '/problem-statements': typeof ProblemStatementsRoute
+  '/register': typeof RegisterRoute
   '/resources': typeof ResourcesRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
@@ -132,11 +150,13 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/event-register'
     | '/events'
     | '/faq'
     | '/forgot-password'
     | '/guidelines'
     | '/problem-statements'
+    | '/register'
     | '/resources'
     | '/signin'
     | '/signup'
@@ -146,11 +166,13 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/event-register'
     | '/events'
     | '/faq'
     | '/forgot-password'
     | '/guidelines'
     | '/problem-statements'
+    | '/register'
     | '/resources'
     | '/signin'
     | '/signup'
@@ -160,11 +182,13 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/event-register'
     | '/events'
     | '/faq'
     | '/forgot-password'
     | '/guidelines'
     | '/problem-statements'
+    | '/register'
     | '/resources'
     | '/signin'
     | '/signup'
@@ -175,11 +199,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
+  EventRegisterRoute: typeof EventRegisterRoute
   EventsRoute: typeof EventsRoute
   FaqRoute: typeof FaqRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   GuidelinesRoute: typeof GuidelinesRoute
   ProblemStatementsRoute: typeof ProblemStatementsRoute
+  RegisterRoute: typeof RegisterRoute
   ResourcesRoute: typeof ResourcesRoute
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
@@ -207,6 +233,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event-register': {
+      id: '/event-register'
+      path: '/event-register'
+      fullPath: '/event-register'
+      preLoaderRoute: typeof EventRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/events': {
@@ -244,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProblemStatementsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/resources': {
       id: '/resources'
       path: '/resources'
@@ -279,11 +319,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
+  EventRegisterRoute: EventRegisterRoute,
   EventsRoute: EventsRoute,
   FaqRoute: FaqRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   GuidelinesRoute: GuidelinesRoute,
   ProblemStatementsRoute: ProblemStatementsRoute,
+  RegisterRoute: RegisterRoute,
   ResourcesRoute: ResourcesRoute,
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
