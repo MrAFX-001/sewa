@@ -2138,7 +2138,7 @@ export function HomePage() {
                   image: teamPhoto("pm-modi"),
                 },
                 {
-                  name: "Smt. Atishi",
+                  name: "Smt. Rekha Gupta",
                   designation: "Hon'ble Chief Minister of Delhi",
                   image: teamPhoto("cm-delhi"),
                 },
