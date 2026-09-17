@@ -2143,7 +2143,7 @@ export function HomePage() {
                   image: teamPhoto("cm-delhi"),
                 },
                 {
-                  name: "Shri Dharmendra Pradhan",
+                  name: "Shri Pralhad Joshi",
                   designation: "Hon'ble Minister of Education, Govt. of India",
                   image: teamPhoto("education-minister"),
                 },
