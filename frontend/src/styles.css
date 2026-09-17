@@ -371,7 +371,7 @@
 
   .ticker > span {
     flex-shrink: 0;
-    padding-inline: 2.5rem;
+    padding-inline: 0;
   }
 
   .eyebrow {

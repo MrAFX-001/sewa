@@ -849,23 +849,19 @@ export function Header({
         </a>
         <div className="live-updates-ticker-wrap min-w-0 flex-1 overflow-hidden">
           <div className="ticker flex h-full items-center whitespace-nowrap font-bold text-xs sm:text-base text-gray-800">
-            <span className="inline-flex items-center gap-8">
+            <span className="inline-flex items-center gap-8 pr-8">
               {liveAnnouncements.map((ann, idx) => (
                 <span key={`live-${ann.id || idx}`} className="inline-flex items-center gap-8">
-                  {idx > 0 && (
-                    <span className="size-2 rounded-full bg-[#ff4d4f] inline-block shrink-0" />
-                  )}
                   <span>{ann.title}</span>
+                  <span className="size-2 rounded-full bg-[#ff4d4f] inline-block shrink-0" />
                 </span>
               ))}
             </span>
-            <span aria-hidden="true" className="inline-flex items-center gap-8">
+            <span aria-hidden="true" className="inline-flex items-center gap-8 pr-8">
               {liveAnnouncements.map((ann, idx) => (
                 <span key={`live-dup-${ann.id || idx}`} className="inline-flex items-center gap-8">
-                  {idx > 0 && (
-                    <span className="size-2 rounded-full bg-[#ff4d4f] inline-block shrink-0" />
-                  )}
                   <span>{ann.title}</span>
+                  <span className="size-2 rounded-full bg-[#ff4d4f] inline-block shrink-0" />
                 </span>
               ))}
             </span>
